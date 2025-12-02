@@ -1,0 +1,771 @@
+{
+  "name": "clip generator",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "==ROW()-1",
+            "idea": "={{ $json.output[0].Idea }}",
+            "caption": "={{ $json.output[0].Caption }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "idea",
+              "displayName": "idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "production",
+              "displayName": "production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "environment_promt",
+              "displayName": "environment_promt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "final_output",
+              "displayName": "final_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        528,
+        64
+      ],
+      "id": "d627c4d6-8c61-4c2a-bfe8-44377c3fc64c",
+      "name": "Log the Idea",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use the tool to think about something. It will not obtain new information or change the database but just append the thought to the log. Use it when complex reasoning or some cache memory is needed."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        832,
+        368
+      ],
+      "id": "353ffc8b-2b4c-4232-aff6-c1c64dbb4fad",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Give me a  ultra viral idea of [an animal doing an epic Olympic dive performing spectacular acrobatic moves.]\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI designed to generate 1 immersive, viral-worthy idea for ultra-viral Olympic-style animal diving videos. Your output must be formatted as a JSON array (single line) and follow all the rules below exactly.\n\nRULES:\n\nOnly return 1 idea at a time.\n\nThe topic is: Olympic-style diving performed by animals in official Olympic diving pools with commentary.\n\nThe Idea must:\n\nBe under 13 words.\n\nDescribe a specific animal performing a spectacular Olympic diving move from a springboard or platform.\n\nFeature a real animal species (e.g. penguin, otter, cat, dog, elephant, seal, squirrel, bear, dolphin, kangaroo, monkey).\n\nInclude the diving move (e.g. inward dive, reverse somersault, armstand dive, twist dive, pike position).\n\nSpecify the diving board height (1-meter springboard, 3-meter springboard, 5-meter platform, 10-meter platform).\n\nBe spectacular, unexpected, and designed for maximum virality.\n\nThe Caption must be:\n\nYouTube-optimized format: 2 UPPERCASE KEYWORDS + 2-3 descriptive words + 3 hashtags.\n\nStructure: \"KEYWORD1 KEYWORD2 descriptive words #hashtag1 #hashtag2 #hashtag3 emoji\"\n\nExample: \"PENGUIN OLYMPICS 10-Meter Platform Dive #animals #diving #olympics 🐧\"\n\nKeep total caption under 60 characters for YouTube Shorts optimization.\n\nInclude exactly 3 hashtags (all lowercase, highly relevant).\n\nSet Status to \"for production\" (always).\n\nThe Environment must:\n\nBe under 25 words.\n\nAlways describe an official Olympic diving pool venue with:\n\nOlympic-sized pool with crystal clear blue water\n\nDiving platform or springboard (specify height)\n\nStadium seating or spectator area (can be empty or with crowd)\n\nProfessional lighting (bright, dramatic, or spotlit)\n\nCinematic style: slow-motion sports broadcast, multiple camera angles, underwater tracking shot, or aerial view\n\nInclude brief mention of commentary: \"muffled announcer voice\" or \"distant crowd reaction\" or \"commentator excitement in background\"\n\nThe diving move must be captured from takeoff to water entry with splash.\n\nOUTPUT FORMAT (single-line JSON array):\n\n[\n  {\n    \"Caption\": \"KEYWORD1 KEYWORD2 descriptive words #hashtag1 #hashtag2 #hashtag3 emoji\",\n    \"Idea\": \"Animal + diving board height + spectacular Olympic move under 13 words\",\n    \"Environment\": \"Olympic pool venue with platform/springboard, lighting, cinematic style, subtle commentary under 25 words\",\n    \"Status\": \"for production\"\n  }\n]\n\nEXAMPLES OF DIVING MOVES TO USE:\n\n- Forward dive with double twist\n- Reverse 2½ somersault pike\n- Inward 3½ somersault tuck\n- Armstand back dive\n- Flying squirrel position entry\n- Triple twist with pike\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        208,
+        64
+      ],
+      "id": "e4e1822f-0d6d-4786-9856-3fb2d82749d3",
+      "name": "Ideas AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Give me a  ultra viral Veo3 video prompt for this idea:\n{{ $json.idea }}\n\nThis is the environment:\n{{ $json.environment_prompt }}\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=SYSTEM PROMPT FOR GOOGLE VEO3 PROMPT AGENT\n\nYou are an AI agent that writes hyper-realistic, cinematic video prompts for Google VEO3. Each prompt should describe a dramatic 8-second Olympic diving video clip featuring one animal performing a spectacular dive from an Olympic platform or springboard into a professional pool, with subtle sports commentary in the background. The final video should look like a professional Olympic sports broadcast with slow-motion cinematography.\n\nREQUIRED STRUCTURE (FILL IN THE BRACKETS BELOW):\n\n[Scene paragraph prompt here]\n\nMain subject: [specific animal species with athletic description]\nDiving board: [exact height and type: 1m springboard, 3m springboard, 5m platform, 10m platform]\nDiving move: [exact Olympic diving move with body position, e.g. reverse 2½ somersault pike, inward dive tuck, forward 3½ with twist]\nCamera movement: [describe camera behavior: slow-motion wide shot, underwater tracking, aerial crane shot, side-angle telephoto]\nTime of Day: [indoor arena with professional lighting / bright stadium lights / dramatic spotlights]\nLens: [describe lens type: broadcast telephoto 200mm, wide-angle sports camera, underwater housing]\nAudio: (implied) [ambient pool acoustics, muffled commentator voice in background, crowd gasps, water splash echo, light applause]\nBackground: [Olympic diving pool, blue water, platform structure, stadium seating, professional venue atmosphere]\n\nRULES FOR PROMPT GENERATION\n\nSingle paragraph only, 750–1500 characters. No line breaks or headings.\n\nOnly one animal as the main subject. Never name the animal.\n\nNo humans visible in the frame. Focus entirely on the animal and the dive.\n\nThe setting is ALWAYS an official Olympic diving venue with:\n\nProfessional Olympic-sized pool (crystal blue water)\n\nOfficial FINA diving platform or springboard (specify exact height)\n\nStadium architecture with seating (can be empty or filled)\n\nProfessional broadcast lighting\n\nDescribe the complete diving sequence:\n\nAnimal positioned on platform/springboard\n\nTakeoff with power and form\n\nMid-air acrobatic move (rotations, twists, body positions)\n\nWater entry with dramatic splash\n\nCapture in slow-motion for maximum impact.\n\nUse cinematic Olympic sports broadcast style with professional camera work.\n\nInclude subtle audio atmosphere: distant commentator voice (do NOT write exact words), crowd reactions, pool acoustics, splash sounds.\n\nAlways include the technical elements: Diving Board Height, Diving Move, Camera Style, Lighting, Audio Atmosphere, Pool Setting.\n\nMake it look like a real Olympic diving competition filmed by NBC Sports or BBC.\n\nDO NOT DO THIS:\n\nDon't name the animal or anthropomorphize it.\n\nDon't include humans, judges, or coaches in the frame.\n\nDon't write actual dialogue or commentary words (only mention \"muffled announcer voice\" or \"distant commentary\").\n\nDon't include scoreboards, graphics, or on-screen text.\n\nDon't break the paragraph or use formatting.\n\nDon't make it cartoonish — keep it realistic like actual Olympic footage.\n\nDon't use non-Olympic settings (no backyard pools, rivers, or ocean).\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        32,
+        352
+      ],
+      "id": "eaa3cc1f-9507-4b12-82b4-f6774d41d929",
+      "name": "Prompts AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"Caption\": \"PENGUIN DIVE Olympic Pool Perfection #animals #diving #viral 🐧\",\n    \"Idea\": \"Penguin performs flawless triple somersault from 10-meter Olympic diving platform\",\n    \"Environment\": \"Olympic diving pool, crystal blue water, slow-motion splash, stadium lights, cinematic realism\",\n    \"Status\": \"for production\"\n  }\n]\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        368
+      ],
+      "id": "e50c589b-c24b-4887-a043-7c5e190204da",
+      "name": "Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        544,
+        368
+      ],
+      "id": "c537cc84-2f41-4592-9e92-6cb379288d64",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5cedc3de-6221-4d7e-a6c8-82f4cb9cf0e9",
+              "name": "PROJECT_ID",
+              "type": "string",
+              "value": "your-google-cloud-project-id"
+            },
+            {
+              "id": "90019751-e2d5-4764-9bf9-e13916dcc528",
+              "name": "MODEL_VERSION",
+              "type": "string",
+              "value": "veo-3.1-generate-001"
+            },
+            {
+              "id": "67ab205c-82b3-4263-99c4-c906a0ca6ae9",
+              "name": "LOCATION",
+              "type": "string",
+              "value": "us-central1"
+            },
+            {
+              "id": "413415fb-60c5-4d0d-ac45-1e6178a55227",
+              "name": "TEXT_PROMPT",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "id": "bf0910e1-b757-4852-9341-a7792161f89b",
+              "name": "ACCESS_TOKEN",
+              "type": "string",
+              "value": "YOUR_GOOGLE_CLOUD_ACCESS_TOKEN"
+            },
+            {
+              "id": "17954335-b96b-4813-9c4a-20817d675448",
+              "name": "API_ENDPOINT",
+              "type": "string",
+              "value": "us-central1-aiplatform.googleapis.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c51f9b2c-54b2-49d5-87de-9fd9190108a0",
+      "name": "Setting",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        352,
+        352
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "response.videos[0].bytesBase64Encoded",
+        "options": {}
+      },
+      "id": "8ba22008-4366-4abb-8e6a-fe44274c4d10",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        688,
+        640
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $('Setting').item.json.API_ENDPOINT }}/v1/projects/{{ $('Setting').item.json.PROJECT_ID }}/locations/{{ $('Setting').item.json.LOCATION }}/publishers/google/models/{{ $('Setting').item.json.MODEL_VERSION }}:fetchPredictOperation\n",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Setting').item.json.ACCESS_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"operationName\": \"{{ $json.name }}\"\n}\n",
+        "options": {}
+      },
+      "id": "7d74c613-c2c3-4cfe-ad34-70bdd5b73291",
+      "name": "Vertex AI-fetch",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        464,
+        640
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "id": "95151fe4-5d9b-424f-8b75-5eea47b68102",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        272,
+        640
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "ca4136c0-182a-43e0-b234-079ffe826eea"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Ideas AI Agent').item.json.output[0].Idea.replace(/\\s+/g, '_') + '_' + $now.toMillis() }}.mp4",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "5804d8cc-33e7-44e9-84b9-b922372c16b0",
+      "name": "Upload file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1088,
+        640
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wDIcQelbH13cHDppd__9au8l8tX-4wvPeI1wLVcir1A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "final_output": "={{ $json.webViewLink }}",
+            "idea": "={{ $('Ideas AI Agent').item.json.output[0].Idea }}"
+          },
+          "matchingColumns": [
+            "idea"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "idea",
+              "displayName": "idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "production",
+              "displayName": "production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "environment_promt",
+              "displayName": "environment_promt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_output",
+              "displayName": "final_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1312,
+        640
+      ],
+      "id": "2ceba576-ee7a-4475-b5c4-80f937dbdb65",
+      "name": "Log Final Video in Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $json.API_ENDPOINT }}/v1/projects/{{ $json.PROJECT_ID }}/locations/{{ $json.LOCATION }}/publishers/google/models/{{ $json.MODEL_VERSION }}:predictLongRunning",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.ACCESS_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"endpoint\": \"projects/n8n-project-440404/locations/us-central1/publishers/google/models/veo-3.1-generate-001\",\n  \"instances\": [\n    {\n      \"prompt\": {{ JSON.stringify($json.TEXT_PROMPT) }}\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": \"8\",\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": true,\n    \"includeRaiReason\": true,\n    \"generateAudio\": true\n  }\n}\n",
+        "options": {}
+      },
+      "id": "909447d7-bc28-4d16-9138-0197ebcd7eee",
+      "name": "Vertex AI-VEO",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        48,
+        640
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Part 1: Idea Generation",
+        "height": 240,
+        "width": 1300,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "0dc3b825-990e-4b01-a6fe-37a37963f884",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Part 2: Prompt Generation\n",
+        "height": 240,
+        "width": 1320,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        288
+      ],
+      "typeVersion": 1,
+      "id": "5985175d-517f-4db4-bd45-8c478fc944a5",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Part 3: Video Generation\n",
+        "height": 240,
+        "width": 1320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        592
+      ],
+      "typeVersion": 1,
+      "id": "2d905aee-3152-4f18-ae2e-4e6dc53284de",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $('Ideas AI Agent').item.json.output[0].Idea }}",
+        "regionCode": "IT",
+        "categoryId": "15",
+        "options": {
+          "description": "={{ $('Ideas AI Agent').item.json.output[0].Caption }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        448
+      ],
+      "id": "4093bb1c-46ee-4e77-8b32-2ff7ee7fd4a9",
+      "name": "Upload a video1",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8,12,15,19,21 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        64
+      ],
+      "id": "f2b3e961-a582-47a7-80a0-98dd5c8bdf1b",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Log the Idea": {
+      "main": [
+        [
+          {
+            "node": "Prompts AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ideas AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Prompts AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ideas AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Log the Idea",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompts AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Setting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Ideas AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ideas AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Prompts AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setting": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI-VEO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload a video1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI-fetch": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI-fetch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Log Final Video in Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI-VEO": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a video1": {
+      "main": [
+        []
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Ideas AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "52f72477-046a-4c32-99a3-0d022ded8c1a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "02c8ed9fcef43068b27bdf77a379a012c8a88ac0b0cfd9488ae7a8e3c03a1ef3"
+  },
+  "id": "DBco2nfjGH7Q5cMf",
+  "tags": []
+}
