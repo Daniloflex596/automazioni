@@ -336,6 +336,24 @@ canvas.waveform {
 }
 .identity-card .id-actions { display: flex; gap: 8px; margin-top: 6px; }
 
+/* suggerimento dell'identità */
+.identity-card.recommended { border-color: var(--accent); }
+.reco-ribbon {
+  align-self: flex-start; font-size: 0.72rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--grad); color: #fff;
+}
+.reco-ribbon.alt { background: var(--accent-soft); color: var(--accent); }
+.suggestion-banner {
+  display: flex; gap: 14px; align-items: flex-start;
+  margin: 12px 0 18px;
+  border-color: var(--accent);
+  background: linear-gradient(160deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.06)), var(--panel);
+}
+.suggestion-banner > div { min-width: 0; overflow-wrap: anywhere; }
+.suggestion-banner .sb-emoji { font-size: 1.7rem; line-height: 1; flex: 0 0 auto; }
+.suggestion-banner h4 { font-size: 1rem; }
+
 /* customize */
 
 .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }

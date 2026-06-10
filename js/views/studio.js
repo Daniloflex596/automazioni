@@ -6,8 +6,8 @@ import { el, toast, formatTime, syncRangeFill } from '../ui.js';
 import { getProject, updateProject, loadAudio } from '../store.js';
 import { AudioEngine } from '../audio/engine.js';
 import { analyzeBuffer, computeWaveformPeaks } from '../audio/analysis.js';
-import { IDENTITIES, getIdentity, computeParams, adaptationNotes } from '../audio/identities.js';
-import { EXPORT_TARGETS, makeVersionBlob } from '../audio/export.js';
+import { IDENTITIES, getIdentity, computeParams, adaptationNotes, recommendIdentities } from '../audio/identities.js';
+import { EXPORT_TARGETS, makeVersionBlob, SNIPPET, makeSnippetBlob } from '../audio/export.js';
 
 const STEPS = [
   { id: 'analysis', label: 'Analisi' },
@@ -248,6 +248,15 @@ export function renderStudio({ navigate, projectId }) {
   // ---------- step 2: identità sonora ----------
 
   function buildIdentity() {
+    // L'app consiglia una direzione in base all'analisi e ne propone alternative.
+    // Se l'utente non ha ancora scelto, la consigliata viene preselezionata: è un
+    // punto di partenza, non un verdetto — resta libero di cambiarla.
+    const suggestion = recommendIdentities(project.analysis);
+    if (suggestion && !project.identityId) {
+      project = updateProject(project.id, { identityId: suggestion.recommendedId });
+      applyEngineParams();
+    }
+
     const grid = el('div', { class: 'identity-grid' });
     const continueBtn = el('button', {
       class: 'btn btn-primary btn-lg',
@@ -255,14 +264,24 @@ export function renderStudio({ navigate, projectId }) {
       onClick: () => drawStep('customize'),
     }, 'Continua con questa →');
 
+    function roleOf(identity) {
+      if (!suggestion) return null;
+      if (suggestion.recommendedId === identity.id) return 'reco';
+      if (suggestion.alternativeIds.includes(identity.id)) return 'alt';
+      return null;
+    }
+
     function drawCards() {
       grid.replaceChildren(...IDENTITIES.map((identity) => {
         const selected = project.identityId === identity.id;
         const previewing = previewingId === identity.id;
+        const role = roleOf(identity);
         return el('div', {
-            class: `identity-card ${selected ? 'selected' : ''}`,
+            class: `identity-card ${selected ? 'selected' : ''} ${role === 'reco' ? 'recommended' : ''}`,
             onClick: () => select(identity),
           },
+          role === 'reco' && el('span', { class: 'reco-ribbon' }, '★ Consigliata per il tuo brano'),
+          role === 'alt' && el('span', { class: 'reco-ribbon alt' }, 'Buona alternativa'),
           el('div', { class: 'id-emoji' }, identity.emoji),
           el('h3', {}, identity.name),
           el('p', { class: 'id-desc' }, identity.description),
@@ -301,9 +320,19 @@ export function renderStudio({ navigate, projectId }) {
     engine.onEnded = () => { previewingId = null; drawCards(); };
     drawCards();
 
+    const recommended = suggestion ? getIdentity(suggestion.recommendedId) : null;
+
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:4px' },
         'Che carattere vuoi dare al brano? Ogni identità si dosa su ciò che abbiamo sentito nell’analisi. Ascoltale sul tuo pezzo: si decide con le orecchie, non con i nomi.'),
+      recommended && el('div', { class: 'card suggestion-banner' },
+        el('span', { class: 'sb-emoji' }, recommended.emoji),
+        el('div', {},
+          el('h4', {}, `Per il tuo brano partiremmo da ${recommended.name}`),
+          el('p', { class: 'muted small' }, suggestion.reason),
+          el('p', { class: 'muted', style: 'font-size:0.8rem; margin-top:4px' },
+            'È già pronta qui sotto: ascoltala, oppure scegli un’altra direzione quando vuoi.'))
+      ),
       grid,
       el('div', { class: 'step-actions' },
         el('button', { class: 'btn', onClick: () => drawStep('analysis') }, '← Analisi'),
@@ -419,6 +448,19 @@ export function renderStudio({ navigate, projectId }) {
     let renderedPromise = null;
     const getRendered = () => (renderedPromise ||= engine.renderBuffer(params));
 
+    // consegna comune a versioni e snippet: download, stato "esportato", toast
+    function deliverBlob(blob, versionName) {
+      const url = URL.createObjectURL(blob);
+      const safeName = `${project.name} — ${identity.name} (${versionName})`.replace(/[\\/:*?"<>|]+/g, '-');
+      const link = el('a', { href: url, download: `${safeName}.wav` });
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      markExported();
+      toast(`Versione ${versionName} scaricata.`);
+    }
+
     async function downloadVersion(target, button) {
       const originalLabel = button.textContent;
       button.disabled = true;
@@ -426,27 +468,7 @@ export function renderStudio({ navigate, projectId }) {
       try {
         const rendered = await getRendered();
         const { blob } = makeVersionBlob(rendered, target);
-        const url = URL.createObjectURL(blob);
-        const safeName = `${project.name} — ${identity.name} (${target.name})`.replace(/[\\/:*?"<>|]+/g, '-');
-        const link = el('a', { href: url, download: `${safeName}.wav` });
-        document.body.append(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
-        if (!project.exported) {
-          project = updateProject(project.id, { exported: true });
-          doneSlot.replaceChildren(
-            el('div', { class: 'export-done' },
-              el('h3', {}, '🎉 Il tuo brano è pronto'),
-              el('p', { class: 'muted small', style: 'margin-top:6px' },
-                'Lo trovi nei download. Il progetto resta in libreria: puoi tornarci e provare un’altra direzione quando vuoi.'),
-              el('div', { style: 'margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap' },
-                el('a', { href: '#/library', class: 'btn btn-primary' }, 'Vai alla libreria'),
-                el('a', { href: '#/new', class: 'btn' }, 'Nuovo brano'))
-            )
-          );
-        }
-        toast(`Versione ${target.name} scaricata.`);
+        deliverBlob(blob, target.name);
       } catch (error) {
         console.error(error);
         toast('Export non riuscito. Riprova.', 'error');
@@ -454,6 +476,40 @@ export function renderStudio({ navigate, projectId }) {
         button.disabled = false;
         button.textContent = originalLabel;
       }
+    }
+
+    // lo snippet riusa lo stesso render della catena: è coerente con
+    // l'identità e le rifiniture per costruzione
+    async function downloadSnippet(button) {
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Cerco il momento migliore…';
+      try {
+        const rendered = await getRendered();
+        const { blob } = makeSnippetBlob(rendered);
+        deliverBlob(blob, SNIPPET.name);
+      } catch (error) {
+        console.error(error);
+        toast('Export non riuscito. Riprova.', 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    }
+
+    function markExported() {
+      if (project.exported) return;
+      project = updateProject(project.id, { exported: true });
+      doneSlot.replaceChildren(
+        el('div', { class: 'export-done' },
+          el('h3', {}, '🎉 Il tuo brano è pronto'),
+          el('p', { class: 'muted small', style: 'margin-top:6px' },
+            'Lo trovi nei download. Il progetto resta in libreria: puoi tornarci e provare un’altra direzione quando vuoi.'),
+          el('div', { style: 'margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap' },
+            el('a', { href: '#/library', class: 'btn btn-primary' }, 'Vai alla libreria'),
+            el('a', { href: '#/new', class: 'btn' }, 'Nuovo brano'))
+        )
+      );
     }
 
     const versionRows = EXPORT_TARGETS.map((target) => {
@@ -468,6 +524,16 @@ export function renderStudio({ navigate, projectId }) {
       );
     });
 
+    const snippetBtn = el('button', { class: 'btn btn-sm' }, '✂️ Esporta snippet');
+    snippetBtn.addEventListener('click', () => downloadSnippet(snippetBtn));
+    const snippetRow = el('div', { class: 'export-version' },
+      el('span', { class: 'ico' }, SNIPPET.emoji),
+      el('div', { class: 'ev-text' },
+        el('h4', {}, SNIPPET.name),
+        el('p', {}, SNIPPET.desc)),
+      snippetBtn
+    );
+
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:8px' },
         'Scegli la destinazione: ogni versione è tarata sul volume giusto per dove la pubblicherai.'),
@@ -480,7 +546,8 @@ export function renderStudio({ navigate, projectId }) {
       ),
       el('div', { class: 'card export-versions' },
         el('h4', {}, 'Le tue versioni'),
-        versionRows
+        versionRows,
+        snippetRow
       ),
       el('div', { class: 'step-actions' },
         el('button', { class: 'btn', onClick: () => drawStep('compare') }, '← Riascolta il confronto'),
