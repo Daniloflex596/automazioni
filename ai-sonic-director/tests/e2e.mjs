@@ -116,11 +116,21 @@ console.log('\n[1] Flusso completo con upload reale');
   await page.waitForSelector('.metric-grid', { timeout: 30000 });
   check((await page.locator('.insight').count()) > 0, 'analisi con osservazioni');
 
-  // A4: l'analisi cita i valori misurati e dichiara cosa NON misura ancora
+  // A4: l'analisi cita i valori misurati e distingue misure da stime
   check(/-?\d+ dB/.test(await page.locator('.insight').first().textContent()),
     'le osservazioni citano i valori misurati del brano');
-  check((await page.locator('p:has-text("BPM e tonalità non vengono ancora misurati")').count()) === 1,
-    'nota di trasparenza su cosa l’analisi non misura');
+  check((await page.locator('p:has-text("BPM e tonalità sono stime")').count()) === 1,
+    'nota di trasparenza: misure vs stime');
+
+  // B1: BPM e tonalità presentati come STIME; sul tono di test (nessun ritmo,
+  // una sola nota) il sistema deve preferire il fallback onesto
+  check((await page.locator('.metric').count()) === 5, 'cinque schede metriche (incluse le stime)');
+  const tempoCard = await page.locator('.metric', { hasText: 'Tempo' }).textContent();
+  check(tempoCard.includes('stima'), 'il tempo è dichiarato come stima');
+  check(tempoCard.includes('—') && tempoCard.includes('certezza'),
+    'fallback onesto: nessun BPM inventato su materiale senza ritmo');
+  const keyCard = await page.locator('.metric', { hasText: 'Tonalità' }).textContent();
+  check(keyCard.includes('stima'), 'la tonalità è dichiarata come stima');
 
   await page.click('button:has-text("Scegli l’identità sonora")');
   await page.waitForSelector('.identity-card');
@@ -298,6 +308,13 @@ console.log('\n[4] Mobile viewport');
   await page.click('button:has-text("brano demo")');
   await page.waitForSelector('.metric-grid', { timeout: 30000 });
   check(await noOverflow(), 'analisi senza overflow');
+
+  // B1 sul brano demo (trap 140 BPM reale): la stima del tempo deve esporsi
+  const demoTempo = await page.locator('.metric', { hasText: 'Tempo' }).textContent();
+  check(/≈ \d+ BPM/.test(demoTempo), 'BPM stimato su un brano con ritmo reale');
+  const demoKey = await page.locator('.metric', { hasText: 'Tonalità' }).textContent();
+  check(/maggiore|minore|certezza/.test(demoKey),
+    'tonalità: stima in linguaggio musicale oppure fallback onesto');
 
   await page.click('button:has-text("Scegli l’identità sonora")');
   await page.waitForSelector('.identity-card');

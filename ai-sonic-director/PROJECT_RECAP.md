@@ -29,7 +29,34 @@
   `change` (A1); file corrotti creavano progetti orfani (A2); catch-all dello Studio dava
   sempre la colpa al "file non leggibile" anche per errori di storage (A3).
 
-## Ultimo step completato — A5: GATE DEL LIVELLO A → ✅ GO al Livello B (2026-06-10)
+## Ultimo step completato — B1: BPM + tonalità nell'analisi (2026-06-10)
+
+**Cosa è stato fatto**
+- **Commit `6eaf505`** (gate A5) prima di aprire lo step.
+- **Stima BPM** (`app/js/audio/analysis.js`): onset a flusso spettrale + autocorrelazione
+  a pettine sul segmento centrale (max 90 s). Demo a 140 BPM → **≈141, conf 0.45, 114 ms**.
+- **Stima tonalità**: chroma (riusa lo stesso passaggio FFT delle bande) + profili
+  Krumhansl-Schmuckler, nomi italiani ("La minore").
+- **Onestà by design**: card "Tempo (stima)"/"Tonalità (stima)" con "≈"; sotto soglia di
+  confidenza → "—" e "Non riusciamo a stimarlo con certezza su questo brano".
+- **Bug trovato in corso d'opera**: la versione a inviluppo RMS dava 94 BPM "sicuri" sul
+  demo a 140 (cieca agli hi-hat nei groove sincopati) — scoperto con una sonda, risolto
+  col flusso spettrale. Mai fidarsi della prima stima plausibile.
+- Nota di trasparenza A4 aggiornata (misure vs stime); progetti pre-B1 rianalizzati alla
+  riapertura (sana anche il debito "insight vecchi"). **Test: +6 controlli, 53/53 ✅.**
+
+**Cosa è aperto**
+- **Push su GitHub** (deploy Pages automatico) — in corso in questa sessione.
+- **Prossimo step: B2 — export MP3**, che richiede una dipendenza di codifica:
+  serve l'ok esplicito del PO prima di aprirlo. In alternativa B3 (limiter vero +
+  A/B loudness-matched) non richiede dipendenze.
+- Limiti residui B1: fallback su brani armonicamente ambigui (deliberato); ottava BPM
+  (70/140) ambigua su half-time; segmento centrale; suggerimento identità non usa ancora
+  i nuovi dati.
+
+---
+
+## Step precedente — A5: GATE DEL LIVELLO A → ✅ GO al Livello B (2026-06-10)
 
 **Cosa è stato fatto**
 - **Commit `063926f`** (A4) prima del gate; working tree pulito.
@@ -235,8 +262,9 @@
 4. ~~**A4 — Analisi presentata meglio + export più pratico**~~ ✅ (47/47, commit `063926f`).
 5. ~~**A5 — Gate del Livello A**~~ ✅ **GO al Livello B** (checklist 5/5 su A1–A4,
    7 debiti non bloccanti tracciati).
-6. **B1 — BPM + tonalità nell'analisi** ← prossimo; poi B2 (MP3, serve ok PO sulla
-   dipendenza), B3 (limiter vero + A/B loudness-matched), B4, B5, B6.
+6. ~~**B1 — BPM + tonalità nell'analisi**~~ ✅ (53/53) — commit + push in chiusura sessione.
+7. **B2 — export MP3** (serve ok PO sulla dipendenza) oppure **B3** (limiter vero +
+   A/B loudness-matched, zero dipendenze); poi B4, B5, B6.
 
 ## Errori o blocchi
 
@@ -263,3 +291,4 @@
 | 2026-06-10 | Commit `28f723a` (A2); benchmark competitivo nella visione (+ A/B loudness-matched in B3); A3 — errori e attese (dialog app, quota, errori Studio distinti), e2e 43/43 ✅ | Chiuso |
 | 2026-06-10 | Commit `9764be6` (A3+benchmark); consolidamento memoria; A4 — analisi con valori misurati + trasparenza, export con peso/formato/naming puliti, e2e 47/47 ✅ | Chiuso |
 | 2026-06-10 | Commit `063926f` (A4); A5 — gate del Livello A: checklist 5/5 su A1–A4, zero gap bloccanti, 7 debiti tracciati → **GO al Livello B** | Chiuso |
+| 2026-06-10 | Commit `6eaf505` (gate A5); B1 — BPM (flusso spettrale, demo ≈141/140) + tonalità (chroma) come stime con fallback onesto, e2e 53/53 ✅, push su GitHub/Pages | Chiuso |

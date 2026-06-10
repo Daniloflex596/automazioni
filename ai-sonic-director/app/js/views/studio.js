@@ -77,7 +77,9 @@ export function renderStudio({ navigate, projectId }) {
     }
 
     try {
-      if (!project.analysis) {
+      // si rianalizza anche se l'analisi salvata è di una versione precedente
+      // (senza stime di tempo/tonalità): così resta coerente con la UI attuale
+      if (!project.analysis || !project.analysis.tempo) {
         project = updateProject(project.id, { analysis: analyzeBuffer(buffer) });
       }
       peaks = computeWaveformPeaks(buffer);
@@ -220,7 +222,14 @@ export function renderStudio({ navigate, projectId }) {
       el('div', { class: 'metric-grid' },
         metric('Durata', formatTime(a.duration), `${a.channels === 1 ? 'Mono' : 'Stereo'} · ${Math.round(a.sampleRate / 1000)} kHz`),
         metric('Volume medio', `${a.rmsDb} dB`, volumeHint(a.rmsDb)),
-        metric('Dinamica', `${a.crest} dB`, dynamicsHint(a.crest))
+        metric('Dinamica', `${a.crest} dB`, dynamicsHint(a.crest)),
+        // stime, mai verità assolute: se la confidenza non basta, lo diciamo
+        a.tempo && a.tempo.reliable
+          ? metric('Tempo (stima)', `≈ ${a.tempo.bpm} BPM`, 'Stimato dal ritmo del brano')
+          : metric('Tempo (stima)', '—', 'Non riusciamo a stimarlo con certezza su questo brano'),
+        a.key && a.key.reliable
+          ? metric('Tonalità (stima)', a.key.name, 'Stimata dall’armonia del brano')
+          : metric('Tonalità (stima)', '—', 'Non riusciamo a stimarla con certezza su questo brano')
       ),
       el('div', { class: 'card', style: 'margin-top:14px' },
         el('h4', {}, 'Bilanciamento tonale'),
@@ -246,9 +255,9 @@ export function renderStudio({ navigate, projectId }) {
               el('p', {}, insight.text))
           ))
       ),
-      // trasparenza: cosa misuriamo davvero oggi, senza promesse implicite
+      // trasparenza: cosa è misurato e cosa è stimato, senza promesse implicite
       el('p', { class: 'muted small', style: 'margin-top:14px' },
-        'Questa analisi misura volume medio, picchi, dinamica e bilanciamento tonale sull’intero brano. BPM e tonalità non vengono ancora misurati.'),
+        'Volume, dinamica e bilanciamento tonale sono misurati sull’intero brano. BPM e tonalità sono stime: quando non sono abbastanza affidabili preferiamo dirtelo, invece di mostrare un valore sbagliato.'),
       el('div', { class: 'step-actions' },
         el('span', {}),
         el('button', { class: 'btn btn-primary btn-lg', onClick: () => drawStep('identity') },
