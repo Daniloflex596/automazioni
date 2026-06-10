@@ -18,18 +18,41 @@
 - **Metodo (ufficiale):** roadmap A/B/C + 5 domande-gate in FONTE_DI_VERITA §8; regola madre
   "prima la base eccellente, poi l'espansione"; regola agenti AI (6 criteri, nessuno
   prioritario ora). Giudizio da audit: **prototipo funzionale** — non demo, non ancora MVP.
-- **Avanzamento Livello A:** A1 (pre-ascolto) ✅ · A2 (validazione robusta) ✅ ·
-  A3 (errori e attese) ✅ · A4 (analisi + export) ✅ · A5 (verifica finale + gate) ← prossimo.
+- **LIVELLO A CHIUSO ✅ (gate A5 superato, GO pieno):** A1 pre-ascolto · A2 validazione ·
+  A3 errori/attese · A4 analisi+export — tutti 5/5 sui criteri di "eccellente".
+  Prossimo: **Livello B, step B1 (BPM + tonalità)**.
 - **Commit di oggi:** `9ff0fe0` (visione+metodo+agenti+A1) → `28f723a` (A2) →
-  `9764be6` (A3+benchmark) → A4 nel working tree, da committare.
-  Branch: `claude/complete-plan-implementation-h0pkbx`.
+  `9764be6` (A3+benchmark) → `063926f` (A4). Branch: `claude/complete-plan-implementation-h0pkbx`.
 - **Qualità:** suite e2e Playwright **47/47 controlli passati**, zero errori JS.
   Eseguibile con `node tests/e2e.mjs` (richiede `npm install` una tantum).
 - **Bug reali trovati e risolti oggi:** riselezione dello stesso file dopo il ✕ non emetteva
   `change` (A1); file corrotti creavano progetti orfani (A2); catch-all dello Studio dava
   sempre la colpa al "file non leggibile" anche per errori di storage (A3).
 
-## Ultimo step completato — A4: analisi presentata meglio + export più pratico (2026-06-10)
+## Ultimo step completato — A5: GATE DEL LIVELLO A → ✅ GO al Livello B (2026-06-10)
+
+**Cosa è stato fatto**
+- **Commit `063926f`** (A4) prima del gate; working tree pulito.
+- **Gate vero, non formalità**: checklist A1–A4 contro i 5 criteri di "eccellente"
+  (FONTE_DI_VERITA §8), con evidenze: run formale suite **47/47 ✅**, grep su `app/` =
+  zero `prompt`/`confirm`/`alert` nativi, niente `console.error` sui casi attesi.
+- **Esito: tutti e 4 gli step 5/5 ✓. Nessun gap bloccante. GO pieno al Livello B.**
+- **7 debiti non bloccanti tracciati** (FONTE_DI_VERITA §8): doppia decodifica;
+  `localStorage.setItem` non protetto (`store.js:24,78`); quota non simulabile in e2e;
+  attese export label-only; estetica player nativa; insight vecchi nei progetti pre-A4;
+  pre-ascolto/dialog non testati su viewport mobile. Nessuno richiede azione prima di B1.
+- Checklist completa nel diario di FONTE_DI_VERITA (§7). Nessun file dell'app toccato.
+
+**Cosa è aperto**
+- **Prossimo step: B1 — BPM + tonalità nell'analisi.** Perimetro preparato: stima BPM
+  (autocorrelazione sull'inviluppo degli onset) + tonalità (profilo chroma), tutto nel
+  browser in `analysis.js`; presentazione in `studio.js`; aggiornamento della nota di
+  trasparenza; e2e estesa. Zero dipendenze nuove. Il suggerimento identità potrà usare i
+  nuovi dati solo se il gate delle 5 domande lo giustifica (non obbligatorio in B1).
+
+---
+
+## Step precedente — A4: analisi presentata meglio + export più pratico (2026-06-10)
 
 **Cosa è stato fatto**
 - **Commit `9764be6`** (A3 + benchmark) prima di aprire lo step; memoria consolidata.
@@ -209,11 +232,11 @@
 1. ~~**A1 — Pre-ascolto**~~ ✅ (36/36, commit `9ff0fe0`).
 2. ~~**A2 — Validazione robusta**~~ ✅ (40/40, commit `28f723a`).
 3. ~~**A3 — Gestione errori e stati di attesa**~~ ✅ (43/43, commit `9764be6` col benchmark).
-4. ~~**A4 — Analisi presentata meglio + export più pratico**~~ ✅ (47/47) — **da committare**.
-5. **A5 — Verifica finale e2e del Livello A** + gate di chiusura A (definizione di
-   "eccellente" verificata su A1–A4).
-6. Solo dopo la chiusura del Livello A: B1 (BPM/tonalità), B2 (MP3), B3 (limiter vero +
-   A/B loudness-matched)…
+4. ~~**A4 — Analisi presentata meglio + export più pratico**~~ ✅ (47/47, commit `063926f`).
+5. ~~**A5 — Gate del Livello A**~~ ✅ **GO al Livello B** (checklist 5/5 su A1–A4,
+   7 debiti non bloccanti tracciati).
+6. **B1 — BPM + tonalità nell'analisi** ← prossimo; poi B2 (MP3, serve ok PO sulla
+   dipendenza), B3 (limiter vero + A/B loudness-matched), B4, B5, B6.
 
 ## Errori o blocchi
 
@@ -239,3 +262,4 @@
 | 2026-06-10 | Commit `9ff0fe0` (visione + metodo + agenti + A1); A2 — validazione robusta (.opus, decodifica pre-creazione, rollback anti-orfani), e2e 40/40 ✅ | Chiuso |
 | 2026-06-10 | Commit `28f723a` (A2); benchmark competitivo nella visione (+ A/B loudness-matched in B3); A3 — errori e attese (dialog app, quota, errori Studio distinti), e2e 43/43 ✅ | Chiuso |
 | 2026-06-10 | Commit `9764be6` (A3+benchmark); consolidamento memoria; A4 — analisi con valori misurati + trasparenza, export con peso/formato/naming puliti, e2e 47/47 ✅ | Chiuso |
+| 2026-06-10 | Commit `063926f` (A4); A5 — gate del Livello A: checklist 5/5 su A1–A4, zero gap bloccanti, 7 debiti tracciati → **GO al Livello B** | Chiuso |
