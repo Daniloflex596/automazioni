@@ -28,7 +28,8 @@ const MIME = {
 
 const server = http.createServer(async (req, res) => {
   try {
-    const path = normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^\/+/, '') || 'index.html';
+    // su Windows normalize('/') produce '\', quindi vanno spogliati entrambi i separatori
+    const path = normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^[/\\]+/, '') || 'index.html';
     const file = await readFile(join(APP_DIR, path === '' ? 'index.html' : path));
     res.writeHead(200, { 'Content-Type': MIME[extname(path)] || 'application/octet-stream' });
     res.end(file);
@@ -107,6 +108,15 @@ console.log('\n[1] Flusso completo con upload reale');
   await page.waitForSelector('.identity-card');
   check((await page.locator('.identity-card').count()) === 6, '6 identità presenti');
 
+  // suggerimento automatico (blocco 6c): banner con motivo, consigliata
+  // evidenziata e preselezionata, due alternative — la scelta resta libera
+  check((await page.locator('.suggestion-banner').count()) === 1, 'banner del suggerimento presente');
+  check((await page.locator('.suggestion-banner h4').textContent()).includes('partiremmo da'),
+    'il suggerimento parla in linguaggio da artista');
+  check((await page.locator('.identity-card.recommended').count()) === 1, 'una identità consigliata evidenziata');
+  check((await page.locator('.identity-card.recommended.selected').count()) === 1, 'la consigliata è preselezionata');
+  check((await page.locator('.reco-ribbon.alt').count()) === 2, 'due alternative proposte');
+
   // pre-ascolto, poi selezione
   await page.locator('.identity-card').nth(1).locator('button:has-text("Ascolta")').click();
   await page.waitForTimeout(400);
@@ -136,16 +146,22 @@ console.log('\n[1] Flusso completo con upload reale');
   await page.click('.step-actions button:has-text("esporta")');
   await page.waitForSelector('.export-summary');
   check((await page.locator('.export-summary .row').count()) === 5, 'riepilogo export completo');
-  check((await page.locator('.export-version').count()) === 3, 'tre versioni di export (Master, Streaming, Social)');
+  check((await page.locator('.export-version').count()) === 4, '3 versioni + snippet social in export');
 
   let download = page.waitForEvent('download', { timeout: 60000 });
   await page.locator('.export-version', { hasText: 'Master' }).locator('button').click();
   await download;
   await page.waitForSelector('.export-done');
   download = page.waitForEvent('download', { timeout: 60000 });
-  await page.locator('.export-version', { hasText: 'Social' }).locator('button').click();
+  await page.locator('.export-version').nth(2).locator('button').click();
   await download;
   check(true, 'versioni Master e Social scaricate');
+
+  // snippet social: presenza nell'export (non testiamo il download reale)
+  check((await page.locator('.export-version', { hasText: 'Snippet social' }).count()) === 1,
+    'voce snippet social presente in export');
+  check((await page.locator('.export-version:has-text("Snippet social") .btn').count()) === 1,
+    'bottone snippet social presente e cliccabile');
 
   // stepper: torno all'analisi e risalto direttamente all'export (già raggiunto)
   await page.click('.stepper button:has-text("Analisi")');

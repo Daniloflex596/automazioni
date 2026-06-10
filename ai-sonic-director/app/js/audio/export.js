@@ -64,6 +64,81 @@ export function makeVersionBlob(buffer, target) {
   return { blob: audioBufferToWav(scaled), gainDb: 20 * Math.log10(gain || 1e-6) };
 }
 
+// SNIPPET SOCIAL (release package): un estratto breve del brano, tagliato sul
+// segmento più energico, pensato per TikTok/Reels/Shorts. È coerente con
+// l'identità scelta per costruzione: si ricava dallo stesso render della
+// catena di elaborazione, poi viene portato al volume Social. Niente stem,
+// niente analisi del cantato: l'"hook" è il punto di massima energia, una
+// approssimazione onesta e dichiarata (come il resto del prototipo).
+export const SNIPPET = {
+  emoji: '✂️',
+  name: 'Snippet social',
+  seconds: 20, // dentro il range 15-30 richiesto dal prodotto
+  desc: 'Il momento più forte del brano, circa 20 secondi, al volume giusto per TikTok, Reels e Shorts.',
+};
+
+// Crea lo snippet dal render: trova la finestra più energica, la ritaglia con
+// dissolvenze anti-click e la porta al volume Social. Se il brano è più corto
+// dello snippet, l'estratto è il brano intero.
+export function makeSnippetBlob(buffer, seconds = SNIPPET.seconds) {
+  const frames = Math.min(buffer.length, Math.round(seconds * buffer.sampleRate));
+  const start = findLoudestWindowStart(buffer, frames);
+  const fade = Math.min(Math.round(0.5 * buffer.sampleRate), Math.floor(frames / 8));
+
+  const channels = [];
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    const source = buffer.getChannelData(ch);
+    const copy = new Float32Array(frames);
+    for (let i = 0; i < frames; i++) copy[i] = source[start + i];
+    for (let i = 0; i < fade; i++) {
+      const ramp = i / fade;
+      copy[i] *= ramp;
+      copy[frames - 1 - i] *= ramp;
+    }
+    channels.push(copy);
+  }
+
+  const sliced = {
+    numberOfChannels: buffer.numberOfChannels,
+    length: frames,
+    sampleRate: buffer.sampleRate,
+    getChannelData: (ch) => channels[ch],
+  };
+
+  const social = EXPORT_TARGETS.find((target) => target.id === 'social');
+  const { blob } = makeVersionBlob(sliced, social);
+  return { blob, startSeconds: start / buffer.sampleRate, seconds: frames / buffer.sampleRate };
+}
+
+// Finestra di massima energia: somma dei quadrati su blocchi da ~0,25 s del
+// mix mono, poi scorrimento della finestra sulla somma cumulata dei blocchi.
+function findLoudestWindowStart(buffer, windowFrames) {
+  if (windowFrames >= buffer.length) return 0;
+  const chans = [];
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) chans.push(buffer.getChannelData(ch));
+
+  const block = Math.max(1, Math.round(buffer.sampleRate * 0.25));
+  const blockCount = Math.ceil(buffer.length / block);
+  const energies = new Float64Array(blockCount);
+  for (let i = 0; i < buffer.length; i++) {
+    let mono = 0;
+    for (const data of chans) mono += data[i];
+    mono /= chans.length;
+    energies[(i / block) | 0] += mono * mono;
+  }
+
+  const blocksPerWindow = Math.max(1, Math.round(windowFrames / block));
+  let sum = 0;
+  for (let b = 0; b < Math.min(blocksPerWindow, blockCount); b++) sum += energies[b];
+  let best = sum;
+  let bestBlock = 0;
+  for (let b = 1; b + blocksPerWindow <= blockCount; b++) {
+    sum += energies[b + blocksPerWindow - 1] - energies[b - 1];
+    if (sum > best) { best = sum; bestBlock = b; }
+  }
+  return Math.min(bestBlock * block, buffer.length - windowFrames);
+}
+
 export function measureLevels(buffer) {
   const chans = [];
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) chans.push(buffer.getChannelData(ch));
