@@ -29,6 +29,18 @@ Tutto avviene nel browser (Web Audio API): l'analisi è reale, le identità sono
 
 Il prototipo serve a validare flusso e percezione di valore, non la qualità da mastering. L'elenco onesto delle semplificazioni è in [`docs/FONTE_DI_VERITA.md`](docs/FONTE_DI_VERITA.md) §5 — in sintesi: le identità si adattano all'analisi del brano con regole semplici (l'adattività fine è da MVP), l'analisi è di base, niente account né backend, export solo WAV.
 
+## Test
+
+La suite end-to-end (Playwright + Chromium headless) copre il flusso completo con upload reale, persistenza di libreria e profilo, gestione dei file corrotti e l'assenza di overflow su mobile:
+
+```bash
+node tests/e2e.mjs
+# se Playwright non è installato nel progetto:
+# PLAYWRIGHT_MODULE=/percorso/a/playwright/index.mjs node tests/e2e.mjs
+```
+
+Regola operativa: la suite deve passare prima e dopo ogni nuovo sviluppo.
+
 ## Struttura
 
 ```

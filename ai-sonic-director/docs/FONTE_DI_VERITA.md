@@ -10,7 +10,7 @@
 
 - **Fase in corso:** Fase 1 completata; primo mattone di Fase 2 (adattività di base) anticipato su decisione del product owner.
 - **Blocchi completati:** 1 (Fondamenta), 2 (Flusso principale), 3 (Credibilità del prototipo), 4 (Libreria e profilo), 5 (Demo e rifinitura), 6a (Adattività di base).
-- **Ultima cosa completata:** elaborazione adattiva di base — le identità sonore ora leggono l'analisi del brano e dosano bassi/alti, compressione e volume di conseguenza; la schermata di personalizzazione spiega come l'identità si è adattata; l'export è protetto dal clipping.
+- **Ultima cosa completata:** consolidamento del prototipo — suite di test end-to-end permanente in `tests/` (flusso completo con upload reale, persistenza, file corrotti, mobile), correzione dell'overflow su mobile nello step Personalizza, rinomina progetto in libreria.
 - **Prossimo passo:** validazione con utenti reali del Gruppo A (in parallelo allo sviluppo a step concordato con il product owner).
 
 ## 2. Priorità corrente
@@ -37,6 +37,7 @@
 | 2026-06-10 | Cambio di perimetro: sviluppo a step in parallelo alla validazione | Richiesta esplicita del product owner; resta la regola "un solo step per volta" |
 | 2026-06-10 | Primo step di Fase 2: adattività di base delle identità | Era il limite più importante dichiarato del prototipo; fattibile interamente lato browser |
 | 2026-06-10 | Export protetto dal clipping (riscala se supera il tetto) | Un file esportato che distorce tradisce la promessa "pronta all'uso" |
+| 2026-06-10 | Suite e2e permanente in `tests/`; deve passare prima e dopo ogni sviluppo | "Prima vedi se tutto funziona, poi aggiungi" reso regola verificabile |
 
 ## 5. Cose simulate o semplificate nel prototipo
 
@@ -65,3 +66,4 @@ Elenco onesto di ciò che è semplificato e andrà reso reale nell'MVP:
 |---|---|
 | 2026-06-09 | Creazione del documento. Piano di prodotto v1.0 approvato come base. Prototipo Fase 1 implementato end-to-end (blocchi 1-5). Priorità impostata su validazione con utenti. |
 | 2026-06-10 | Cambio di perimetro (sviluppo a step su richiesta del product owner). Completato blocco 6a: adattività di base delle identità, note di adattamento in UI, protezione anti-clipping dell'export. |
+| 2026-06-10 | Consolidamento "prototipo finale": suite e2e permanente (26 controlli), fix overflow mobile nello step Personalizza, rinomina progetto in libreria. |
