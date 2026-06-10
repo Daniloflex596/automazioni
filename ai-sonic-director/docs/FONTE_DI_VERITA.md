@@ -1,7 +1,7 @@
 # AI Sonic Director — Fonte di Verità
 
 > Unico documento che descrive lo **stato corrente** del progetto.
-> La mappa completa è in [`PIANO_PRODOTTO.md`](./PIANO_PRODOTTO.md). In caso di conflitto tra memoria, chat e altri documenti, **vince questo file**.
+> La mappa completa è in [`PIANO_PRODOTTO.md`](./PIANO_PRODOTTO.md); la **visione finale ufficiale** del prodotto è in [`VISIONE_PRODOTTO.md`](./VISIONE_PRODOTTO.md). In caso di conflitto tra memoria, chat e altri documenti, **vince questo file**.
 > Regola: ogni sessione di lavoro inizia leggendo questo file e finisce aggiornandolo.
 
 ---
@@ -10,14 +10,16 @@
 
 - **Fase in corso:** Fase 1 completata; primi mattoni di Fase 2 anticipati su decisione del product owner (sviluppo a step).
 - **Blocchi completati:** 1 (Fondamenta), 2 (Flusso principale), 3 (Credibilità del prototipo), 4 (Libreria e profilo), 5 (Demo e rifinitura), 6a (Adattività di base), 6b (Export per destinazione), 6c (Suggerimento automatico dell'identità), **Snippet/highlight social**.
-- **Ultima cosa completata:** snippet/highlight social nel release package — UI export completata, test e2e estesi (+2 controlli), **34/34 controlli passati**. Il release package ora include 3 versioni + snippet.
-- **Prossimo passo:** validazione con utenti reali del Gruppo A (in parallelo allo sviluppo a step concordato con il product owner).
+- **Ultima cosa completata:** **step A1 — pre-ascolto prima del caricamento** (primo step del Livello A): player nativo nel form Nuovo progetto, gestione cambio/rimozione file, fix del bug "stesso file riselezionato non emette change", suite e2e estesa (+3 controlli) — **36/36 ✅**. Inoltre: regola agenti AI interni aggiunta a `VISIONE_PRODOTTO.md` (sezione "POSSIBILI AGENTI AI INTERNI") e a §8; visione + roadmap + metodo approvati formalmente dal PO.
+- **Prossimo passo:** step A2 — validazione robusta (`.opus`/MIME vuoto accettati, decodifica prima della creazione del progetto, zero progetti orfani).
 
 ## 2. Priorità corrente
 
 > **Sviluppo a step (decisione del product owner, 2026-06-10):** un solo miglioramento per volta, scelto per valore, validazione utenti in parallelo.
 >
-> **Step appena chiuso:** snippet/highlight social (suite 34/34). **Prossimo candidato:** commit del working tree (6c + snippet mai committati), poi versioni multiple esportate insieme (vedi §6).
+> **Regola in vigore (decisione del PO, 2026-06-10): "prima la base eccellente, poi l'espansione".** Nessuna feature nuova di Livello B o C finché il Livello A non è chiuso (vedi §8).
+>
+> **Step appena chiuso:** A1 — pre-ascolto prima del caricamento (e2e 36/36 ✅). **Prossimo step:** A2 — validazione robusta dell'upload.
 
 ## 3. Perimetro adesso
 
@@ -48,6 +50,8 @@
 | 2026-06-10 | Regola "memoria operativa sempre aggiornata": ogni step si apre leggendo `PROJECT_RECAP.md` (root) + questo file, registra le decisioni appena emergono e si chiude aggiornando entrambi prima di fermarsi | La memoria non deve vivere nella chat: il lavoro è a sessioni discontinue e ogni step deve essere ricostruibile in due minuti di lettura |
 | 2026-06-10 | Playwright installato come `devDependencies` (con `.gitignore` per `node_modules/`) | Autorizzato dal PO per la verifica e2e; l'app resta a zero dipendenze di runtime — la dipendenza serve solo alla suite di test |
 | 2026-06-10 | Fix del server statico della suite e2e per Windows (separatori di percorso) | La suite era nata su Linux; su Windows la richiesta `/` non risolveva `index.html`. Fix nel solo `tests/e2e.mjs`, app intoccata |
+| 2026-06-10 | Approvati: `VISIONE_PRODOTTO.md` come guida permanente, roadmap A/B/C + metodo (§8), regola "prima la base eccellente, poi l'espansione" | Mandato esplicito del product owner; ogni step futuro passa dalle 5 domande-gate |
+| 2026-06-10 | Regola agenti AI interni: ammessi solo se superano i 6 criteri (vedi VISIONE_PRODOTTO.md); nessun agente prioritario ora | Evitare "fuffa AI"; gli agenti sono strumenti invisibili, non gimmick; vincolo backend li colloca dopo il Livello A |
 
 ## 5. Cose simulate o semplificate nel prototipo
 
@@ -58,7 +62,11 @@ Elenco onesto di ciò che è semplificato e andrà reso reale nell'MVP:
 - **Il profilo è locale e senza account:** un nome salvato nel browser; nell'MVP serviranno account reali.
 - **Export solo WAV:** le versioni per destinazione ci sono (Master/Streaming/Social), ma la codifica MP3 è rimandata all'MVP; il loudness è misurato in RMS, un'approssimazione del vero LUFS.
 - **La libreria vive nel browser dell'utente:** cambiando browser/dispositivo i progetti non seguono l'utente.
-- **Il suggerimento dell'identità è di base:** confronta bilanciamento tonale, dinamica e volume con un profilo-target per identità, con motivazione dal tratto più marcato del brano; nell'MVP potrà appoggiarsi a un'analisi più ricca (chiave, BPM) e imparare dal gusto dell'utente.
+- **Il suggerimento dell'identità è di base:** confronta bilanciamento tonale, dinamica e volume con un profilo-target per identità, con motivazione dal tratto più marcato del brano; nell'MVP potrà appoggiarsi a un'analisi più ricca (chiave, BPM) e imparare dal gusto dell'utente. È una distanza pesata su regole fisse, non machine learning: il nome "AI" va difeso alzando la qualità dell'analisi.
+- **Manca il pre-ascolto del file prima del caricamento** (confermato dall'audit 2026-06-10): l'utente può ascoltare solo dopo la creazione del progetto, nello Studio.
+- **La validazione dell'upload è superficiale:** solo prefisso MIME + estensione + 80 MB. I vocali WhatsApp `.opus` vengono respinti (estensione fuori whitelist, MIME spesso vuoto su Windows); un file corrotto crea comunque il progetto, che resta orfano in libreria quando la decodifica fallisce nello Studio.
+- **Il tetto anti-clipping non è un vero limiter:** è una riduzione di guadagno sul picco; brani molto dinamici possono non raggiungere il target RMS della destinazione.
+- **Nessuna integrazione WhatsApp:** oggi è possibile solo caricare a mano un file ricevuto sul dispositivo. "Condividi verso app" richiederebbe una PWA (manifest + service worker, solo Android/Chrome); WhatsApp Business/Cloud API richiede un backend e non è fattibile nel prototipo frontend-only.
 
 ## 6. Parcheggio idee
 
@@ -86,3 +94,69 @@ Elenco onesto di ciò che è semplificato e andrà reso reale nell'MVP:
 | 2026-06-10 | **Chiusura formale dello step 6c — Suggerimento automatico dell'identità.** *Obiettivo:* l'app consiglia la migliore identità per il brano, con motivazione in linguaggio da artista e alternative, senza togliere libertà di scelta. *Modifiche:* `recommendIdentities(analysis)` + profili di fit in `app/js/audio/identities.js`; banner "Per il tuo brano partiremmo da…", preselezione e badge Consigliata/Alternativa nello step Identità di `app/js/views/studio.js`; stili in `app/css/main.css`. *Verifiche eseguite:* syntax check (`node --check`) sui file toccati, test logico della raccomandazione (7 controlli passati: brano bassoso→Trap Scura, leggero/brillante→Acustico Naturale, equilibrato→Radio Pulito; 2 alternative distinte; motivazione presente; analisi assente gestita). *Limite rimasto aperto:* suite e2e (`tests/e2e.mjs`) NON eseguita perché Playwright non è installato sulla macchina. *Decisione:* installazione Playwright ed esecuzione della suite rimandate a uno step successivo esplicito; fino ad allora il debito di verifica resta dichiarato qui. |
 | 2026-06-10 | **Chiusura dello step "Verifica e2e dello step 6c" — debito estinto.** *Obiettivo:* verificare formalmente il suggerimento automatico nel flusso end-to-end. *Fatto:* Playwright + Chromium installati (`devDependencies`, `.gitignore` per `node_modules/`); fix Windows del server statico della suite (separatori di percorso, solo `tests/e2e.mjs`); suite estesa con 5 controlli sul suggerimento (banner presente, linguaggio da artista, consigliata evidenziata, consigliata preselezionata, 2 alternative). *Esito:* prima esecuzione completa 27/27 ✅, suite estesa **32/32 ✅**, zero errori JS raccolti. *Nessun file dell'app toccato in questo step.* |
 | 2026-06-10 | **Chiusura dello step "Snippet/highlight social".** *Obiettivo:* estratto breve del brano (20 s, punto più energico, volume Social) come parte del release package. *Fatto:* UI export completata in `app/js/views/studio.js` (4ª riga snippet con bottone ✂️, riusa `.export-version`); test e2e estesi in `tests/e2e.mjs` (conteggio 3→4, +2 controlli su voce e bottone). *Esito:* suite **34/34 ✅**, zero errori JS. *Nota:* 6c + snippet sono solo nel working tree, mai committati — rischio di perdita. |
+| 2026-06-10 | **Audit completo del prototipo (richiesta del PO).** *Verificato:* tutte le aree (upload, validazione, analisi, suggerimento, personalizzazione, A/B, export, snippet, libreria, errori, persistenza, backend). *Esito:* nessuna funzione è simulata — tutta la pipeline audio è reale (Web Audio + DSP custom); semplificazioni e assenze registrate in §5. Suite e2e rieseguita: tutti i controlli ✅ (il runner stampa 33 voci, non 34 — imprecisione di conteggio nei recap, nessun test fallito). Git verificato: 6c + snippet committati (`6eb38fa`), working tree pulito, esiste anche workflow GitHub Pages (`90d2baa`, repo `automazioni/.github`). *Problemi confermati:* niente pre-ascolto pre-upload; analisi povera per credibilità (no BPM/tonalità/LUFS); `.opus` WhatsApp respinti; progetto orfano da file corrotto. *Problemi smentiti:* "funzioni solo frontend/finte" (non ce ne sono); "lavoro non committato" (commit fatto). *WhatsApp:* upload manuale già possibile (con fix `.opus`); share-to-app = serve PWA, Android-only; Cloud API = non fattibile senza backend. *Giudizio:* prototipo funzionale, non demo, non ancora MVP. *Nessun file dell'app toccato.* |
+| 2026-06-10 | **Visione finale ufficiale del prodotto + roadmap A/B/C + metodo di costruzione.** *Fatto:* creato `docs/VISIONE_PRODOTTO.md` (visione completa dal punto di vista dell'artista, contraddizioni note col prototipo, definizione finale del prodotto); aggiunta la §8 a questo file (roadmap a 3 livelli + metodo ufficiale: 5 domande-gate prima di ogni step, regola "prima la base eccellente, poi l'espansione"). *Nessun file dell'app toccato.* Prossimo step: **A1 — pre-ascolto del file prima del caricamento**. |
+| 2026-06-10 | **Chiusura dello step A1 — Pre-ascolto prima del caricamento.** *Obiettivo:* ascoltare il file scelto PRIMA di creare il progetto; preview che si aggiorna cambiando file e sparisce togliendolo. *Modifiche:* solo `app/js/views/newProject.js` — slot di preview con `<audio controls>` nativo su object URL, `showPreview`/`clearPreview` (pausa + revoca URL), cleanup alla navigazione (la vista ora restituisce `{node, cleanup}`), e fix di un bug reale scovato dal test: il ✕ non azzerava `fileInput.value`, quindi riselezionare lo stesso file non emetteva `change`. *Test:* `tests/e2e.mjs` +3 controlli (preview presente su file scelto, rimossa col ✕, torna ricaricando un file). *Esito:* suite **36/36 ✅**, zero errori JS, nessuna regressione. *Limiti residui dichiarati:* il player è quello nativo del browser (estetica non custom — rifinitura eventuale in A3/A4, non bloccante); la preview riproduce il file originale, non l'identità (corretto per definizione dello step). *In parallelo (solo docs):* regola agenti AI interni registrata in VISIONE_PRODOTTO.md e §8. |
+
+## 8. Roadmap A/B/C e metodo ufficiale di costruzione (in vigore dal 2026-06-10)
+
+**Regola madre:** *prima si rendono eccellenti e affidabili le funzioni base già esistenti,
+poi si espande verso la visione (`VISIONE_PRODOTTO.md`).* Niente feature grandi su base fragile.
+
+### Livello A — base da rendere eccellente SUBITO (in ordine)
+
+| # | Step | Problema utente che risolve |
+|---|---|---|
+| A1 | Pre-ascolto del file prima del caricamento | Fiducia nei primi 60 secondi; oggi si carica "al buio" |
+| A2 | Validazione robusta: `.opus`/MIME vuoto accettati, decodifica PRIMA di creare il progetto (zero progetti orfani) | I file reali degli artisti (vocali WhatsApp, bounce) non vengono respinti; un file rotto non sporca la libreria |
+| A3 | Gestione errori e stati di attesa: messaggi chiari ovunque, quota storage gestita, niente attese mute, sostituzione di `prompt`/`confirm` nativi | L'app non deve mai sembrare fragile o muta |
+| A4 | Presentazione dell'analisi più solida e onesta (chiarezza, niente promesse oltre il misurato) + export più pratico (naming, feedback di progresso, avviso dimensioni WAV) | Credibilità del momento-fiducia e dell'ultimo miglio |
+| A5 | Estensione suite e2e su tutti i fix A1–A4 | Le basi restano solide nel tempo |
+
+**Definizione di "eccellente" per una funzione di Livello A:** gestisce i casi reali e i casi
+d'errore con messaggi chiari; non lascia mai l'utente bloccato o senza spiegazione; è coperta
+dalla suite e2e; usa il linguaggio dell'artista; nessun dato dell'utente va perso silenziosamente.
+
+### Livello B — core da evolvere DOPO che A è chiuso (in ordine)
+
+| # | Step | Valore |
+|---|---|---|
+| B1 | BPM + tonalità nell'analisi | L'analisi diventa credibile da prodotto; rafforza suggerimento e adattività |
+| B2 | Export MP3 (richiede dipendenza di codifica → ok esplicito del PO) | Lo snippet e le versioni diventano davvero condivisibili/pratici |
+| B3 | Vero limiter + loudness LUFS-like | I target di destinazione vengono raggiunti davvero; qualità da prodotto |
+| B4 | Release package in un click (tutte le versioni + snippet insieme) | La promessa "esci con tutto" resa letterale |
+| B5 | Modalità expert ("apri il cofano" nei pannelli esistenti) | Retention degli utenti che crescono; credibilità presso i producer |
+| B6 | PWA di base + rifinitura mobile (prerequisito dello share flow) | Il telefono è dove vivono i brani grezzi |
+
+### Livello C — espansione verso la visione finale (dopo B, ordine indicativo)
+
+| # | Step | Nota |
+|---|---|---|
+| C1 | Account + cloud (la libreria segue l'artista) | Primo backend; prerequisito di tutto il resto di C |
+| C2 | Scheda d'ascolto prima/dopo condivisibile | Il loop virale primario |
+| C3 | Share target (condividi-verso-app, incluso WhatsApp) | Richiede PWA (B6); Android/Chrome |
+| C4 | Collaborazione (feedback, piccoli team) | Richiede C1 |
+| C5 | Premium/monetizzazione, confronto con riferimento, firma sonora | Solo a base e core consolidati |
+
+### Metodo ufficiale di costruzione del progetto (da ora in poi)
+
+Prima di proporre o iniziare QUALSIASI step, rispondere per iscritto a 5 domande:
+1. **Perché viene prima** degli altri candidati?
+2. **Che problema utente** risolve (concreto, non astratto)?
+3. **Che impatto** ha sul prodotto percepito?
+4. **Che rischio evita** (o quale rischio corre se rimandato)?
+5. **La base attuale è abbastanza solida** per costruirci sopra questo step? Se no, fermarsi.
+
+Regole permanenti: un solo step per volta (regola esistente, confermata); suite e2e verde
+prima e dopo ogni step; niente Livello B finché A non è chiuso, niente C finché B non è
+avviato sul serio; niente refactor estetici senza impatto percepito; ogni step si chiude
+aggiornando `PROJECT_RECAP.md` + questo file; ogni nuova proposta si misura contro
+`VISIONE_PRODOTTO.md` ("ci avvicina alla visione o è solo superficie?").
+
+**Agenti AI interni (regola del PO, 2026-06-10):** il prodotto può dotarsi di agenti AI
+dedicati a funzioni specifiche, ma solo se superano i 6 criteri definiti in
+`VISIONE_PRODOTTO.md` → "POSSIBILI AGENTI AI INTERNI DEL PRODOTTO" (problema utente concreto;
+meglio di una regola fissa; esperienza più forte; flusso non complicato; coerenza con la
+visione; niente giocattolo/chat). Sono strumenti invisibili, mai gimmick. Stato attuale:
+**nessun agente è prioritario**; vincolo backend → non prima di B/C; primo candidato da
+rivalutare a B1 chiuso: "l'orecchio che spiega" (analisi narrativa).

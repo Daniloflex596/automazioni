@@ -10,6 +10,7 @@ const MAX_SIZE_MB = 80;
 
 export function renderNewProject({ navigate }) {
   let selectedFile = null;
+  let previewUrl = null;
 
   const fileInput = el('input', {
     type: 'file',
@@ -19,6 +20,33 @@ export function renderNewProject({ navigate }) {
   });
 
   const filePillSlot = el('div', {});
+  // Pre-ascolto del file scelto, prima di creare il progetto: l'utente non
+  // carica mai "al buio". Player nativo: robusto e senza codice da mantenere.
+  const previewSlot = el('div', {});
+
+  function clearPreview() {
+    const audio = previewSlot.querySelector('audio');
+    if (audio) audio.pause();
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+    previewSlot.replaceChildren();
+  }
+
+  function showPreview(file) {
+    clearPreview();
+    previewUrl = URL.createObjectURL(file);
+    previewSlot.replaceChildren(
+      el('div', { class: 'small', style: 'margin-top:10px' }, 'Riascoltalo prima di iniziare:'),
+      el('audio', {
+        controls: true,
+        src: previewUrl,
+        preload: 'metadata',
+        style: 'width:100%; margin-top:6px',
+      })
+    );
+  }
   const nameInput = el('input', {
     type: 'text',
     placeholder: 'Es. “Notte fonda — v1”',
@@ -59,9 +87,20 @@ export function renderNewProject({ navigate }) {
       el('div', { class: 'file-pill' },
         el('span', {}, '🎵'),
         el('span', { class: 'name' }, file.name),
-        el('button', { class: 'btn btn-ghost btn-sm', onClick: () => { selectedFile = null; filePillSlot.replaceChildren(); refresh(); } }, '✕')
+        el('button', {
+          class: 'btn btn-ghost btn-sm',
+          onClick: () => {
+            selectedFile = null;
+            // azzera l'input: senza, riscegliere lo stesso file non emette "change"
+            fileInput.value = '';
+            filePillSlot.replaceChildren();
+            clearPreview();
+            refresh();
+          },
+        }, '✕')
       )
     );
+    showPreview(file);
     if (!nameInput.value.trim()) {
       nameInput.value = file.name.replace(/\.[^.]+$/, '');
     }
@@ -109,13 +148,14 @@ export function renderNewProject({ navigate }) {
     }
   }
 
-  return el('div', { class: 'narrow' },
+  const node = el('div', { class: 'narrow' },
     el('div', { class: 'eyebrow' }, 'Nuovo progetto'),
     el('h1', { class: 'page-title' }, 'Bastano un file e un nome'),
     el('p', { class: 'page-sub' }, 'Carica il tuo brano così com’è: anche una bounce grezza va benissimo.'),
     fileInput,
     dropzone,
     filePillSlot,
+    previewSlot,
     el('div', { class: 'form-row' },
       el('label', {}, 'Nome del progetto'),
       nameInput
@@ -124,4 +164,7 @@ export function renderNewProject({ navigate }) {
     el('div', { class: 'divider-or' }, 'oppure'),
     demoBtn
   );
+
+  // ferma il pre-ascolto e libera l'object URL quando si lascia la vista
+  return { node, cleanup: clearPreview };
 }

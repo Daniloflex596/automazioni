@@ -100,6 +100,14 @@ console.log('\n[1] Flusso completo con upload reale');
   check(await page.locator('.file-pill .name').textContent() === 'mio-pezzo.wav', 'file accettato e mostrato');
   check((await page.inputValue('input[type="text"]')) === 'mio-pezzo', 'nome progetto precompilato dal file');
 
+  // pre-ascolto prima del caricamento (step A1): player presente sul file
+  // scelto, sparisce togliendo il file, ricompare scegliendone un altro
+  check((await page.locator('audio[src^="blob:"]').count()) === 1, 'pre-ascolto disponibile sul file scelto');
+  await page.locator('.file-pill button').click();
+  check((await page.locator('audio').count()) === 0, 'pre-ascolto rimosso togliendo il file');
+  await page.setInputFiles('input[type="file"]', goodWav);
+  check((await page.locator('audio[src^="blob:"]').count()) === 1, 'pre-ascolto torna ricaricando un file');
+
   await page.click('button:has-text("Crea il progetto")');
   await page.waitForSelector('.metric-grid', { timeout: 30000 });
   check((await page.locator('.insight').count()) > 0, 'analisi con osservazioni');
