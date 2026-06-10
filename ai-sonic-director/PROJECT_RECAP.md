@@ -29,7 +29,28 @@
   `change` (A1); file corrotti creavano progetti orfani (A2); catch-all dello Studio dava
   sempre la colpa al "file non leggibile" anche per errori di storage (A3).
 
-## Ultimo step completato — B1: BPM + tonalità nell'analisi (2026-06-10)
+## Ultimo step completato — B3: vero limiter + loudness LUFS-like + A/B loudness-matched (2026-06-11)
+
+**Cosa è stato fatto**
+- **Commit `5402db9`** dopo verifica e2e **54/54 ✅**, zero errori JS, zero regressioni.
+- **`loudness.js` (nuovo):** K-weighting BS.1770 (high-shelf coefficienti DeMan + high-pass ~38 Hz), `measureLoudness` con gating assoluto (−70) e relativo (−10 LU) su blocchi 400 ms / hop 100 ms. Stima dichiarata, non certificazione.
+- **`limitChannels`:** look-ahead ~5 ms via deque monotona O(n), release esponenziale 80 ms, guadagno linkato tra canali, clamp finale di sicurezza.
+- **`export.js`:** target `targetLufs` al posto di `targetRms`; Streaming/Social raggiungono il target LUFS-like + passano dal limiter; Master trasparente.
+- **`engine.js`:** `setLoudnessTrims` (≤1, mai amplifica) + `renderSegment` offline su segmento arbitrario.
+- **`studio.js`:** `matchSegment` (8 s centrali, `originalLufs` misurato all'apertura), `refreshLoudnessMatch` debounced 350 ms, nota onesta nel passo Confronto, cleanup corretto.
+- **Test:** +1 controllo (nota parità di volume nel Confronto). Suite **54/54 ✅**.
+
+**Limiti residui dichiarati**
+- Sample-peak ≠ true-peak: manca oversampling (documentato in §5 FDVR).
+- Pareggio A/B su segmento centrale, non sull'intero brano (stima, dichiarata nell'UI).
+
+**Cosa è aperto**
+- B3 non ancora su gh-pages (sito live ancora a B1).
+- **Prossimo step: B2 — export MP3** (serve ok PO sulla dipendenza di codifica) oppure candidato alternativo dalla roadmap B.
+
+---
+
+## Step precedente — B1: BPM + tonalità nell'analisi (2026-06-10)
 
 **Cosa è stato fatto**
 - **Commit `6eaf505`** (gate A5) prima di aprire lo step.
@@ -275,8 +296,8 @@
 5. ~~**A5 — Gate del Livello A**~~ ✅ **GO al Livello B** (checklist 5/5 su A1–A4,
    7 debiti non bloccanti tracciati).
 6. ~~**B1 — BPM + tonalità nell'analisi**~~ ✅ (53/53) — commit + push in chiusura sessione.
-7. **B2 — export MP3** (serve ok PO sulla dipendenza) oppure **B3** (limiter vero +
-   A/B loudness-matched, zero dipendenze); poi B4, B5, B6.
+7. ~~**B2 — export MP3**~~ (serve ok PO) / ~~**B3 — limiter + LUFS + A/B**~~ ✅ (54/54, commit `5402db9`).
+8. **B2 — export MP3** (serve ok PO sulla dipendenza) oppure candidato alternativo B; poi B4, B5, B6.
 
 ## Errori o blocchi
 
@@ -304,3 +325,4 @@
 | 2026-06-10 | Commit `9764be6` (A3+benchmark); consolidamento memoria; A4 — analisi con valori misurati + trasparenza, export con peso/formato/naming puliti, e2e 47/47 ✅ | Chiuso |
 | 2026-06-10 | Commit `063926f` (A4); A5 — gate del Livello A: checklist 5/5 su A1–A4, zero gap bloccanti, 7 debiti tracciati → **GO al Livello B** | Chiuso |
 | 2026-06-10 | Commit `6eaf505` (gate A5); B1 — BPM (flusso spettrale, demo ≈141/140) + tonalità (chroma) come stime con fallback onesto, e2e 53/53 ✅, push su GitHub/Pages | Chiuso |
+| 2026-06-11 | Commit `5402db9`; B3 — loudness.js (K-weighting BS.1770), limiter look-ahead, export LUFS-like, A/B loudness-matched, e2e 54/54 ✅ | Chiuso |
