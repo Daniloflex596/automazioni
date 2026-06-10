@@ -155,9 +155,14 @@ export function renderNewProject({ navigate }) {
       await saveAudio(project.id, selectedFile);
       navigate(`#/studio/${project.id}`);
     } catch (error) {
-      console.error(error);
       if (project) await deleteProject(project.id).catch(() => {});
-      toast('Non sono riuscito a salvare il brano. Riprova.', 'error');
+      // spazio del browser esaurito: caso utente atteso, con via d'uscita chiara
+      if (error && (error.name === 'QuotaExceededError' || error.code === 22)) {
+        toast('Lo spazio del browser è pieno: elimina qualche progetto dalla libreria e riprova.', 'error');
+      } else {
+        console.error(error);
+        toast('Non sono riuscito a salvare il brano. Riprova; se succede ancora, ricarica la pagina.', 'error');
+      }
       createBtn.disabled = false;
       createBtn.textContent = 'Crea il progetto →';
     }

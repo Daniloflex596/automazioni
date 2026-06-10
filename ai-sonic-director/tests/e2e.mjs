@@ -89,8 +89,8 @@ async function newPage(context = desktopContext) {
   const page = await context.newPage();
   page.on('pageerror', (e) => jsErrors.push(`PAGEERROR: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') jsErrors.push(`CONSOLE: ${m.text()}`); });
-  // conferma i confirm(); risponde ai prompt() (usato dal test di rinomina)
-  page.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'Rinominato' : undefined));
+  // nessun handler per i dialog nativi: l'app non deve più usarli (step A3);
+  // se ricomparissero, Playwright li chiude e i test falliscono — di proposito
   return page;
 }
 
@@ -194,7 +194,13 @@ console.log('\n[2] Libreria, persistenza, profilo');
   check((await page.locator('.proj-card').count()) === 1, 'progetto presente dopo nuova sessione');
   check((await page.locator('.badge.done').count()) === 1, 'badge "esportato" presente');
 
+  // rinomina con il dialog dell'app (A3: niente prompt nativi)
   await page.locator('.proj-card button:has-text("Rinomina")').click();
+  await page.waitForSelector('.dialog-card');
+  check((await page.locator('.dialog-card h3').textContent()).includes('Rinomina'),
+    'dialog di rinomina coerente con l’app');
+  await page.fill('.dialog-card input', 'Rinominato');
+  await page.locator('.dialog-card button:has-text("Salva")').click();
   await page.waitForTimeout(200);
   check((await page.locator('.proj-card h3').first().textContent()) === 'Rinominato', 'rinomina progetto funziona');
 
@@ -205,7 +211,19 @@ console.log('\n[2] Libreria, persistenza, profilo');
   await page.goto(`${BASE}/#/library`);
   await page.waitForSelector('.proj-card');
   check((await page.locator('.proj-card').count()) === 2, 'due progetti in libreria');
+
+  // eliminazione con conferma dell'app (A3): prima Annulla, poi conferma
   await page.locator('.proj-card', { hasText: 'Brano demo' }).locator('button:has-text("Elimina")').click();
+  await page.waitForSelector('.dialog-card');
+  check((await page.locator('.dialog-card').textContent()).includes('non si può annullare'),
+    'conferma di eliminazione chiara sulle conseguenze');
+  await page.locator('.dialog-card button:has-text("Annulla")').click();
+  await page.waitForTimeout(200);
+  check((await page.locator('.proj-card').count()) === 2, 'annulla non elimina nulla');
+
+  await page.locator('.proj-card', { hasText: 'Brano demo' }).locator('button:has-text("Elimina")').click();
+  await page.waitForSelector('.dialog-card');
+  await page.locator('.dialog-card button:has-text("Elimina")').click();
   await page.waitForTimeout(300);
   check((await page.locator('.proj-card').count()) === 1, 'eliminazione funziona');
 

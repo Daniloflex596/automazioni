@@ -20,7 +20,37 @@
 - **Qualità:** suite e2e Playwright **34/34 controlli passati** (estesa con i controlli su
   snippet social). Eseguibile con `node tests/e2e.mjs` (richiede `npm install` una tantum).
 
-## Ultimo step completato — A2: validazione robusta dell'upload (2026-06-10)
+## Ultimo step completato — A3: gestione errori e stati di attesa (2026-06-10)
+
+**Cosa è stato fatto**
+- **Commit `28f723a`** (A2) prima di aprire lo step, come richiesto dal PO.
+- **Dialog dell'app al posto dei nativi** (`app/js/ui.js` + stili in `main.css`): componente
+  `appDialog` (conferma o input, Esc/click-fuori per annullare); usato in `library.js` per
+  rinomina ed elimina (conferma esplicita: "non si può annullare", bottone rosso).
+- **Quota/spazio esaurito** (`newProject.js`): `QuotaExceededError` al salvataggio →
+  messaggio specifico con via d'uscita ("elimina qualche progetto dalla libreria e
+  riprova"), rollback già in atto da A2, niente console.error per i casi attesi.
+- **Errori di avvio dello Studio distinti** (`studio.js`): archivio inaccessibile / audio
+  mancante / file non decodificabile / imprevisto in analisi — ognuno con messaggio
+  specifico e cosa fare. Prima un catch-all dava sempre la colpa al "file non leggibile".
+- **Toast d'errore più persistenti** (~5 s: ora contengono anche l'azione consigliata).
+- **Test e2e**: rimosso l'handler dei dialog nativi (se tornassero, i test falliscono);
+  rinomina/elimina via dialog dell'app; +3 controlli (incluso "annulla non elimina nulla").
+- **In parallelo (solo docs):** benchmark competitivo del PO integrato in
+  `VISIONE_PRODOTTO.md` (mappa competitor, 4 fasce funzionali, tesi "finishing OS");
+  unica ricaduta su roadmap: **A/B loudness-matched aggiunto a B3**.
+
+**Esito verifiche**
+- Suite e2e: **43/43 ✅**, zero errori JS, nessuna regressione.
+
+**Cosa è aperto**
+- **Commit di A3 + benchmark**, poi **A4 — analisi presentata meglio + export più pratico**.
+- Limiti residui dichiarati: quota localStorage (pochi byte) non gestita ad hoc; il caso
+  quota non è simulabile nella suite e2e; attese di export ancora label-only.
+
+---
+
+## Step precedente — A2: validazione robusta dell'upload (2026-06-10)
 
 **Cosa è stato fatto**
 - **Commit `9ff0fe0`** prima di aprire lo step: visione + metodo + regola agenti + A1 al sicuro.
@@ -140,12 +170,13 @@
 
 ## Prossimi micro-step consigliati (in ordine — roadmap ufficiale in FONTE_DI_VERITA §8)
 
-1. ~~**A1 — Pre-ascolto del file prima del caricamento**~~ ✅ chiuso (36/36, commit `9ff0fe0`).
-2. ~~**A2 — Validazione robusta**~~ ✅ chiuso (40/40) — **da committare**.
-3. **A3 — Gestione errori e stati di attesa** (quota storage, niente attese mute,
-   sostituzione `prompt`/`confirm`).
+1. ~~**A1 — Pre-ascolto**~~ ✅ (36/36, commit `9ff0fe0`).
+2. ~~**A2 — Validazione robusta**~~ ✅ (40/40, commit `28f723a`).
+3. ~~**A3 — Gestione errori e stati di attesa**~~ ✅ (43/43) — **da committare** (insieme
+   al benchmark nella visione).
 4. **A4 — Analisi presentata meglio + export più pratico**; **A5 — e2e estesa sui fix**.
-5. Solo dopo la chiusura del Livello A: B1 (BPM/tonalità), B2 (MP3), B3 (limiter vero)…
+5. Solo dopo la chiusura del Livello A: B1 (BPM/tonalità), B2 (MP3), B3 (limiter vero +
+   A/B loudness-matched)…
 
 ## Errori o blocchi
 
@@ -169,3 +200,4 @@
 | 2026-06-10 | Visione finale ufficiale (docs/VISIONE_PRODOTTO.md) + roadmap A/B/C + metodo di costruzione (FONTE_DI_VERITA §8) | Chiuso |
 | 2026-06-10 | A1 — Pre-ascolto prima del caricamento (+ fix bug riselezione stesso file) + regola agenti AI nei docs, e2e 36/36 ✅ | Chiuso |
 | 2026-06-10 | Commit `9ff0fe0` (visione + metodo + agenti + A1); A2 — validazione robusta (.opus, decodifica pre-creazione, rollback anti-orfani), e2e 40/40 ✅ | Chiuso |
+| 2026-06-10 | Commit `28f723a` (A2); benchmark competitivo nella visione (+ A/B loudness-matched in B3); A3 — errori e attese (dialog app, quota, errori Studio distinti), e2e 43/43 ✅ | Chiuso |

@@ -243,6 +243,99 @@ roadmap A/B/C e il metodo in FONTE_DI_VERITA §8 — **prima la base eccellente,
 
 ---
 
+## BENCHMARK COMPETITIVO E PERIMETRO FUNZIONALE DELLA VERSIONE FINALE
+
+> Aggiunto il 2026-06-10 su analisi competitiva fornita dal product owner.
+> Tesi di posizionamento: i competitor danno strumenti forti ma frammentati;
+> AI Sonic Director dà **un flusso unico centrato sull'artista** — "entro con un brano
+> grezzo, capisco che identità ha senso, provo più direzioni credibili, rifinisco senza
+> essere fonico, esco con tutto ciò che serve per pubblicare e condividere".
+> Non "mastering con AI": un **finishing OS per artisti indipendenti**.
+
+### Mappa competitiva (pattern di mercato)
+
+| Player | Cosa copre | Cosa ci insegna |
+|---|---|---|
+| LANDR | Mastering illimitato, reference track, album mastering, distribution, samples, plugin, mobile, collaboration | Lo standard di mercato include reference workflow e A/B loudness-matched; il solo mastering non basta più |
+| BandLab | Mobile-first, cloud projects, mastering free, collaborazione cross-device, distribution | Il telefono è un cittadino di prima classe; il free tier aggressivo esiste già |
+| RoEx / Automix | Mix+master da stems, mix insights, reference match, processed stems, export verso DAW | Il segmento premium si gioca su stem-awareness e rientro in DAW |
+| Masterchannel | Mastering AI con focus su coerenza preview/risultato | "Ciò che senti è ciò che esporti" è una promessa difendibile |
+| Output Co-Producer | Ascolta il brano e suggerisce materiale in tempo/tonalità | L'"app che ha ascoltato" è una direzione di mercato reale |
+| AudioShake | Stem separation seria, lyric alignment, contenuti riusabili | La separazione stem è un prodotto a sé: confermato tenerla fuori dal core |
+
+Nessun player oggi unisce **scelta della direzione artistica + confronto credibile + release
+package + share** in un flusso unico in linguaggio artista: è lo spazio nostro.
+
+### 1. Funzioni minime indispensabili (senza queste il prodotto è "sotto" i competitor)
+
+1. Upload senza attrito (drag&drop, telefono, WAV/MP3/FLAC/M4A/OPUS) con pre-ascolto immediato e validazione robusta. *(in corso: A1–A2 fatti)*
+2. Analisi credibile: loudness, dinamica, tonale, stereo image, **BPM, tonalità**, punti deboli in linguaggio artista. *(B1)*
+3. 3–6 direzioni sonore consigliate con motivo, ascoltabili sul proprio brano. *(esiste, da rafforzare con B1)*
+4. A/B istantaneo **a parità di volume percepito (loudness-matched)** — senza, il confronto inganna: "più forte" sembra "meglio". *(da aggiungere alla roadmap, fascia B)*
+5. Processing coerente preview/export, limiter vero, loudness target per destinazione. *(B3)*
+6. Multi-export per piattaforma (Spotify/Apple/YouTube/TikTok/IG) in WAV e MP3, naming pulito. *(B2/B4)*
+7. Snippet social pronto. *(esiste; diventa reale con MP3)*
+8. Libreria cloud con cronologia versioni. *(C1)*
+9. Share link before/after. *(C2)*
+10. Mobile serio: flusso completo, non viewer. *(B6)*
+11. Release package finale in un click. *(B4)*
+
+### 2. Funzioni avanzate ad alto vantaggio competitivo
+
+- **Reference mode vero**: carico un riferimento e chiedo "portami verso questa energia /
+  questo punch / questa apertura voce". LANDR e RoEx lo hanno già: nella versione finale
+  non averlo significa essere sotto mercato. Richiede analisi ricca (B1) come base.
+- **Multi-version workflow**: non "la master giusta" ma direzioni credibili tra cui
+  scegliere (streaming balanced, loud/hype, clean, social, club, vocal-forward,
+  reference-inspired). È l'estensione naturale delle identità: il nostro punto di forza.
+- **Vocal finishing suite** (per il target rap/indie è centrale): presenza voce, de-harsh,
+  de-ess, corpo/chiarezza, tuning light/medium/hard, spazio, trattamento adlib — venduta
+  come controlli musicali, mai come rack di plugin.
+- **Social-ready output completo**: snippet 15/30/60s, hook-first version, listening card
+  con waveform, share link before/after. Il ponte tra core product e viralità.
+- **Expert mode finale** (più profondo di B5): tono, low-end, vocal focus, dinamica,
+  spazio, aggressività, target loudness, reference blend, matrice di confronto versioni —
+  profondità sulle stesse decisioni, mai una DAW nascosta.
+
+### 3. Funzioni premium / future
+
+- Album/EP mastering con coerenza tra tracce + consigli di sequencing.
+- Stem-aware layer: upload stems opzionale, auto-mix di base, processed stems, export
+  verso DAW (territorio RoEx; premium, non core).
+- Stem separation da mix stereo per contenuti derivati (terreno AudioShake; fase futura,
+  conferma la decisione esistente: fuori dal core).
+- Lyrics/transcription alignment per asset social.
+- Sample/reference intelligence (suggerimenti in tempo/tonalità, alla Co-Producer) —
+  orientata al finishing, non alla composizione.
+- Review mode con commenti temporali per producer/manager.
+- "Release workspace": master, snippet, versioni, metadata, note, asset in un unico posto.
+- Analytics leggere post-share (chi ha ascoltato, quale versione converte).
+
+### 4. Funzioni da evitare perché fuori focus
+
+- DAW completa nel browser / timeline multitraccia pesante.
+- AI che compone o aggiunge musica al posto dell'artista.
+- Chat assistant generico.
+- Marketplace dispersivo "tutto per tutti" (samples, plugin, beat store).
+- Distribution in proprio nel breve/medio termine: è il business di LANDR/BandLab e
+  richiede infrastruttura legale/commerciale; meglio integrare/linkare che costruire.
+
+### Definizione finale aggiornata
+
+Non il sito che masterizza una canzone: **il posto dove un artista prende le decisioni
+sonore finali sul proprio pezzo** — lo capisce, gli dà un'identità, produce più versioni
+credibili, le confronta ad armi pari, le condivide e le porta fuori pronte per il mondo.
+Sopra i tool singoli di mastering, più focalizzato e premium delle piattaforme "tutto
+incluso": un finishing OS per artisti indipendenti.
+
+> **Nota di metodo:** questo benchmark NON cambia la roadmap in corso. Tutto ciò che è
+> elencato qui passa dalle 5 domande-gate e entra solo dopo la chiusura del Livello A
+> (FONTE_DI_VERITA §8). Unica aggiunta operativa alla roadmap suggerita da questo
+> benchmark: **A/B loudness-matched** in fascia B (vicino a B3), perché tocca
+> l'onestà del confronto — il cuore della promessa.
+
+---
+
 ## POSSIBILI AGENTI AI INTERNI DEL PRODOTTO
 
 > **Regola strategica (decisione del PO, 2026-06-10, parte del metodo ufficiale):**

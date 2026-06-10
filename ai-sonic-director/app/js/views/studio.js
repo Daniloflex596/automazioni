@@ -42,17 +42,41 @@ export function renderStudio({ navigate, projectId }) {
   root.append(loadingStage('Sto ascoltando il tuo brano…'));
   init();
 
+  // Ogni fase dell'avvio ha il suo errore, con un messaggio che dice cosa
+  // fare: accesso all'archivio, audio mancante, decodifica, imprevisto.
   async function init() {
+    let blob = null;
     try {
-      const blob = await loadAudio(project.id);
-      if (!blob) {
-        root.replaceChildren(emptyError(
-          'L’audio di questo progetto non è più disponibile in questo browser. Crea un nuovo progetto ricaricando il file.',
-          navigate
-        ));
-        return;
-      }
-      const buffer = await engine.loadBlob(blob);
+      blob = await loadAudio(project.id);
+    } catch (error) {
+      console.error(error);
+      root.replaceChildren(emptyError(
+        'Non riesco ad accedere all’archivio audio del browser. Ricarica la pagina e riprova.',
+        navigate
+      ));
+      return;
+    }
+    if (!blob) {
+      root.replaceChildren(emptyError(
+        'L’audio di questo progetto non è più disponibile in questo browser. Crea un nuovo progetto ricaricando il file.',
+        navigate
+      ));
+      return;
+    }
+
+    let buffer = null;
+    try {
+      buffer = await engine.loadBlob(blob);
+    } catch {
+      // file non decodificabile: caso atteso (niente console.error)
+      root.replaceChildren(emptyError(
+        'Non sono riuscito a leggere questo file audio. Crea un nuovo progetto riesportando il brano in MP3 o WAV.',
+        navigate
+      ));
+      return;
+    }
+
+    try {
       if (!project.analysis) {
         project = updateProject(project.id, { analysis: analyzeBuffer(buffer) });
       }
@@ -61,7 +85,10 @@ export function renderStudio({ navigate, projectId }) {
       drawStep(project.step || 'analysis');
     } catch (error) {
       console.error(error);
-      root.replaceChildren(emptyError('Non sono riuscito a leggere questo file audio. Prova con un altro formato (MP3 o WAV).', navigate));
+      root.replaceChildren(emptyError(
+        'Qualcosa è andato storto durante l’analisi del brano. Ricarica la pagina e riprova.',
+        navigate
+      ));
     }
   }
 
