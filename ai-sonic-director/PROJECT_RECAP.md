@@ -45,8 +45,20 @@
 - Nota di trasparenza A4 aggiornata (misure vs stime); progetti pre-B1 rianalizzati alla
   riapertura (sana anche il debito "insight vecchi"). **Test: +6 controlli, 53/53 ✅.**
 
+**Deploy web (scoperta di questa sessione)**
+- Il sito live (`https://daniloflex596.github.io/automazioni/`) è servito dal **branch
+  `gh-pages` in modalità legacy**, NON dal workflow `deploy-pages.yml`: quel workflow
+  fallisce in 2 s (Pages non è configurato come source "GitHub Actions"). Era fermo allo
+  stato pre-A1.
+- **Procedura di deploy che funziona**: copiare `ai-sonic-director/app` nel branch
+  `gh-pages` (worktree) e pushare. Fatto: commit `7eea5f9` su `gh-pages` con A1–A4+B1.
+- **Debito tracciato**: allineare il meccanismo (o si configura Pages su "GitHub Actions"
+  dalle impostazioni repo — richiede il PO — o si rimuove il workflow e si tiene gh-pages).
+- ⚠️ robocopy /MIR cancella il file `.git` del worktree: escluderlo o ricrearlo
+  (`gitdir: .../automazioni/.git/worktrees/<nome>`).
+
 **Cosa è aperto**
-- **Push su GitHub** (deploy Pages automatico) — in corso in questa sessione.
+- Verifica del sito live dopo la build Pages (in corso a fine sessione).
 - **Prossimo step: B2 — export MP3**, che richiede una dipendenza di codifica:
   serve l'ok esplicito del PO prima di aprirlo. In alternativa B3 (limiter vero +
   A/B loudness-matched) non richiede dipendenze.

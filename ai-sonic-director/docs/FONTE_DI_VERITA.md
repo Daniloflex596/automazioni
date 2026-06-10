@@ -11,7 +11,8 @@
 - **Fase in corso:** Fase 1 completata; primi mattoni di Fase 2 anticipati su decisione del product owner (sviluppo a step).
 - **Blocchi completati:** 1 (Fondamenta), 2 (Flusso principale), 3 (Credibilità del prototipo), 4 (Libreria e profilo), 5 (Demo e rifinitura), 6a (Adattività di base), 6b (Export per destinazione), 6c (Suggerimento automatico dell'identità), **Snippet/highlight social**.
 - **Ultima cosa completata:** **B1 — BPM + tonalità nell'analisi** (primo step del Livello B): stima BPM con onset a flusso spettrale + autocorrelazione a pettine (demo 140 BPM → stimato ≈141, confidenza 0.45, in 114 ms); stima tonalità con chroma + profili Krumhansl-Schmuckler; entrambe presentate come STIME con fallback onesto quando la confidenza non basta (tono puro → "—"; demo armonicamente ambiguo Am/C → fallback, corretto). Nota di trasparenza aggiornata (misure vs stime). Suite e2e **53/53 ✅**. Gate Livello A superato in `6eaf505`.
-- **Prossimo passo:** push su GitHub (deploy Pages automatico sul branch), poi **B2 — export MP3** (richiede dipendenza di codifica → serve ok esplicito del PO prima di aprire lo step).
+- **Deploy web:** branch `e6f4c92` pushato su GitHub; sito live aggiornato via **branch `gh-pages`** (commit `7eea5f9`) — Pages è in modalità legacy su quel branch, il workflow `deploy-pages.yml` fallisce (source non configurato su "GitHub Actions"; debito tracciato: allineare meccanismo o rimuovere il workflow).
+- **Prossimo passo:** **B2 — export MP3** (richiede dipendenza di codifica → serve ok esplicito del PO prima di aprire lo step); in alternativa B3 (limiter + A/B loudness-matched, zero dipendenze).
 
 ## 2. Priorità corrente
 
