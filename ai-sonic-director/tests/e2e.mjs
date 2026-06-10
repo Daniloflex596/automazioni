@@ -136,12 +136,16 @@ console.log('\n[1] Flusso completo con upload reale');
   await page.click('.step-actions button:has-text("esporta")');
   await page.waitForSelector('.export-summary');
   check((await page.locator('.export-summary .row').count()) === 5, 'riepilogo export completo');
+  check((await page.locator('.export-version').count()) === 3, 'tre versioni di export (Master, Streaming, Social)');
 
-  const download = page.waitForEvent('download', { timeout: 60000 });
-  await page.click('button:has-text("Scarica WAV")');
+  let download = page.waitForEvent('download', { timeout: 60000 });
+  await page.locator('.export-version', { hasText: 'Master' }).locator('button').click();
   await download;
   await page.waitForSelector('.export-done');
-  check(true, 'export WAV scaricato');
+  download = page.waitForEvent('download', { timeout: 60000 });
+  await page.locator('.export-version', { hasText: 'Social' }).locator('button').click();
+  await download;
+  check(true, 'versioni Master e Social scaricate');
 
   // stepper: torno all'analisi e risalto direttamente all'export (già raggiunto)
   await page.click('.stepper button:has-text("Analisi")');

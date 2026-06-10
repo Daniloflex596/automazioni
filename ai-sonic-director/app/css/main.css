@@ -394,6 +394,18 @@ input[type="range"]::-moz-range-thumb {
   background: rgba(52, 211, 153, 0.06);
 }
 
+.export-versions { margin-top: 16px; }
+.export-version {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 4px; border-bottom: 1px solid var(--line);
+}
+.export-version:last-child { border-bottom: none; padding-bottom: 4px; }
+.export-version .ico { font-size: 1.3rem; flex: none; }
+.export-version .ev-text { flex: 1; min-width: 0; }
+.export-version h4 { font-size: 0.95rem; }
+.export-version p { color: var(--text-dim); font-size: 0.84rem; }
+.export-version .btn { flex: none; }
+
 /* footer nav of each step */
 .step-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
 
