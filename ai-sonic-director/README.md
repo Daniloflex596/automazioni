@@ -27,7 +27,7 @@ Tutto avviene nel browser (Web Audio API): l'analisi è reale, le identità sono
 
 ## Cosa è reale e cosa è semplificato
 
-Il prototipo serve a validare flusso e percezione di valore, non la qualità da mastering. L'elenco onesto delle semplificazioni è in [`docs/FONTE_DI_VERITA.md`](docs/FONTE_DI_VERITA.md) §5 — in sintesi: le identità non sono ancora adattive al singolo brano, l'analisi è di base, niente account né backend, export solo WAV.
+Il prototipo serve a validare flusso e percezione di valore, non la qualità da mastering. L'elenco onesto delle semplificazioni è in [`docs/FONTE_DI_VERITA.md`](docs/FONTE_DI_VERITA.md) §5 — in sintesi: le identità si adattano all'analisi del brano con regole semplici (l'adattività fine è da MVP), l'analisi è di base, niente account né backend, export solo WAV.
 
 ## Struttura
 

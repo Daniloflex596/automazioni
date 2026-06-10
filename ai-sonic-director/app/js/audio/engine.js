@@ -160,7 +160,27 @@ export class AudioEngine {
     source.connect(chain.input);
     source.start(0);
     const rendered = await offline.startRendering();
+    protectFromClipping(rendered);
     return audioBufferToWav(rendered);
+  }
+}
+
+// Se l'elaborazione ha spinto il segnale oltre il tetto, riscala l'intero
+// render: il file esportato non deve mai distorcere per clipping digitale.
+function protectFromClipping(buffer, ceiling = 0.985) {
+  let peak = 0;
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    const data = buffer.getChannelData(ch);
+    for (let i = 0; i < data.length; i++) {
+      const abs = Math.abs(data[i]);
+      if (abs > peak) peak = abs;
+    }
+  }
+  if (peak <= ceiling) return;
+  const scale = ceiling / peak;
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    const data = buffer.getChannelData(ch);
+    for (let i = 0; i < data.length; i++) data[i] *= scale;
   }
 }
 

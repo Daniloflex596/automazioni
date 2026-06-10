@@ -8,14 +8,14 @@
 
 ## 1. Stato attuale
 
-- **Fase in corso:** Fase 1 — Prototipo interattivo.
-- **Blocchi completati:** 1 (Fondamenta), 2 (Flusso principale), 3 (Credibilità del prototipo), 4 (Libreria e profilo), 5 (Demo e rifinitura).
-- **Ultima cosa completata:** prototipo end-to-end funzionante in `app/` — flusso Home → Nuovo progetto → Analisi → Identità → Personalizzazione → Confronto → Export → Libreria, con audio reale (Web Audio API), brano demo integrato ed export WAV.
-- **Prossimo passo:** far provare il prototipo a 3-5 utenti del Gruppo A e raccogliere reazioni sul flusso e sulle identità sonore, **prima** di aprire qualsiasi discorso di Fase 2.
+- **Fase in corso:** Fase 1 completata; primo mattone di Fase 2 (adattività di base) anticipato su decisione del product owner.
+- **Blocchi completati:** 1 (Fondamenta), 2 (Flusso principale), 3 (Credibilità del prototipo), 4 (Libreria e profilo), 5 (Demo e rifinitura), 6a (Adattività di base).
+- **Ultima cosa completata:** elaborazione adattiva di base — le identità sonore ora leggono l'analisi del brano e dosano bassi/alti, compressione e volume di conseguenza; la schermata di personalizzazione spiega come l'identità si è adattata; l'export è protetto dal clipping.
+- **Prossimo passo:** validazione con utenti reali del Gruppo A (in parallelo allo sviluppo a step concordato con il product owner).
 
 ## 2. Priorità corrente
 
-> **Validare il prototipo con utenti reali.** Nessun nuovo sviluppo finché non ci sono riscontri.
+> **Sviluppo a step (decisione del product owner, 2026-06-10):** un solo miglioramento per volta, scelto per valore, validazione utenti in parallelo.
 
 ## 3. Perimetro adesso
 
@@ -34,12 +34,15 @@
 | 2026-06-09 | Linguaggio UI: solo termini da artista (Calore, Punch, Brillantezza, Spazio) | Il linguaggio è prodotto (principio 4 del piano) |
 | 2026-06-09 | Persistenza: localStorage (metadati) + IndexedDB (file audio) | Permette una libreria vera senza backend |
 | 2026-06-09 | Registrazione da microfono: rifiutata per ora | Sposta il prodotto verso la DAW (vedi piano §11.G) |
+| 2026-06-10 | Cambio di perimetro: sviluppo a step in parallelo alla validazione | Richiesta esplicita del product owner; resta la regola "un solo step per volta" |
+| 2026-06-10 | Primo step di Fase 2: adattività di base delle identità | Era il limite più importante dichiarato del prototipo; fattibile interamente lato browser |
+| 2026-06-10 | Export protetto dal clipping (riscala se supera il tetto) | Un file esportato che distorce tradisce la promessa "pronta all'uso" |
 
 ## 5. Cose simulate o semplificate nel prototipo
 
 Elenco onesto di ciò che è semplificato e andrà reso reale nell'MVP:
 
-- **Le identità sonore non sono adattive:** applicano la stessa catena di effetti a ogni brano; nell'MVP devono adattarsi all'analisi del singolo brano.
+- **L'adattività è di base:** le identità si dosano sull'analisi del brano (bilanciamento tonale, dinamica, volume) con regole semplici e clampate; nell'MVP servirà un'adattività più fine (per sezioni del brano, su diagnosi specifiche).
 - **L'analisi è di base:** volume, dinamica e bilanciamento tonale calcolati sul file; nell'MVP servirà un'analisi più ricca (chiave, BPM, problemi specifici).
 - **Il profilo è locale e senza account:** un nome salvato nel browser; nell'MVP serviranno account reali.
 - **Export solo WAV:** MP3 e formati per piattaforma sono rimandati all'MVP.
@@ -61,3 +64,4 @@ Elenco onesto di ciò che è semplificato e andrà reso reale nell'MVP:
 | Data | Aggiornamento |
 |---|---|
 | 2026-06-09 | Creazione del documento. Piano di prodotto v1.0 approvato come base. Prototipo Fase 1 implementato end-to-end (blocchi 1-5). Priorità impostata su validazione con utenti. |
+| 2026-06-10 | Cambio di perimetro (sviluppo a step su richiesta del product owner). Completato blocco 6a: adattività di base delle identità, note di adattamento in UI, protezione anti-clipping dell'export. |
