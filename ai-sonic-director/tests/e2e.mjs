@@ -63,6 +63,10 @@ const goodWav = join(fixtureDir, 'mio-pezzo.wav');
 await writeFile(goodWav, makeWavFixture());
 const badWav = join(fixtureDir, 'corrotto.wav');
 await writeFile(badWav, Buffer.from('questo non è un file audio, è testo travestito'));
+// "vocale WhatsApp": estensione .opus (MIME spesso vuoto/generico) con dentro
+// audio reale — il primo controllo deve farlo passare, la decodifica decide
+const opusVoice = join(fixtureDir, 'vocale-whatsapp.opus');
+await writeFile(opusVoice, makeWavFixture(1, 330));
 
 // ---------- harness ----------
 
@@ -220,20 +224,32 @@ console.log('\n[2] Libreria, persistenza, profilo');
   await page.close();
 }
 
-// ---------- test 3: file corrotto → errore gestito ----------
+// ---------- test 3: validazione upload (A2) — corrotto bloccato, .opus accettato ----------
 
-console.log('\n[3] File corrotto');
+console.log('\n[3] Validazione upload: file corrotto e vocale .opus');
 {
   const page = await newPage();
+
+  // file corrotto: la creazione viene bloccata SUL FORM, nessun progetto creato
   await page.goto(`${BASE}/#/new`, { waitUntil: 'networkidle' });
   await page.setInputFiles('input[type="file"]', badWav);
   await page.click('button:has-text("Crea il progetto")');
-  await page.waitForSelector('.empty-state', { timeout: 30000 });
-  check((await page.locator('.empty-state').textContent()).includes('Non sono riuscito a leggere'),
-    'errore di decodifica gestito con messaggio chiaro');
-  // l'errore di decodeAudioData è atteso: non contarlo come errore JS
-  const expected = jsErrors.findIndex((e) => /decod|Unable|EncodingError/i.test(e));
-  if (expected !== -1) jsErrors.splice(expected, 1);
+  await page.waitForSelector('.toast.error', { timeout: 30000 });
+  check((await page.locator('.toast.error').textContent()).includes('Non riesco a leggere'),
+    'file corrotto bloccato con messaggio chiaro');
+  check((await page.locator('.dropzone').count()) === 1, 'si resta sul form, niente Studio');
+  await page.goto(`${BASE}/#/library`);
+  await page.waitForSelector('.proj-card');
+  check((await page.locator('.proj-card').count()) === 1, 'nessun progetto orfano dal file corrotto');
+
+  // vocale .opus con audio reale: accettato e portato fino all'analisi
+  await page.goto(`${BASE}/#/new`);
+  await page.setInputFiles('input[type="file"]', opusVoice);
+  check(await page.locator('.file-pill .name').textContent() === 'vocale-whatsapp.opus',
+    'file .opus accettato dal form');
+  await page.click('button:has-text("Crea il progetto")');
+  await page.waitForSelector('.metric-grid', { timeout: 30000 });
+  check(true, 'progetto creato dal vocale .opus, analisi raggiunta');
   await page.close();
 }
 

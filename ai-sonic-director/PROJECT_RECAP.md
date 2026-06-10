@@ -20,7 +20,34 @@
 - **Qualità:** suite e2e Playwright **34/34 controlli passati** (estesa con i controlli su
   snippet social). Eseguibile con `node tests/e2e.mjs` (richiede `npm install` una tantum).
 
-## Ultimo step completato — A1: pre-ascolto prima del caricamento (2026-06-10)
+## Ultimo step completato — A2: validazione robusta dell'upload (2026-06-10)
+
+**Cosa è stato fatto**
+- **Commit `9ff0fe0`** prima di aprire lo step: visione + metodo + regola agenti + A1 al sicuro.
+- **Unico file dell'app toccato: `app/js/views/newProject.js`**:
+  - whitelist estensioni estesa con `.opus` e `.oga` (vocali WhatsApp; il MIME vuoto passa
+    perché decide l'estensione, e in ultima istanza la decodifica);
+  - `assertDecodable()`: il file viene **decodificato prima di creare il progetto** — file
+    illeggibile → toast chiaro ("riesportalo in MP3 o WAV"), si resta sul form, **nessun
+    progetto orfano**;
+  - rollback: se `saveAudio` fallisce dopo `createProject` (es. spazio pieno), il progetto
+    viene eliminato — in libreria non esistono progetti senza audio.
+- **Test e2e** (`tests/e2e.mjs`): test 3 riscritto (corrotto bloccato sul form, zero orfani)
+  + nuovo caso end-to-end "vocale `.opus`" (fixture audio reale con estensione .opus).
+
+**Esito verifiche**
+- Suite e2e: **40/40 ✅**, zero errori JS, nessuna regressione (il vecchio percorso d'errore
+  dello Studio resta per progetti pre-esistenti).
+
+**Cosa è aperto**
+- **Commit di A2** (working tree contiene solo questo step), poi **A3 — gestione errori e
+  stati di attesa** (quota storage, attese spiegate, sostituzione `prompt`/`confirm`).
+- Limiti residui dichiarati: doppia decodifica (validazione + Studio), accettata per
+  perimetro; browser senza codec opus → rifiuto con messaggio-guida (corretto così).
+
+---
+
+## Step precedente — A1: pre-ascolto prima del caricamento (2026-06-10)
 
 **Cosa è stato fatto**
 - **Unico file dell'app toccato: `app/js/views/newProject.js`** — preview con `<audio controls>`
@@ -113,14 +140,12 @@
 
 ## Prossimi micro-step consigliati (in ordine — roadmap ufficiale in FONTE_DI_VERITA §8)
 
-1. ~~**A1 — Pre-ascolto del file prima del caricamento**~~ ✅ chiuso (36/36).
-2. **A2 — Validazione robusta**: `.opus`/MIME vuoto accettati, decodifica prima della
-   creazione del progetto (zero progetti orfani).
+1. ~~**A1 — Pre-ascolto del file prima del caricamento**~~ ✅ chiuso (36/36, commit `9ff0fe0`).
+2. ~~**A2 — Validazione robusta**~~ ✅ chiuso (40/40) — **da committare**.
 3. **A3 — Gestione errori e stati di attesa** (quota storage, niente attese mute,
    sostituzione `prompt`/`confirm`).
 4. **A4 — Analisi presentata meglio + export più pratico**; **A5 — e2e estesa sui fix**.
 5. Solo dopo la chiusura del Livello A: B1 (BPM/tonalità), B2 (MP3), B3 (limiter vero)…
-6. Anche consigliato: **commit** di A1 + documenti (visione, roadmap, regola agenti).
 
 ## Errori o blocchi
 
@@ -143,3 +168,4 @@
 | 2026-06-10 | Audit completo del prototipo: verifica reale/simulato/parziale per tutte le aree, e2e ripassata ✅, roadmap fix definita | Chiuso |
 | 2026-06-10 | Visione finale ufficiale (docs/VISIONE_PRODOTTO.md) + roadmap A/B/C + metodo di costruzione (FONTE_DI_VERITA §8) | Chiuso |
 | 2026-06-10 | A1 — Pre-ascolto prima del caricamento (+ fix bug riselezione stesso file) + regola agenti AI nei docs, e2e 36/36 ✅ | Chiuso |
+| 2026-06-10 | Commit `9ff0fe0` (visione + metodo + agenti + A1); A2 — validazione robusta (.opus, decodifica pre-creazione, rollback anti-orfani), e2e 40/40 ✅ | Chiuso |
