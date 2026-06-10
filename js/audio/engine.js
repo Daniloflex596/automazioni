@@ -6,8 +6,6 @@
 // La stessa catena viene costruita sia nel contesto live sia in quello
 // offline: ciò che l'utente esporta è esattamente ciò che ha ascoltato.
 
-import { audioBufferToWav } from './wav.js';
-
 const CROSSFADE = 0.04; // secondi, per l'A/B senza click
 
 export class AudioEngine {
@@ -145,8 +143,10 @@ export class AudioEngine {
     this.dryGain = null;
   }
 
-  // Render offline con la stessa catena dell'ascolto live → Blob WAV.
-  async renderToWav(params) {
+  // Render offline con la stessa catena dell'ascolto live → AudioBuffer.
+  // Le versioni di export (loudness per destinazione, tetto anti-clipping,
+  // codifica) sono responsabilità di audio/export.js.
+  async renderBuffer(params) {
     if (!this.buffer) throw new Error('Nessun audio caricato');
     const offline = new OfflineAudioContext(
       Math.min(2, this.buffer.numberOfChannels) || 1,
@@ -159,28 +159,7 @@ export class AudioEngine {
     source.buffer = this.buffer;
     source.connect(chain.input);
     source.start(0);
-    const rendered = await offline.startRendering();
-    protectFromClipping(rendered);
-    return audioBufferToWav(rendered);
-  }
-}
-
-// Se l'elaborazione ha spinto il segnale oltre il tetto, riscala l'intero
-// render: il file esportato non deve mai distorcere per clipping digitale.
-function protectFromClipping(buffer, ceiling = 0.985) {
-  let peak = 0;
-  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
-    const data = buffer.getChannelData(ch);
-    for (let i = 0; i < data.length; i++) {
-      const abs = Math.abs(data[i]);
-      if (abs > peak) peak = abs;
-    }
-  }
-  if (peak <= ceiling) return;
-  const scale = ceiling / peak;
-  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
-    const data = buffer.getChannelData(ch);
-    for (let i = 0; i < data.length; i++) data[i] *= scale;
+    return offline.startRendering();
   }
 }
 

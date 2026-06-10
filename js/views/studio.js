@@ -7,6 +7,7 @@ import { getProject, updateProject, loadAudio } from '../store.js';
 import { AudioEngine } from '../audio/engine.js';
 import { analyzeBuffer, computeWaveformPeaks } from '../audio/analysis.js';
 import { IDENTITIES, getIdentity, computeParams, adaptationNotes } from '../audio/identities.js';
+import { EXPORT_TARGETS, makeVersionBlob } from '../audio/export.js';
 
 const STEPS = [
   { id: 'analysis', label: 'Analisi' },
@@ -407,59 +408,83 @@ export function renderStudio({ navigate, projectId }) {
 
   function buildExport() {
     const identity = getIdentity(project.identityId);
+    const params = computeParams(identity, project.macros, project.analysis);
     const macroSummary = MACROS
       .map((macro) => `${macro.name} ${project.macros[macro.id]}`)
       .join(' · ');
 
     const doneSlot = el('div', {});
-    const exportBtn = el('button', { class: 'btn btn-primary btn-lg', onClick: onExport }, '⬇ Scarica WAV');
+    // il render della catena si fa una volta sola, alla prima richiesta;
+    // ogni versione applica poi solo il proprio livello di destinazione
+    let renderedPromise = null;
+    const getRendered = () => (renderedPromise ||= engine.renderBuffer(params));
 
-    async function onExport() {
-      exportBtn.disabled = true;
-      exportBtn.textContent = 'Preparo il tuo brano…';
+    async function downloadVersion(target, button) {
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Preparo…';
       try {
-        const blob = await engine.renderToWav(computeParams(identity, project.macros, project.analysis));
+        const rendered = await getRendered();
+        const { blob } = makeVersionBlob(rendered, target);
         const url = URL.createObjectURL(blob);
-        const safeName = `${project.name} — ${identity.name}`.replace(/[\\/:*?"<>|]+/g, '-');
+        const safeName = `${project.name} — ${identity.name} (${target.name})`.replace(/[\\/:*?"<>|]+/g, '-');
         const link = el('a', { href: url, download: `${safeName}.wav` });
         document.body.append(link);
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 10000);
-        project = updateProject(project.id, { exported: true });
-        doneSlot.replaceChildren(
-          el('div', { class: 'export-done' },
-            el('h3', {}, '🎉 Il tuo brano è pronto'),
-            el('p', { class: 'muted small', style: 'margin-top:6px' },
-              'Lo trovi nei download. Il progetto resta in libreria: puoi tornarci e provare un’altra direzione quando vuoi.'),
-            el('div', { style: 'margin-top:16px; display:flex; gap:10px; justify-content:center' },
-              el('a', { href: '#/library', class: 'btn btn-primary' }, 'Vai alla libreria'),
-              el('a', { href: '#/new', class: 'btn' }, 'Nuovo brano'))
-          )
-        );
-        toast('Export completato.');
+        if (!project.exported) {
+          project = updateProject(project.id, { exported: true });
+          doneSlot.replaceChildren(
+            el('div', { class: 'export-done' },
+              el('h3', {}, '🎉 Il tuo brano è pronto'),
+              el('p', { class: 'muted small', style: 'margin-top:6px' },
+                'Lo trovi nei download. Il progetto resta in libreria: puoi tornarci e provare un’altra direzione quando vuoi.'),
+              el('div', { style: 'margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap' },
+                el('a', { href: '#/library', class: 'btn btn-primary' }, 'Vai alla libreria'),
+                el('a', { href: '#/new', class: 'btn' }, 'Nuovo brano'))
+            )
+          );
+        }
+        toast(`Versione ${target.name} scaricata.`);
       } catch (error) {
         console.error(error);
         toast('Export non riuscito. Riprova.', 'error');
       } finally {
-        exportBtn.disabled = false;
-        exportBtn.textContent = '⬇ Scarica WAV';
+        button.disabled = false;
+        button.textContent = originalLabel;
       }
     }
 
+    const versionRows = EXPORT_TARGETS.map((target) => {
+      const button = el('button', { class: 'btn btn-sm' }, '⬇ Scarica');
+      button.addEventListener('click', () => downloadVersion(target, button));
+      return el('div', { class: 'export-version' },
+        el('span', { class: 'ico' }, target.emoji),
+        el('div', { class: 'ev-text' },
+          el('h4', {}, target.name),
+          el('p', {}, target.desc)),
+        button
+      );
+    });
+
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:8px' },
-        'Riepilogo delle tue scelte. Quello che scarichi è esattamente quello che hai ascoltato.'),
+        'Scegli la destinazione: ogni versione è tarata sul volume giusto per dove la pubblicherai.'),
       el('div', { class: 'export-summary' },
         summaryRow('Brano', project.name),
         summaryRow('File originale', project.fileName),
         summaryRow('Identità sonora', `${identity.emoji} ${identity.name}`),
         summaryRow('Rifiniture', macroSummary),
-        summaryRow('Formato', 'WAV 16 bit (MP3 e versioni per piattaforma: prossima fase)')
+        summaryRow('Formato', 'WAV 16 bit (MP3: prossima fase)')
+      ),
+      el('div', { class: 'card export-versions' },
+        el('h4', {}, 'Le tue versioni'),
+        versionRows
       ),
       el('div', { class: 'step-actions' },
         el('button', { class: 'btn', onClick: () => drawStep('compare') }, '← Riascolta il confronto'),
-        exportBtn
+        el('span', {})
       ),
       doneSlot
     );
