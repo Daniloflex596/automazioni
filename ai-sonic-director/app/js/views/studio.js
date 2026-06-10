@@ -8,6 +8,7 @@ import { AudioEngine } from '../audio/engine.js';
 import { analyzeBuffer, computeWaveformPeaks } from '../audio/analysis.js';
 import { IDENTITIES, getIdentity, computeParams, adaptationNotes, recommendIdentities } from '../audio/identities.js';
 import { EXPORT_TARGETS, makeVersionBlob, SNIPPET, makeSnippetBlob } from '../audio/export.js';
+import { measureLoudness } from '../audio/loudness.js';
 
 const STEPS = [
   { id: 'analysis', label: 'Analisi' },
@@ -38,6 +39,38 @@ export function renderStudio({ navigate, projectId }) {
   let rafId = null;
   const frameCallbacks = new Set();
   let previewingId = null;
+
+  // ---- pareggio di loudness per l'A/B onesto ----
+  // Un segmento centrale (~8 s) del brano fa da riferimento: a ogni cambio di
+  // parametri si rifà il render del segmento lavorato, si confrontano le due
+  // loudness (stima LUFS-like) e si abbassa il percorso più forte. Mai
+  // amplificare: niente clipping, e la differenza che resta è il carattere.
+  let matchSegment = null;        // { offset, duration, originalLufs }
+  let matchTimer = null;
+  let matchToken = 0;
+
+  function scheduleLoudnessMatch() {
+    clearTimeout(matchTimer);
+    matchTimer = setTimeout(refreshLoudnessMatch, 350);
+  }
+
+  async function refreshLoudnessMatch() {
+    if (!engine.buffer || !engine.params || !matchSegment) return;
+    const token = ++matchToken;
+    try {
+      const rendered = await engine.renderSegment(engine.params, matchSegment.offset, matchSegment.duration);
+      if (token !== matchToken) return; // nel frattempo i parametri sono cambiati
+      const processedLufs = measureLoudness(rendered);
+      const { originalLufs } = matchSegment;
+      if (!Number.isFinite(processedLufs) || !Number.isFinite(originalLufs)) return;
+      const diffDb = processedLufs - originalLufs;
+      engine.setLoudnessTrims(diffDb > 0
+        ? { original: 1, processed: Math.pow(10, -diffDb / 20) }
+        : { original: Math.pow(10, diffDb / 20), processed: 1 });
+    } catch {
+      // il pareggio è un comfort di confronto: se fallisce, si resta com'è
+    }
+  }
 
   root.append(loadingStage('Sto ascoltando il tuo brano…'));
   init();
@@ -83,6 +116,21 @@ export function renderStudio({ navigate, projectId }) {
         project = updateProject(project.id, { analysis: analyzeBuffer(buffer) });
       }
       peaks = computeWaveformPeaks(buffer);
+
+      // riferimento per il pareggio A/B: segmento centrale del brano
+      const segDuration = Math.min(8, buffer.duration);
+      const segOffset = Math.max(0, buffer.duration / 2 - segDuration / 2);
+      const start = Math.floor(segOffset * buffer.sampleRate);
+      const frames = Math.floor(segDuration * buffer.sampleRate);
+      const slice = {
+        numberOfChannels: buffer.numberOfChannels,
+        length: frames,
+        sampleRate: buffer.sampleRate,
+        getChannelData: (ch) => buffer.getChannelData(ch).subarray(start, start + frames),
+      };
+      matchSegment = { offset: segOffset, duration: segDuration, originalLufs: measureLoudness(slice) };
+      scheduleLoudnessMatch();
+
       startFrameLoop();
       drawStep(project.step || 'analysis');
     } catch (error) {
@@ -157,6 +205,7 @@ export function renderStudio({ navigate, projectId }) {
   function applyEngineParams() {
     const identity = getIdentity(project.identityId) || IDENTITIES[0];
     engine.setParams(computeParams(identity, project.macros, project.analysis));
+    scheduleLoudnessMatch();
   }
 
   // ---------- player condiviso ----------
@@ -351,6 +400,7 @@ export function renderStudio({ navigate, projectId }) {
         previewingId = null;
       } else {
         engine.setParams(computeParams(identity, project.macros, project.analysis));
+        scheduleLoudnessMatch();
         engine.setMode('processed');
         engine.play(engine.isPlaying() || engine.getPosition() > 0 ? engine.getPosition() : engine.duration * 0.25);
         previewingId = identity.id;
@@ -464,6 +514,8 @@ export function renderStudio({ navigate, projectId }) {
         stateLabel,
         el('p', { class: 'muted small', style: 'margin-top:10px' },
           'Premi play e passa da una versione all’altra mentre il brano suona. Il cambio è istantaneo.'),
+        el('p', { class: 'muted small', style: 'margin-top:6px' },
+          '🔊 Confronto a parità di volume (allineamento stimato): la differenza che senti è il carattere, non un volume più alto.'),
         el('div', { class: 'compare-switch' }, btnA, btnB)
       ),
       el('div', { style: 'margin-top:18px' }, playerBar()),
@@ -628,6 +680,8 @@ export function renderStudio({ navigate, projectId }) {
     node: root,
     cleanup() {
       if (rafId) cancelAnimationFrame(rafId);
+      clearTimeout(matchTimer);
+      matchToken++; // invalida eventuali render di pareggio in volo
       engine.dispose();
     },
   };

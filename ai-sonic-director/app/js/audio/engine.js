@@ -17,6 +17,9 @@ export class AudioEngine {
     this.dryGain = null;
     this.master = null;
     this.mode = 'processed'; // 'original' | 'processed'
+    // trim di pareggio loudness per l'A/B onesto (≤1, mai amplifica):
+    // calcolati fuori (vista Studio) su un segmento rappresentativo
+    this.trims = { original: 1, processed: 1 };
     this.playing = false;
     this.startedAt = 0;   // ctx.currentTime alla partenza
     this.startOffset = 0; // posizione nel brano alla partenza
@@ -62,9 +65,20 @@ export class AudioEngine {
     this.mode = mode;
     if (!this.ctx || !this.dryGain) return;
     const now = this.ctx.currentTime;
-    const dryTarget = mode === 'original' ? 1 : 0;
-    this.dryGain.gain.setTargetAtTime(dryTarget, now, CROSSFADE);
-    this.chain.output.gain.setTargetAtTime(1 - dryTarget, now, CROSSFADE);
+    const dry = mode === 'original' ? this.trims.original : 0;
+    const wet = mode === 'original' ? 0 : this.trims.processed;
+    this.dryGain.gain.setTargetAtTime(dry, now, CROSSFADE);
+    this.chain.output.gain.setTargetAtTime(wet, now, CROSSFADE);
+  }
+
+  // Pareggio di loudness per il confronto A/B: applica i trim (≤1) al
+  // percorso attivo senza interrompere la riproduzione.
+  setLoudnessTrims(trims) {
+    this.trims = {
+      original: Math.min(1, trims.original || 1),
+      processed: Math.min(1, trims.processed || 1),
+    };
+    if (this.ctx && this.dryGain) this.setMode(this.mode);
   }
 
   play(offset = null) {
@@ -83,11 +97,11 @@ export class AudioEngine {
     if (this.chain) this.chain.output.disconnect();
 
     this.dryGain = ctx.createGain();
-    this.dryGain.gain.value = this.mode === 'original' ? 1 : 0;
+    this.dryGain.gain.value = this.mode === 'original' ? this.trims.original : 0;
     this.dryGain.connect(this.master);
 
     this.chain = buildChain(ctx, this.params);
-    this.chain.output.gain.value = this.mode === 'original' ? 0 : 1;
+    this.chain.output.gain.value = this.mode === 'original' ? 0 : this.trims.processed;
     this.chain.output.connect(this.master);
 
     this.source = ctx.createBufferSource();
@@ -159,6 +173,25 @@ export class AudioEngine {
     source.buffer = this.buffer;
     source.connect(chain.input);
     source.start(0);
+    return offline.startRendering();
+  }
+
+  // Render offline di un breve segmento con la stessa catena: serve alla
+  // misura di loudness del "lavorato" per il pareggio A/B (vista Studio).
+  async renderSegment(params, offsetSeconds, durationSeconds) {
+    if (!this.buffer) throw new Error('Nessun audio caricato');
+    const duration = Math.min(durationSeconds, this.buffer.duration - offsetSeconds);
+    const offline = new OfflineAudioContext(
+      Math.min(2, this.buffer.numberOfChannels) || 1,
+      Math.max(1, Math.round(duration * this.buffer.sampleRate)),
+      this.buffer.sampleRate
+    );
+    const chain = buildChain(offline, params);
+    chain.output.connect(offline.destination);
+    const source = offline.createBufferSource();
+    source.buffer = this.buffer;
+    source.connect(chain.input);
+    source.start(0, offsetSeconds, duration);
     return offline.startRendering();
   }
 }

@@ -171,6 +171,9 @@ console.log('\n[1] Flusso completo con upload reale');
 
   await page.click('.step-actions button:has-text("Confronta")');
   await page.waitForSelector('.compare-switch');
+  // B3: il confronto dichiara il pareggio di volume (e che è una stima)
+  check((await page.locator('.compare-stage', { hasText: 'parità di volume' }).count()) === 1,
+    'confronto A/B dichiarato a parità di volume');
   await page.click('.step-actions button:has-text("esporta")');
   await page.waitForSelector('.export-summary');
   check((await page.locator('.export-summary .row').count()) === 5, 'riepilogo export completo');
