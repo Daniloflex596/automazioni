@@ -1,6 +1,6 @@
 // Libreria: la continuità del lavoro (piano §5). Lista, riapertura, eliminazione.
 
-import { el, toast, formatDate } from '../ui.js';
+import { el, toast, formatDate, appDialog } from '../ui.js';
 import { listProjects, updateProject, deleteProject } from '../store.js';
 import { getIdentity } from '../audio/identities.js';
 
@@ -54,10 +54,14 @@ export function renderLibrary({ navigate }) {
           project.exported ? 'Riapri' : 'Riprendi'),
         el('button', {
           class: 'btn btn-ghost btn-sm',
-          onClick: () => {
-            const name = prompt('Nuovo nome del progetto:', project.name);
-            if (name && name.trim() && name.trim() !== project.name) {
-              updateProject(project.id, { name: name.trim() });
+          onClick: async () => {
+            const name = await appDialog({
+              title: 'Rinomina progetto',
+              input: { value: project.name, maxlength: '60' },
+              confirmLabel: 'Salva',
+            });
+            if (name && name !== project.name) {
+              updateProject(project.id, { name });
               draw();
             }
           },
@@ -65,9 +69,20 @@ export function renderLibrary({ navigate }) {
         el('button', {
           class: 'btn btn-ghost btn-sm',
           onClick: async () => {
-            if (!confirm(`Eliminare “${project.name}”? L’audio salvato verrà rimosso.`)) return;
-            await deleteProject(project.id);
-            toast('Progetto eliminato.');
+            const ok = await appDialog({
+              title: `Eliminare “${project.name}”?`,
+              message: 'Il progetto e l’audio salvato verranno rimossi. Questa azione non si può annullare.',
+              confirmLabel: 'Elimina',
+              danger: true,
+            });
+            if (!ok) return;
+            try {
+              await deleteProject(project.id);
+              toast('Progetto eliminato.');
+            } catch (error) {
+              console.error(error);
+              toast('Non sono riuscito a eliminare il progetto. Ricarica la pagina e riprova.', 'error');
+            }
             draw();
           },
         }, 'Elimina')

@@ -171,6 +171,34 @@ input[type="text"]:focus { border-color: var(--accent); }
 .toast.error { border-color: #7f1d1d; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } }
 
+/* ---------- dialog (sostituisce prompt/confirm nativi) ---------- */
+
+.dialog-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(8, 8, 16, 0.66);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: toast-in 0.18s ease;
+}
+.dialog-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: min(420px, 100%);
+  box-shadow: var(--shadow);
+}
+.dialog-card h3 { font-size: 1.1rem; }
+.dialog-actions {
+  display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;
+}
+.btn-danger {
+  background: #7f1d1d;
+  border-color: #7f1d1d;
+  color: #fff;
+}
+.btn-danger:hover { background: #991b1b; border-color: #991b1b; }
+
 /* ---------- home ---------- */
 
 .hero { text-align: center; padding: 56px 0 30px; }

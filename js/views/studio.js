@@ -42,18 +42,44 @@ export function renderStudio({ navigate, projectId }) {
   root.append(loadingStage('Sto ascoltando il tuo brano…'));
   init();
 
+  // Ogni fase dell'avvio ha il suo errore, con un messaggio che dice cosa
+  // fare: accesso all'archivio, audio mancante, decodifica, imprevisto.
   async function init() {
+    let blob = null;
     try {
-      const blob = await loadAudio(project.id);
-      if (!blob) {
-        root.replaceChildren(emptyError(
-          'L’audio di questo progetto non è più disponibile in questo browser. Crea un nuovo progetto ricaricando il file.',
-          navigate
-        ));
-        return;
-      }
-      const buffer = await engine.loadBlob(blob);
-      if (!project.analysis) {
+      blob = await loadAudio(project.id);
+    } catch (error) {
+      console.error(error);
+      root.replaceChildren(emptyError(
+        'Non riesco ad accedere all’archivio audio del browser. Ricarica la pagina e riprova.',
+        navigate
+      ));
+      return;
+    }
+    if (!blob) {
+      root.replaceChildren(emptyError(
+        'L’audio di questo progetto non è più disponibile in questo browser. Crea un nuovo progetto ricaricando il file.',
+        navigate
+      ));
+      return;
+    }
+
+    let buffer = null;
+    try {
+      buffer = await engine.loadBlob(blob);
+    } catch {
+      // file non decodificabile: caso atteso (niente console.error)
+      root.replaceChildren(emptyError(
+        'Non sono riuscito a leggere questo file audio. Crea un nuovo progetto riesportando il brano in MP3 o WAV.',
+        navigate
+      ));
+      return;
+    }
+
+    try {
+      // si rianalizza anche se l'analisi salvata è di una versione precedente
+      // (senza stime di tempo/tonalità): così resta coerente con la UI attuale
+      if (!project.analysis || !project.analysis.tempo) {
         project = updateProject(project.id, { analysis: analyzeBuffer(buffer) });
       }
       peaks = computeWaveformPeaks(buffer);
@@ -61,7 +87,10 @@ export function renderStudio({ navigate, projectId }) {
       drawStep(project.step || 'analysis');
     } catch (error) {
       console.error(error);
-      root.replaceChildren(emptyError('Non sono riuscito a leggere questo file audio. Prova con un altro formato (MP3 o WAV).', navigate));
+      root.replaceChildren(emptyError(
+        'Qualcosa è andato storto durante l’analisi del brano. Ricarica la pagina e riprova.',
+        navigate
+      ));
     }
   }
 
@@ -188,12 +217,19 @@ export function renderStudio({ navigate, projectId }) {
     const a = project.analysis;
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:18px' },
-        'Abbiamo ascoltato il tuo brano. Ecco cosa abbiamo sentito — in parole semplici.'),
+        'Abbiamo misurato volume, dinamica e bilanciamento tonale del tuo brano. Ecco cosa dicono — in parole semplici.'),
       playerBar(),
       el('div', { class: 'metric-grid' },
         metric('Durata', formatTime(a.duration), `${a.channels === 1 ? 'Mono' : 'Stereo'} · ${Math.round(a.sampleRate / 1000)} kHz`),
         metric('Volume medio', `${a.rmsDb} dB`, volumeHint(a.rmsDb)),
-        metric('Dinamica', `${a.crest} dB`, dynamicsHint(a.crest))
+        metric('Dinamica', `${a.crest} dB`, dynamicsHint(a.crest)),
+        // stime, mai verità assolute: se la confidenza non basta, lo diciamo
+        a.tempo && a.tempo.reliable
+          ? metric('Tempo (stima)', `≈ ${a.tempo.bpm} BPM`, 'Stimato dal ritmo del brano')
+          : metric('Tempo (stima)', '—', 'Non riusciamo a stimarlo con certezza su questo brano'),
+        a.key && a.key.reliable
+          ? metric('Tonalità (stima)', a.key.name, 'Stimata dall’armonia del brano')
+          : metric('Tonalità (stima)', '—', 'Non riusciamo a stimarla con certezza su questo brano')
       ),
       el('div', { class: 'card', style: 'margin-top:14px' },
         el('h4', {}, 'Bilanciamento tonale'),
@@ -206,7 +242,9 @@ export function renderStudio({ navigate, projectId }) {
           el('span', {}, el('i', { style: 'background:#6366f1' }), `Bassi ${a.bands.low}%`),
           el('span', {}, el('i', { style: 'background:#a855f7' }), `Medi ${a.bands.mid}%`),
           el('span', {}, el('i', { style: 'background:#ec4899' }), `Alti ${a.bands.high}%`)
-        )
+        ),
+        el('p', { class: 'muted', style: 'font-size:0.78rem; margin-top:10px' },
+          'Quota di energia misurata sull’intero brano: bassi sotto i 250 Hz, medi tra 250 e 4000 Hz, alti oltre i 4000 Hz.')
       ),
       el('div', { class: 'insights' },
         project.analysis.insights.map((insight) =>
@@ -217,6 +255,9 @@ export function renderStudio({ navigate, projectId }) {
               el('p', {}, insight.text))
           ))
       ),
+      // trasparenza: cosa è misurato e cosa è stimato, senza promesse implicite
+      el('p', { class: 'muted small', style: 'margin-top:14px' },
+        'Volume, dinamica e bilanciamento tonale sono misurati sull’intero brano. BPM e tonalità sono stime: quando non sono abbastanza affidabili preferiamo dirtelo, invece di mostrare un valore sbagliato.'),
       el('div', { class: 'step-actions' },
         el('span', {}),
         el('button', { class: 'btn btn-primary btn-lg', onClick: () => drawStep('identity') },
@@ -448,30 +489,47 @@ export function renderStudio({ navigate, projectId }) {
     let renderedPromise = null;
     const getRendered = () => (renderedPromise ||= engine.renderBuffer(params));
 
+    // peso stimato del WAV 16 bit: l'utente lo sa PRIMA di scaricare
+    function wavSizeLabel(seconds) {
+      const channels = Math.min(2, engine.buffer.numberOfChannels) || 1;
+      const mb = (seconds * engine.buffer.sampleRate * 2 * channels) / 1048576;
+      return mb < 1 ? 'meno di 1 MB' : `~${Math.round(mb)} MB`;
+    }
+
     // consegna comune a versioni e snippet: download, stato "esportato", toast
     function deliverBlob(blob, versionName) {
       const url = URL.createObjectURL(blob);
-      const safeName = `${project.name} — ${identity.name} (${versionName})`.replace(/[\\/:*?"<>|]+/g, '-');
+      // nome file pulito e prevedibile: "Brano - Identità - Versione.wav"
+      const safeName = `${project.name} - ${identity.name} - ${versionName}`
+        .replace(/[\\/:*?"<>|]+/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
       const link = el('a', { href: url, download: `${safeName}.wav` });
       document.body.append(link);
       link.click();
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 10000);
       markExported();
-      toast(`Versione ${versionName} scaricata.`);
+      toast(`Versione ${versionName} scaricata: la trovi nei download.`);
+    }
+
+    // il primo export elabora il brano (più lento); i successivi riusano
+    // lo stesso render e sono rapidi — la label lo dice all'utente
+    function waitLabel(fallback) {
+      return renderedPromise ? fallback : 'Elaboro il brano… (solo la prima volta)';
     }
 
     async function downloadVersion(target, button) {
       const originalLabel = button.textContent;
       button.disabled = true;
-      button.textContent = 'Preparo…';
+      button.textContent = waitLabel('Preparo il file…');
       try {
         const rendered = await getRendered();
         const { blob } = makeVersionBlob(rendered, target);
         deliverBlob(blob, target.name);
       } catch (error) {
         console.error(error);
-        toast('Export non riuscito. Riprova.', 'error');
+        toast('Export non riuscito. Riprova; se succede ancora, ricarica la pagina.', 'error');
       } finally {
         button.disabled = false;
         button.textContent = originalLabel;
@@ -483,14 +541,14 @@ export function renderStudio({ navigate, projectId }) {
     async function downloadSnippet(button) {
       const originalLabel = button.textContent;
       button.disabled = true;
-      button.textContent = 'Cerco il momento migliore…';
+      button.textContent = waitLabel('Cerco il momento migliore…');
       try {
         const rendered = await getRendered();
         const { blob } = makeSnippetBlob(rendered);
         deliverBlob(blob, SNIPPET.name);
       } catch (error) {
         console.error(error);
-        toast('Export non riuscito. Riprova.', 'error');
+        toast('Export non riuscito. Riprova; se succede ancora, ricarica la pagina.', 'error');
       } finally {
         button.disabled = false;
         button.textContent = originalLabel;
@@ -519,18 +577,23 @@ export function renderStudio({ navigate, projectId }) {
         el('span', { class: 'ico' }, target.emoji),
         el('div', { class: 'ev-text' },
           el('h4', {}, target.name),
-          el('p', {}, target.desc)),
+          el('p', {}, target.desc),
+          el('p', { class: 'muted', style: 'font-size:0.78rem; margin-top:4px' },
+            `WAV 16 bit · ${wavSizeLabel(engine.duration)} · brano intero`)),
         button
       );
     });
 
     const snippetBtn = el('button', { class: 'btn btn-sm' }, '✂️ Esporta snippet');
     snippetBtn.addEventListener('click', () => downloadSnippet(snippetBtn));
+    const snippetSeconds = Math.min(SNIPPET.seconds, engine.duration);
     const snippetRow = el('div', { class: 'export-version' },
       el('span', { class: 'ico' }, SNIPPET.emoji),
       el('div', { class: 'ev-text' },
         el('h4', {}, SNIPPET.name),
-        el('p', {}, SNIPPET.desc)),
+        el('p', {}, SNIPPET.desc),
+        el('p', { class: 'muted', style: 'font-size:0.78rem; margin-top:4px' },
+          `WAV 16 bit · ${wavSizeLabel(snippetSeconds)} · circa ${Math.round(snippetSeconds)} secondi`)),
       snippetBtn
     );
 
@@ -542,7 +605,7 @@ export function renderStudio({ navigate, projectId }) {
         summaryRow('File originale', project.fileName),
         summaryRow('Identità sonora', `${identity.emoji} ${identity.name}`),
         summaryRow('Rifiniture', macroSummary),
-        summaryRow('Formato', 'WAV 16 bit (MP3: prossima fase)')
+        summaryRow('Formato', 'WAV 16 bit, qualità piena — l’MP3 arriverà in una fase successiva')
       ),
       el('div', { class: 'card export-versions' },
         el('h4', {}, 'Le tue versioni'),
