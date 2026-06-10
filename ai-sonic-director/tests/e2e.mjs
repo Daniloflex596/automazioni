@@ -116,6 +116,12 @@ console.log('\n[1] Flusso completo con upload reale');
   await page.waitForSelector('.metric-grid', { timeout: 30000 });
   check((await page.locator('.insight').count()) > 0, 'analisi con osservazioni');
 
+  // A4: l'analisi cita i valori misurati e dichiara cosa NON misura ancora
+  check(/-?\d+ dB/.test(await page.locator('.insight').first().textContent()),
+    'le osservazioni citano i valori misurati del brano');
+  check((await page.locator('p:has-text("BPM e tonalità non vengono ancora misurati")').count()) === 1,
+    'nota di trasparenza su cosa l’analisi non misura');
+
   await page.click('button:has-text("Scegli l’identità sonora")');
   await page.waitForSelector('.identity-card');
   check((await page.locator('.identity-card').count()) === 6, '6 identità presenti');
@@ -160,9 +166,15 @@ console.log('\n[1] Flusso completo con upload reale');
   check((await page.locator('.export-summary .row').count()) === 5, 'riepilogo export completo');
   check((await page.locator('.export-version').count()) === 4, '3 versioni + snippet social in export');
 
+  // A4: ogni versione dichiara formato e peso stimato prima del download
+  check((await page.locator('.export-version', { hasText: 'WAV 16 bit ·' }).count()) === 4,
+    'formato e peso stimato dichiarati per ogni versione');
+
   let download = page.waitForEvent('download', { timeout: 60000 });
   await page.locator('.export-version', { hasText: 'Master' }).locator('button').click();
-  await download;
+  const masterDl = await download;
+  check(masterDl.suggestedFilename().endsWith(' - Master.wav'),
+    'nome file pulito e usabile (Brano - Identità - Versione.wav)');
   await page.waitForSelector('.export-done');
   download = page.waitForEvent('download', { timeout: 60000 });
   await page.locator('.export-version').nth(2).locator('button').click();

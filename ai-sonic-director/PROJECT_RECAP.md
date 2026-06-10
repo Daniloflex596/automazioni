@@ -8,19 +8,54 @@
 
 ---
 
-## Stato del progetto oggi (2026-06-10)
+## Stato del progetto oggi (2026-06-10, fine giornata)
 
 - **Prodotto:** web app frontend-only (zero dipendenze di runtime, zero build, Web Audio API)
   che trasforma un brano grezzo in versioni con identità sonora, confrontabili ed esportabili.
-- **Goal finale:** il modo più semplice per portare un brano grezzo alla sua migliore identità
-  sonora e a un *release package* pronto alla pubblicazione, senza ragionare da fonico.
-- **Fase:** Fase 1 (prototipo) completata; primi mattoni di Fase 2 anticipati a step.
-- **Blocchi completati:** 1–5 (prototipo), 6a (adattività di base), 6b (export per destinazione),
-  6c (suggerimento automatico dell'identità), **Snippet/highlight social**.
-- **Qualità:** suite e2e Playwright **34/34 controlli passati** (estesa con i controlli su
-  snippet social). Eseguibile con `node tests/e2e.mjs` (richiede `npm install` una tantum).
+- **Goal finale (ufficiale):** definito in `docs/VISIONE_PRODOTTO.md` — "finishing OS per
+  artisti indipendenti": direzione artistica guidata, versioni credibili, release package,
+  share. Approvato dal PO il 2026-06-10, con benchmark competitivo integrato.
+- **Metodo (ufficiale):** roadmap A/B/C + 5 domande-gate in FONTE_DI_VERITA §8; regola madre
+  "prima la base eccellente, poi l'espansione"; regola agenti AI (6 criteri, nessuno
+  prioritario ora). Giudizio da audit: **prototipo funzionale** — non demo, non ancora MVP.
+- **Avanzamento Livello A:** A1 (pre-ascolto) ✅ · A2 (validazione robusta) ✅ ·
+  A3 (errori e attese) ✅ · A4 (analisi + export) ✅ · A5 (verifica finale + gate) ← prossimo.
+- **Commit di oggi:** `9ff0fe0` (visione+metodo+agenti+A1) → `28f723a` (A2) →
+  `9764be6` (A3+benchmark) → A4 nel working tree, da committare.
+  Branch: `claude/complete-plan-implementation-h0pkbx`.
+- **Qualità:** suite e2e Playwright **47/47 controlli passati**, zero errori JS.
+  Eseguibile con `node tests/e2e.mjs` (richiede `npm install` una tantum).
+- **Bug reali trovati e risolti oggi:** riselezione dello stesso file dopo il ✕ non emetteva
+  `change` (A1); file corrotti creavano progetti orfani (A2); catch-all dello Studio dava
+  sempre la colpa al "file non leggibile" anche per errori di storage (A3).
 
-## Ultimo step completato — A3: gestione errori e stati di attesa (2026-06-10)
+## Ultimo step completato — A4: analisi presentata meglio + export più pratico (2026-06-10)
+
+**Cosa è stato fatto**
+- **Commit `9764be6`** (A3 + benchmark) prima di aprire lo step; memoria consolidata.
+- **Analisi più credibile e onesta** (`app/js/audio/analysis.js`, `app/js/views/studio.js`):
+  osservazioni che citano i valori misurati sul brano ("Il volume medio misurato è −18 dB:
+  più piano dei circa −14 dB tipici…") — i numeri cambiano per brano, via l'effetto template;
+  copy d'apertura su cosa misuriamo davvero; range espliciti delle bande tonali;
+  **nota di trasparenza**: "BPM e tonalità non vengono ancora misurati".
+- **Export più chiaro** (`studio.js`): ogni versione dichiara "WAV 16 bit · ~X MB · brano
+  intero" (snippet: "~Y MB · circa 20 secondi") PRIMA del download; primo export con label
+  "Elaboro il brano… (solo la prima volta)"; nomi file `Brano - Identità - Versione.wav`;
+  riga Formato e toast riformulati.
+- **Test e2e** (+4): valori misurati negli insight, nota trasparenza, formato+peso su tutte
+  le righe, nome file scaricato verificato sul pattern nuovo.
+
+**Esito verifiche**
+- Suite e2e: **47/47 ✅**, zero errori JS, nessuna regressione.
+
+**Cosa è aperto**
+- **Commit di A4**, poi **A5 — verifica finale e2e del Livello A** e gate di chiusura A.
+- Limiti residui: insight ancora a soglie (varietà piena con B1); peso stimato (scarto
+  trascurabile); progetti pre-A4 conservano gli insight vecchi (salvati nell'analisi).
+
+---
+
+## Step precedente — A3: gestione errori e stati di attesa (2026-06-10)
 
 **Cosa è stato fatto**
 - **Commit `28f723a`** (A2) prima di aprire lo step, come richiesto dal PO.
@@ -44,7 +79,8 @@
 - Suite e2e: **43/43 ✅**, zero errori JS, nessuna regressione.
 
 **Cosa è aperto**
-- **Commit di A3 + benchmark**, poi **A4 — analisi presentata meglio + export più pratico**.
+- ~~Commit di A3 + benchmark~~ → fatto: `9764be6`. Prossimo: **A4 — analisi presentata
+  meglio + export più pratico**.
 - Limiti residui dichiarati: quota localStorage (pochi byte) non gestita ad hoc; il caso
   quota non è simulabile nella suite e2e; attese di export ancora label-only.
 
@@ -172,10 +208,11 @@
 
 1. ~~**A1 — Pre-ascolto**~~ ✅ (36/36, commit `9ff0fe0`).
 2. ~~**A2 — Validazione robusta**~~ ✅ (40/40, commit `28f723a`).
-3. ~~**A3 — Gestione errori e stati di attesa**~~ ✅ (43/43) — **da committare** (insieme
-   al benchmark nella visione).
-4. **A4 — Analisi presentata meglio + export più pratico**; **A5 — e2e estesa sui fix**.
-5. Solo dopo la chiusura del Livello A: B1 (BPM/tonalità), B2 (MP3), B3 (limiter vero +
+3. ~~**A3 — Gestione errori e stati di attesa**~~ ✅ (43/43, commit `9764be6` col benchmark).
+4. ~~**A4 — Analisi presentata meglio + export più pratico**~~ ✅ (47/47) — **da committare**.
+5. **A5 — Verifica finale e2e del Livello A** + gate di chiusura A (definizione di
+   "eccellente" verificata su A1–A4).
+6. Solo dopo la chiusura del Livello A: B1 (BPM/tonalità), B2 (MP3), B3 (limiter vero +
    A/B loudness-matched)…
 
 ## Errori o blocchi
@@ -201,3 +238,4 @@
 | 2026-06-10 | A1 — Pre-ascolto prima del caricamento (+ fix bug riselezione stesso file) + regola agenti AI nei docs, e2e 36/36 ✅ | Chiuso |
 | 2026-06-10 | Commit `9ff0fe0` (visione + metodo + agenti + A1); A2 — validazione robusta (.opus, decodifica pre-creazione, rollback anti-orfani), e2e 40/40 ✅ | Chiuso |
 | 2026-06-10 | Commit `28f723a` (A2); benchmark competitivo nella visione (+ A/B loudness-matched in B3); A3 — errori e attese (dialog app, quota, errori Studio distinti), e2e 43/43 ✅ | Chiuso |
+| 2026-06-10 | Commit `9764be6` (A3+benchmark); consolidamento memoria; A4 — analisi con valori misurati + trasparenza, export con peso/formato/naming puliti, e2e 47/47 ✅ | Chiuso |

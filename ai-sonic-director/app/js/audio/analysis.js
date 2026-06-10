@@ -150,26 +150,31 @@ function fft(real, imag) {
 }
 
 // Traduzione delle misure in osservazioni comprensibili per l'artista.
+// Ogni osservazione cita i valori realmente misurati SU QUESTO brano: la
+// credibilità nasce dalla specificità, non dall'enfasi. Niente promesse
+// oltre il misurato.
 function buildInsights({ rmsDb, crest, bands }) {
   const insights = [];
+  const vol = Math.round(rmsDb);
+  const dyn = Math.round(crest);
 
   if (rmsDb < -22) {
     insights.push({
       icon: '🔈',
       title: 'Volume sotto gli standard',
-      text: 'Il brano è più piano rispetto a quelli che senti nelle playlist. Le identità sonore lo porteranno a un livello competitivo.',
+      text: `Il volume medio misurato è ${vol} dB: più piano dei circa −14 dB tipici dei brani in playlist. Le identità sonore lo porteranno a un livello competitivo senza schiacciarlo.`,
     });
   } else if (rmsDb > -11) {
     insights.push({
-      icon: '🔥',
-      title: 'Già molto spinto',
-      text: 'Il volume medio è già alto: lavoreremo più sul carattere che sulla potenza, per non schiacciarlo.',
+      icon: '🔊',
+      title: 'Volume già alto',
+      text: `Il volume medio misurato è ${vol} dB, sopra la zona tipica dello streaming: lavoreremo più sul carattere che sulla potenza, per non schiacciare il brano.`,
     });
   } else {
     insights.push({
       icon: '✅',
       title: 'Volume in zona sana',
-      text: 'Il livello medio è in una buona zona di partenza: c’è spazio per dare carattere senza forzare.',
+      text: `Il volume medio misurato è ${vol} dB: una buona base di partenza, con spazio per dare carattere senza forzare.`,
     });
   }
 
@@ -177,13 +182,13 @@ function buildInsights({ rmsDb, crest, bands }) {
     insights.push({
       icon: '🌊',
       title: 'Dinamica molto aperta',
-      text: 'Ci sono grandi differenze tra i momenti piano e quelli forte. Un po’ di controllo renderà il brano più stabile all’ascolto.',
+      text: `Tra i momenti piano e quelli forte ci sono ${dyn} dB di escursione: tanta. Un po’ di controllo renderà il brano più stabile all’ascolto.`,
     });
   } else if (crest < 8) {
     insights.push({
       icon: '🧱',
       title: 'Dinamica già compressa',
-      text: 'Il brano respira poco: meglio identità delicate, spingere ancora rischierebbe di affaticarlo.',
+      text: `L’escursione tra piano e forte è di soli ${dyn} dB: il brano respira poco. Meglio identità delicate; spingere ancora lo affaticherebbe.`,
     });
   }
 
@@ -191,13 +196,13 @@ function buildInsights({ rmsDb, crest, bands }) {
     insights.push({
       icon: '🌑',
       title: 'Bassi dominanti',
-      text: 'Le basse frequenze guidano il brano. Ottimo per mood scuri e da club; le identità più chiare le terranno in equilibrio.',
+      text: `Il ${bands.low}% dell’energia del brano sta nelle basse frequenze: lo guidano loro. Ottimo per mood scuri e da club; le identità più chiare le terranno in equilibrio.`,
     });
   } else if (bands.low < 22) {
     insights.push({
       icon: '🪶',
       title: 'Bassi leggeri',
-      text: 'Il brano è chiaro e leggero in basso. Le identità con più Calore gli daranno corpo.',
+      text: `Solo il ${bands.low}% dell’energia è nelle basse frequenze: il brano è chiaro e leggero in basso. Le identità con più Calore gli daranno corpo.`,
     });
   }
 
@@ -205,13 +210,13 @@ function buildInsights({ rmsDb, crest, bands }) {
     insights.push({
       icon: '🌫️',
       title: 'Poca aria in alto',
-      text: 'Le frequenze alte sono timide: un tocco di Brillantezza aprirà il suono.',
+      text: `Le frequenze alte pesano solo il ${bands.high}% dell’energia: il suono è chiuso in alto. Un tocco di Brillantezza lo aprirà.`,
     });
   } else if (bands.high > 32) {
     insights.push({
       icon: '✨',
       title: 'Molto brillante',
-      text: 'Il brano ha tanta energia in alto: attenzione a non aggiungerne troppa con la Brillantezza.',
+      text: `Le frequenze alte pesano il ${bands.high}% dell’energia: il brano è già molto aperto. Attenzione a non aggiungere troppa Brillantezza.`,
     });
   }
 
