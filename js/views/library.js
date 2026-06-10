@@ -1,7 +1,7 @@
 // Libreria: la continuità del lavoro (piano §5). Lista, riapertura, eliminazione.
 
 import { el, toast, formatDate } from '../ui.js';
-import { listProjects, deleteProject } from '../store.js';
+import { listProjects, updateProject, deleteProject } from '../store.js';
 import { getIdentity } from '../audio/identities.js';
 
 const STEP_LABELS = {
@@ -52,6 +52,16 @@ export function renderLibrary({ navigate }) {
       el('div', { class: 'proj-actions' },
         el('button', { class: 'btn btn-sm', onClick: () => navigate(`#/studio/${project.id}`) },
           project.exported ? 'Riapri' : 'Riprendi'),
+        el('button', {
+          class: 'btn btn-ghost btn-sm',
+          onClick: () => {
+            const name = prompt('Nuovo nome del progetto:', project.name);
+            if (name && name.trim() && name.trim() !== project.name) {
+              updateProject(project.id, { name: name.trim() });
+              draw();
+            }
+          },
+        }, 'Rinomina'),
         el('button', {
           class: 'btn btn-ghost btn-sm',
           onClick: async () => {
