@@ -6,7 +6,7 @@ import { el, toast, formatTime, syncRangeFill } from '../ui.js';
 import { getProject, updateProject, loadAudio } from '../store.js';
 import { AudioEngine } from '../audio/engine.js';
 import { analyzeBuffer, computeWaveformPeaks } from '../audio/analysis.js';
-import { IDENTITIES, getIdentity, computeParams } from '../audio/identities.js';
+import { IDENTITIES, getIdentity, computeParams, adaptationNotes } from '../audio/identities.js';
 
 const STEPS = [
   { id: 'analysis', label: 'Analisi' },
@@ -126,7 +126,7 @@ export function renderStudio({ navigate, projectId }) {
 
   function applyEngineParams() {
     const identity = getIdentity(project.identityId) || IDENTITIES[0];
-    engine.setParams(computeParams(identity, project.macros));
+    engine.setParams(computeParams(identity, project.macros, project.analysis));
   }
 
   // ---------- player condiviso ----------
@@ -289,7 +289,7 @@ export function renderStudio({ navigate, projectId }) {
         engine.pause();
         previewingId = null;
       } else {
-        engine.setParams(computeParams(identity, project.macros));
+        engine.setParams(computeParams(identity, project.macros, project.analysis));
         engine.setMode('processed');
         engine.play(engine.isPlaying() || engine.getPosition() > 0 ? engine.getPosition() : engine.duration * 0.25);
         previewingId = identity.id;
@@ -302,7 +302,7 @@ export function renderStudio({ navigate, projectId }) {
 
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:4px' },
-        'Che carattere vuoi dare al brano? Ascoltale sul tuo pezzo: si decide con le orecchie, non con i nomi.'),
+        'Che carattere vuoi dare al brano? Ogni identità si dosa su ciò che abbiamo sentito nell’analisi. Ascoltale sul tuo pezzo: si decide con le orecchie, non con i nomi.'),
       grid,
       el('div', { class: 'step-actions' },
         el('button', { class: 'btn', onClick: () => drawStep('analysis') }, '← Analisi'),
@@ -340,10 +340,19 @@ export function renderStudio({ navigate, projectId }) {
       );
     });
 
+    const notes = adaptationNotes(identity, project.analysis);
+
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:18px' },
         `Stai lavorando su ${identity.emoji} ${identity.name}. Rifinisci mentre ascolti: niente tecnicismi, solo orecchie.`),
       playerBar({ showAb: true }),
+      el('div', { class: 'card', style: 'margin-top:14px' },
+        el('h4', {}, `🎯 ${identity.name}, adattata al tuo brano`),
+        el('div', { class: 'insights', style: 'margin-top:10px' },
+          notes.map((note) => el('div', { class: 'insight', style: 'padding:10px 14px' },
+            el('span', { class: 'ico' }, '·'),
+            el('p', { class: 'muted', style: 'font-size:0.88rem' }, note))))
+      ),
       el('div', { class: 'macro-grid' }, sliders),
       el('div', { class: 'step-actions' },
         el('div', { style: 'display:flex; gap:10px' },
@@ -409,7 +418,7 @@ export function renderStudio({ navigate, projectId }) {
       exportBtn.disabled = true;
       exportBtn.textContent = 'Preparo il tuo brano…';
       try {
-        const blob = await engine.renderToWav(computeParams(identity, project.macros));
+        const blob = await engine.renderToWav(computeParams(identity, project.macros, project.analysis));
         const url = URL.createObjectURL(blob);
         const safeName = `${project.name} — ${identity.name}`.replace(/[\\/:*?"<>|]+/g, '-');
         const link = el('a', { href: url, download: `${safeName}.wav` });
