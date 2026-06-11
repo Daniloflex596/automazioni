@@ -29,6 +29,14 @@
   `change` (A1); file corrotti creavano progetti orfani (A2); catch-all dello Studio dava
   sempre la colpa al "file non leggibile" anche per errori di storage (A3).
 
+## PRIMA COSA DA FARE ALLA PROSSIMA SESSIONE
+
+1. **Verifica deploy Actions:** controlla `github.com/Daniloflex596/automazioni/actions` — l'ultimo run (`79714ed`) deve essere verde. Se rosso, leggi l'errore e correggi.
+2. **Chiudi il fix WhatsApp/iPhone:** `newProject.js` ha modifiche uncommitted (rimozione gate MIME/ext, accept allargato per iOS, copy aggiornato). Esegui `node tests/e2e.mjs` dalla root `ai-sonic-director/` — se 54/54 ✅ → commit.
+3. **Solo dopo:** decidere se aprire B2 (MP3, richiede ok PO su dipendenza) o altro step B.
+
+---
+
 ## Ultimo step completato — B3: vero limiter + loudness LUFS-like + A/B loudness-matched (2026-06-11)
 
 **Cosa è stato fatto**

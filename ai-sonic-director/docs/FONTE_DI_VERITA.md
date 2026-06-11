@@ -11,8 +11,9 @@
 - **Fase in corso:** Fase 1 completata; primi mattoni di Fase 2 anticipati su decisione del product owner (sviluppo a step).
 - **Blocchi completati:** 1 (Fondamenta), 2 (Flusso principale), 3 (Credibilità del prototipo), 4 (Libreria e profilo), 5 (Demo e rifinitura), 6a (Adattività di base), 6b (Export per destinazione), 6c (Suggerimento automatico dell'identità), **Snippet/highlight social**.
 - **Ultima cosa completata:** **B3 — vero limiter + loudness LUFS-like + A/B loudness-matched** (commit `5402db9`): `loudness.js` con K-weighting (coefficienti DeMan/BS.1770) + gating assoluto/relativo (stima onesta, dichiarata); `limitChannels` look-ahead ~5 ms, release 80 ms; `export.js` target LUFS-like al posto di RMS, limiter attivo su Streaming/Social, Master trasparente; `engine.js` `setLoudnessTrims` + `renderSegment`; `studio.js` pareggio A/B debounced su 8 s centrali + nota onesta nel passo Confronto. Suite e2e **54/54 ✅**.
-- **Deploy web:** branch `gh-pages` (commit `7eea5f9`) serve ancora B1 — B3 non è ancora su gh-pages. Il workflow `deploy-pages.yml` fallisce (source non configurato su "GitHub Actions"; debito tracciato: allineare meccanismo o rimuovere il workflow).
-- **Prossimo passo:** **B2 — export MP3** (richiede dipendenza di codifica → serve ok esplicito del PO prima di aprire lo step). B3 chiuso.
+- **Deploy web:** canale ufficiale aggiornato a **GitHub Actions** (`deploy-pages.yml`). Branch `gh-pages` (commit `483c907`) serve B3 come fallback stabile. Environment protection rules impostate su "All branches" dal PO (2026-06-11). Ultimo trigger: commit `79714ed` — esito da verificare all'apertura della prossima sessione. URL live invariato: https://daniloflex596.github.io/automazioni/
+- **Lavoro aperto (non committato):** fix upload WhatsApp/iPhone in `app/js/views/newProject.js` — rimosso il gate MIME/estensione da `pickFile`, allargato `accept` per iOS, aggiornato copy dropzone. **Non testato, non committato.** Prima azione della prossima sessione: `node tests/e2e.mjs` → se 54/54 ✅ → commit.
+- **Prossimo passo dopo il fix WhatsApp:** decidere se aprire **B2 — export MP3** (richiede ok PO su dipendenza) o altro step B.
 
 ## 2. Priorità corrente
 
