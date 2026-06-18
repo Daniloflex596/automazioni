@@ -1,0 +1,16 @@
+# --- Dipendenze per INFERENZA locale (CPU) ---
+# Funzionalità di base (preprocessing, dati sintetici, annotazioni, GUI):
+numpy>=1.24
+opencv-python-headless>=4.8
+Pillow>=10.0
+scikit-image>=0.21
+scikit-learn>=1.3
+PyYAML>=6.0
+gradio>=4.0
+
+# --- AI (opzionale ma consigliato) ---
+# Embedding e anomaly detection con backbone preaddestrato.
+# Se torch non è installabile/avviabile, il codice usa un fallback classico
+# (feature handcrafted) e resta comunque funzionante.
+torch>=2.1; platform_system != "Emscripten"
+torchvision>=0.16; platform_system != "Emscripten"

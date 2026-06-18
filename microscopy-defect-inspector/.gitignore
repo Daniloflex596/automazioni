@@ -1,0 +1,21 @@
+# Dati e modelli generati (rigenerabili / pesanti) — non versionare
+data/good/*.png
+data/annotated/*.png
+data/defects/**/*.png
+data/processed/
+reports/
+models/*.pkl
+models/*.pt
+models/*.onnx
+
+# Mantieni la struttura delle cartelle
+!**/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+.venv/
+venv/

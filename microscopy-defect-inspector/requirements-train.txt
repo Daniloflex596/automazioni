@@ -1,0 +1,17 @@
+# --- Dipendenze EXTRA per il TRAINING (Google Colab / GPU) ---
+# Installare insieme a requirements.txt.
+-r requirements.txt
+
+# Anomaly detection few-shot (PatchCore/PaDiM) pronta all'uso.
+# Su Colab con GPU questa è la via più semplice; in locale è opzionale.
+anomalib>=1.0
+
+# Data augmentation
+albumentations>=1.4
+
+# Backbone self-supervised opzionali (DINOv2 via timm)
+timm>=1.0
+
+# Utilità varie
+matplotlib>=3.7
+tqdm>=4.66

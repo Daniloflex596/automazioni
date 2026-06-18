@@ -1,0 +1,61 @@
+# Configurazione dell'app di ispezione difetti al microscopio.
+# Tutti i path sono relativi alla root del progetto (microscopy-defect-inspector/).
+
+# Classi di difetto riconosciute. Modificabili in base ai difetti reali.
+# Aggiungere/rimuovere cartelle corrispondenti in data/defects/.
+defect_classes:
+  - cricca      # crack: linea sottile e netta
+  - graffio     # scratch: striatura allungata, superficiale
+  - buco        # hole/pit: macchia scura tondeggiante
+
+# Percorsi dei dati
+paths:
+  data_root: data
+  good_dir: data/good             # immagini SENZA difetti (il "normale")
+  defects_dir: data/defects       # sottocartelle per classe
+  annotated_dir: data/annotated   # immagini con cerchio blu + frecce
+  processed_dir: data/processed   # crop/augmentate generate automaticamente
+  models_dir: models              # pesi addestrati
+  reports_dir: reports            # referti generati dalla GUI
+
+# Preprocessing
+preprocess:
+  target_size: 512          # lato lungo a cui ridimensionare
+  use_clahe: true
+  clahe_clip: 2.0
+  clahe_grid: 8
+  denoise: true
+  illumination_correction: true
+
+# Estrazione annotazioni (cerchio blu + frecce)
+annotations:
+  # Range HSV per il blu (OpenCV: H 0-179, S 0-255, V 0-255)
+  hue_min: 90
+  hue_max: 130
+  sat_min: 80
+  val_min: 50
+  min_area: 150             # area minima (px) per considerare un marchio valido
+  inpaint: true            # rimuove i marchi blu per ottenere la versione pulita
+
+# Anomaly detection (rileva SE e DOVE)
+anomaly:
+  backbone: resnet18        # backbone per gli embedding (torchvision)
+  layers: [layer2, layer3]  # layer da cui estrarre le feature
+  coreset_ratio: 0.25       # frazione di patch tenute nella memory bank
+  score_threshold: null     # se null viene calcolata dai dati "good" al training
+  threshold_sigma: 3.0      # soglia = media + sigma*std degli score "good"
+
+# Classificatore tipo difetto (dice CHE difetto è)
+classifier:
+  backbone: resnet18        # backbone per gli embedding dei crop
+  method: knn               # knn | prototype
+  k: 3
+  min_confidence: 0.45      # sotto questa soglia → "sconosciuto"
+
+# Generatore dati sintetici (per sviluppo SENZA foto reali)
+synthetic:
+  image_size: 512
+  n_good: 12
+  n_per_defect: 8
+  annotated_fraction: 0.4   # quota di immagini difettose con cerchio blu
+  seed: 42
