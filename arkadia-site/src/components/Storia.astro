@@ -1,0 +1,63 @@
+---
+// ATTO II — Il Rifugio. Testo rivelato a blocchi durante lo scroll; timeline.
+import { storia } from '../data/contenuti';
+---
+
+<section id="rifugio" class="storia" data-scene-act="rifugio">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>{storia.occhiello}</p>
+    <h2 class="storia-titolo" data-split>{storia.titolo}</h2>
+
+    <ol class="timeline">
+      {
+        storia.blocchi.map((b) => (
+          <li class="tl-item" data-reveal>
+            <span class="tl-anno mono">{b.anno}</span>
+            <p class="tl-testo">{b.testo}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .storia-titolo {
+    font-size: var(--fs-h2);
+    max-width: 18ch;
+    margin-top: 1.5rem;
+    white-space: pre-line;
+  }
+  .timeline {
+    list-style: none;
+    margin-top: clamp(3rem, 8vh, 6rem);
+    display: grid;
+    gap: 2.5rem;
+    max-width: 62ch;
+  }
+  .tl-item {
+    display: grid;
+    grid-template-columns: minmax(6rem, 8rem) 1fr;
+    gap: clamp(1rem, 4vw, 3rem);
+    align-items: baseline;
+    padding-top: 2rem;
+    border-top: 1px solid var(--linea);
+  }
+  .tl-anno {
+    color: var(--oro);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+  }
+  .tl-testo {
+    font-size: clamp(1.1rem, 2.6vw, 1.5rem);
+    line-height: 1.5;
+    color: var(--schiuma);
+  }
+  @media (max-width: 640px) {
+    .tl-item {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+  }
+</style>

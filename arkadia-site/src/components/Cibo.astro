@@ -1,0 +1,111 @@
+---
+// ATTO IV — La Tavola. Piatti signature, uno alla volta con micro-scena.
+import { cibo, info } from '../data/contenuti';
+---
+
+<section id="tavola" class="tavola" data-scene-act="tavola">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>{cibo.occhiello}</p>
+    <h2 class="tavola-titolo" data-split>{cibo.titolo}</h2>
+
+    <div class="piatti">
+      {
+        cibo.piatti.map((p, i) => (
+          <article class="piatto" data-reveal>
+            <span class="piatto-num mono">0{i + 1}</span>
+            <div class="piatto-body">
+              <p class="piatto-cat mono">{p.categoria}</p>
+              <h3 class="piatto-nome">{p.nome}</h3>
+              <p class="piatto-desc">{p.descrizione}</p>
+              <span class="piatto-prezzo mono">€ {p.prezzo}</span>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <a class="menu-cta" href={info.menuCompletoUrl} target="_blank" rel="noopener">
+      <span>Vedi il menu completo</span>
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .tavola-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.5rem;
+  }
+  .piatti {
+    margin-top: clamp(3rem, 8vh, 5rem);
+    display: grid;
+    gap: 0;
+  }
+  .piatto {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(1rem, 4vw, 2.5rem);
+    align-items: start;
+    padding-block: clamp(2rem, 5vh, 3rem);
+    border-top: 1px solid var(--linea);
+  }
+  .piatto:last-of-type {
+    border-bottom: 1px solid var(--linea);
+  }
+  .piatto-num {
+    font-size: var(--fs-small);
+    color: var(--oro);
+    opacity: 0.8;
+  }
+  .piatto-cat {
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+  }
+  .piatto-nome {
+    font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+    margin-top: 0.4rem;
+  }
+  .piatto-desc {
+    margin-top: 0.9rem;
+    color: var(--schiuma-soft);
+    max-width: 52ch;
+  }
+  .piatto-prezzo {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 1.15rem;
+    color: var(--oro);
+    white-space: nowrap;
+    letter-spacing: var(--tracking-mono);
+  }
+  .menu-cta {
+    margin-top: 3rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.35rem;
+    transition: gap 0.3s var(--ease-out), color 0.3s;
+  }
+  .menu-cta:hover {
+    gap: 1.25rem;
+    color: var(--oro);
+  }
+  @media (max-width: 640px) {
+    .piatto {
+      grid-template-columns: auto 1fr;
+      gap: 0.5rem 1.25rem;
+    }
+    .piatto-prezzo {
+      grid-column: 2;
+      margin-top: 0.5rem;
+    }
+  }
+</style>

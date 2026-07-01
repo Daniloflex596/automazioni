@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import Preloader from '../components/Preloader.astro';
+import Hero from '../components/Hero.astro';
+import Storia from '../components/Storia.astro';
+import Birre from '../components/Birre.astro';
+import Cibo from '../components/Cibo.astro';
+import Luogo from '../components/Luogo.astro';
+import Prenotazione from '../components/Prenotazione.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base>
+  <Preloader />
+
+  <!-- Scena persistente dietro i contenuti: canvas 3D + fallback SVG -->
+  <div id="scena" aria-hidden="true">
+    <canvas id="scena-canvas"></canvas>
+
+    <!-- Fallback senza WebGL / reduced-motion / dispositivi deboli -->
+    <svg
+      id="scena-fallback"
+      viewBox="0 0 200 300"
+      preserveAspectRatio="xMidYMid meet"
+      style="display:none"
+    >
+      <defs>
+        <linearGradient id="fbLiquid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#e8b04b" />
+          <stop offset="1" stop-color="#c77b29" />
+        </linearGradient>
+        <radialGradient id="fbGlow" cx="0.5" cy="0.4" r="0.6">
+          <stop offset="0" stop-color="rgba(232,176,75,0.5)" />
+          <stop offset="1" stop-color="rgba(14,10,7,0)" />
+        </radialGradient>
+        <clipPath id="fbClip">
+          <path d="M66,58 C66,150 84,203 100,203 C116,203 134,150 134,58 Z" />
+        </clipPath>
+      </defs>
+
+      <rect x="0" y="0" width="200" height="300" fill="url(#fbGlow)" />
+
+      <!-- Liquido (riempito via JS) -->
+      <g clip-path="url(#fbClip)">
+        <rect class="fb-fill" x="60" y="210" width="80" height="0" fill="url(#fbLiquid)" />
+      </g>
+      <ellipse class="fb-foam" cx="100" cy="210" rx="34" ry="6" fill="#f4e9d0" style="opacity:0" />
+
+      <!-- Vetro del calice -->
+      <g fill="none" stroke="rgba(244,233,208,0.55)" stroke-width="2" stroke-linecap="round">
+        <path d="M60,55 L140,55" />
+        <path d="M64,55 C64,150 82,205 100,205 C118,205 136,150 136,55" />
+        <path d="M100,205 L100,258" />
+        <path d="M74,272 Q100,256 126,272" />
+      </g>
+    </svg>
+  </div>
+
+  <main id="contenuto">
+    <Hero />
+    <Storia />
+    <Birre />
+    <Cibo />
+    <Luogo />
+    <Prenotazione />
+  </main>
+
+  <Footer />
+
+  <script>
+    import '../scroll/experience.js';
+  </script>
+</Base>
+
+<style>
+  #scena-canvas {
+    width: 100%;
+    height: 100%;
+  }
+  #scena-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(70vw, 46vh);
+    height: auto;
+    opacity: 0.9;
+  }
+  @media (min-width: 821px) {
+    /* Coerente con il calice 3D: spostato a destra, colonna testo a sinistra. */
+    #scena-fallback {
+      left: 72%;
+      width: min(34vw, 62vh);
+    }
+  }
+</style>

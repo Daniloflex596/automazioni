@@ -1,0 +1,83 @@
+---
+// Preloader: il calice si riempie come barra di caricamento reale (coerente
+// con la metafora). Il progresso viene aggiornato dal client in base agli asset.
+import { info } from '../data/contenuti';
+---
+
+<div id="preloader" aria-hidden="true">
+  <div class="pl-glass">
+    <span class="pl-fill"></span>
+  </div>
+  <div class="pl-meta mono">
+    <span class="pl-name">{info.nome}</span>
+    <span class="pl-pct" id="pl-pct">0%</span>
+  </div>
+</div>
+
+<style>
+  #preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-content: center;
+    gap: 1.5rem;
+    background: var(--notte);
+    transition: opacity 0.8s var(--ease-out), visibility 0.8s;
+  }
+  #preloader.is-done {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .pl-glass {
+    width: 64px;
+    height: 96px;
+    margin-inline: auto;
+    border: 2px solid var(--schiuma-soft);
+    /* forma stilizzata di calice */
+    border-radius: 6px 6px 22px 22px;
+    position: relative;
+    overflow: hidden;
+    background: var(--notte-2);
+  }
+  .pl-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0%;
+    background: linear-gradient(180deg, var(--oro), var(--ambra));
+    transition: height 0.3s var(--ease-out);
+  }
+  .pl-fill::before {
+    /* schiuma in cima al liquido */
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 0;
+    right: 0;
+    height: 7px;
+    background: var(--schiuma);
+    border-radius: 50%;
+    opacity: 0.9;
+  }
+  .pl-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 160px;
+    margin-inline: auto;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    color: var(--schiuma-soft);
+  }
+  .pl-name {
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pl-fill {
+      transition: none;
+    }
+  }
+</style>

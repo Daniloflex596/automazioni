@@ -1,0 +1,77 @@
+---
+// Layout base: <head> con SEO locale, Open Graph, Schema.org Restaurant.
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/inter';
+import '@fontsource/space-mono';
+import '../styles/global.css';
+import { info, meta, orariSchema } from '../data/contenuti';
+
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+
+// Schema.org Restaurant — nutre la ricerca locale e i rich result.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Restaurant',
+  name: `${info.nome} Pub`,
+  description: meta.descrizione,
+  servesCuisine: ['Pub', 'Hamburger', 'Birreria'],
+  priceRange: info.fasciaPrezzo,
+  url: canonical,
+  telephone: info.telefonoHref,
+  image: new URL(meta.ogImage, Astro.site).toString(),
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: info.indirizzo,
+    addressLocality: info.citta,
+    postalCode: info.cap,
+    addressRegion: info.provincia,
+    addressCountry: 'IT',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: info.geo.lat,
+    longitude: info.geo.lng,
+  },
+  openingHours: orariSchema,
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: info.rating.valore,
+    reviewCount: info.rating.recensioni,
+  },
+  sameAs: [info.social.instagram, info.social.facebook],
+  hasMenu: info.menuCompletoUrl,
+};
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href={canonical} />
+    <title>{meta.titolo}</title>
+    <meta name="description" content={meta.descrizione} />
+    <meta name="keywords" content={meta.keywords} />
+    <meta name="theme-color" content="#0e0a07" />
+    <meta name="author" content={`${info.nome} Pub`} />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="restaurant" />
+    <meta property="og:site_name" content={`${info.nome} Pub`} />
+    <meta property="og:title" content={meta.titolo} />
+    <meta property="og:description" content={meta.descrizione} />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(meta.ogImage, Astro.site).toString()} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenuto">Salta al contenuto</a>
+    <slot />
+  </body>
+</html>

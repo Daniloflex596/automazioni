@@ -1,0 +1,123 @@
+---
+// ATTO III — La Spina. Climax dell'elemento 3D: qui avviene la mescita.
+// Tap-list con scheda tecnica (ABV/IBU/prezzo) in mono.
+import { birre } from '../data/contenuti';
+---
+
+<section id="spina" class="spina" data-scene-act="spina">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>{birre.occhiello}</p>
+    <h2 class="spina-titolo" data-split>{birre.titolo}</h2>
+    <p class="spina-intro" data-reveal>{birre.intro}</p>
+
+    <ul class="taplist">
+      {
+        birre.lista.map((b) => (
+          <li class="tap" data-reveal>
+            <div class="tap-main">
+              <h3 class="tap-nome">{b.nome}</h3>
+              <p class="tap-stile mono">
+                {b.stile} · {b.origine}
+                {b.glutenFree && <span class="tap-gf">gluten free</span>}
+              </p>
+              <p class="tap-nota">{b.nota}</p>
+            </div>
+            <dl class="tap-stats mono" aria-label="Scheda tecnica">
+              <div><dt>ABV</dt><dd>{b.abv}%</dd></div>
+              <div><dt>IBU</dt><dd>{b.ibu}</dd></div>
+              <div class="tap-prezzo"><dt>€</dt><dd>{b.prezzo}</dd></div>
+            </dl>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .spina-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.5rem;
+  }
+  .spina-intro {
+    max-width: 46ch;
+    margin-top: 1.25rem;
+    color: var(--schiuma-soft);
+  }
+  .taplist {
+    list-style: none;
+    margin-top: clamp(3rem, 8vh, 5rem);
+    display: grid;
+    gap: 0;
+  }
+  .tap {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-block: 1.75rem;
+    border-top: 1px solid var(--linea);
+  }
+  .tap:last-child {
+    border-bottom: 1px solid var(--linea);
+  }
+  .tap-nome {
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+  }
+  .tap-stile {
+    font-size: var(--fs-small);
+    color: var(--oro);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .tap-gf {
+    color: var(--notte);
+    background: var(--luppolo);
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+  .tap-nota {
+    margin-top: 0.75rem;
+    color: var(--schiuma-soft);
+    max-width: 48ch;
+  }
+  .tap-stats {
+    display: flex;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+    text-align: left;
+    padding-top: 0.25rem;
+    border-top: 1px dashed var(--schiuma-faint);
+    width: fit-content;
+  }
+  .tap-stats dt {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+    opacity: 0.7;
+  }
+  .tap-stats dd {
+    font-size: 1.2rem;
+    color: var(--schiuma);
+    margin-top: 0.15rem;
+  }
+  .tap-prezzo dd {
+    color: var(--oro);
+  }
+  @media (max-width: 640px) {
+    .tap {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    .tap-stats {
+      text-align: left;
+      justify-content: flex-start;
+    }
+  }
+</style>
