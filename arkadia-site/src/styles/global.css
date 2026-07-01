@@ -173,6 +173,9 @@ section {
   display: inline-block;
   overflow: hidden;
   vertical-align: top;
+  /* spazio per i descender (g, p, q) senza rompere l'effetto maschera */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
 }
 .split-inner {
   display: inline-block;

@@ -1,0 +1,418 @@
+---
+import Base from '../layouts/Base.astro';
+import Preloader from '../components/Preloader.astro';
+import Footer from '../components/Footer.astro';
+import { birre, birreBottiglia, categorieMenu, info } from '../data/contenuti';
+
+const base = import.meta.env.BASE_URL;
+const menuTitolo = `Menu · ${info.nome} Pub — Birre, hamburger e cocktail a Ciampino`;
+const menuDesc =
+  'Il menu completo di Arkadia Pub: birre alla spina e in bottiglia (belghe, italiane, artigianali), hamburger da 200gr, fritti, dessert, cocktail e caffetteria.';
+---
+
+<Base title={menuTitolo} description={menuDesc}>
+  <Preloader />
+
+  <div id="scena" aria-hidden="true">
+    <canvas id="scena-canvas"></canvas>
+    <svg id="scena-fallback" viewBox="0 0 200 300" preserveAspectRatio="xMidYMid meet" style="display:none">
+      <defs>
+        <linearGradient id="fbLiquid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#e8b04b" />
+          <stop offset="1" stop-color="#c77b29" />
+        </linearGradient>
+        <radialGradient id="fbGlow" cx="0.5" cy="0.4" r="0.6">
+          <stop offset="0" stop-color="rgba(232,176,75,0.5)" />
+          <stop offset="1" stop-color="rgba(14,10,7,0)" />
+        </radialGradient>
+        <clipPath id="fbClip">
+          <path d="M66,58 C66,150 84,203 100,203 C116,203 134,150 134,58 Z" />
+        </clipPath>
+      </defs>
+      <rect x="0" y="0" width="200" height="300" fill="url(#fbGlow)" />
+      <g clip-path="url(#fbClip)">
+        <rect class="fb-fill" x="60" y="210" width="80" height="0" fill="url(#fbLiquid)" />
+      </g>
+      <ellipse class="fb-foam" cx="100" cy="210" rx="34" ry="6" fill="#f4e9d0" style="opacity:0" />
+      <g fill="none" stroke="rgba(244,233,208,0.55)" stroke-width="2" stroke-linecap="round">
+        <path d="M60,55 L140,55" />
+        <path d="M64,55 C64,150 82,205 100,205 C118,205 136,150 136,55" />
+        <path d="M100,205 L100,258" />
+        <path d="M74,272 Q100,256 126,272" />
+      </g>
+    </svg>
+  </div>
+
+  <main id="contenuto">
+    <!-- Barra di navigazione minimale -->
+    <nav class="topbar">
+      <a class="topbar-back" href={base}>
+        <span aria-hidden="true">←</span> <span>Arkadia</span>
+      </a>
+      <a class="topbar-cta" href={`${base}#brindisi`}>Prenota</a>
+    </nav>
+
+    <!-- Hero del menu -->
+    <header class="menu-hero">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Il Menu</p>
+        <h1 class="menu-h1" data-split>Tutto quello che versiamo e serviamo</h1>
+        <p class="menu-lead" data-reveal>
+          Dalla spina alla bottiglia, dai panini ai dolci. Ecco cosa trovi da Arkadia.
+        </p>
+      </div>
+    </header>
+
+    <!-- Tab categorie (sticky) -->
+    <div class="tabs" id="tabs">
+      <div class="wrap tabs-row">
+        {
+          categorieMenu.map((c) => (
+            <a
+              class:list={['tab', { 'is-soon': !c.pronta }]}
+              href={`#cat-${c.id}`}
+              data-tab={c.id}
+            >
+              {c.nome}
+              {!c.pronta && <span class="tab-soon">presto</span>}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- ===================== BIRRE ===================== -->
+    <section class="cat" id="cat-birre" data-scene-act="spina">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Birre</p>
+        <h2 class="cat-titolo" data-split>Alla spina</h2>
+        <p class="cat-slogan" data-reveal>{birre.slogan}</p>
+
+        <div class="spina-tabella">
+          {
+            birre.spina.map((b) => (
+              <article class="spina-riga" data-reveal>
+                <div class="spina-info">
+                  <h3 class="spina-nome">
+                    {b.nome}
+                    {b.novita && <span class="badge">novità</span>}
+                  </h3>
+                  <p class="spina-stile mono">{b.stile}</p>
+                  <p class="spina-nota">{b.nota}</p>
+                </div>
+                <dl class="spina-formati mono" aria-label="Formati e prezzi">
+                  {birre.formati.map((f, i) =>
+                    b.prezzi[i] !== '—' ? (
+                      <div>
+                        <dt>{f}</dt>
+                        <dd>€ {b.prezzi[i]}</dd>
+                      </div>
+                    ) : null
+                  )}
+                </dl>
+              </article>
+            ))
+          }
+        </div>
+
+        <h2 class="cat-titolo cat-titolo--sub" data-split>In bottiglia</h2>
+        <p class="cat-slogan" data-reveal>
+          Belghe, italiane, artigianali e sidri. Diciotto etichette, dal chiaro al forte.
+        </p>
+
+        <ul class="bottiglie">
+          {
+            birreBottiglia.map((b) => (
+              <li class="bottiglia" data-reveal>
+                <div class="bottiglia-main">
+                  <h3 class="bottiglia-nome">
+                    {b.nome}
+                    {b.novita && <span class="badge">novità</span>}
+                  </h3>
+                  <p class="bottiglia-meta mono">
+                    {b.stile} · {b.grad} · {b.formato}
+                  </p>
+                </div>
+                <span class="bottiglia-prezzo mono">€ {b.prezzo}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ ALTRE CATEGORIE (in arrivo) ============ -->
+    {
+      categorieMenu
+        .filter((c) => !c.pronta)
+        .map((c) => (
+          <section class="cat cat--soon" id={`cat-${c.id}`}>
+            <div class="wrap">
+              <p class="occhiello" data-reveal>{c.nome}</p>
+              <h2 class="cat-titolo" data-split>{c.nome}</h2>
+              <p class="cat-slogan" data-reveal>{c.slogan}</p>
+              <p class="soon-nota mono" data-reveal>In arrivo — stiamo impiattando questa sezione.</p>
+            </div>
+          </section>
+        ))
+    }
+  </main>
+
+  <Footer />
+
+  <script>
+    import '../scroll/menu.js';
+  </script>
+</Base>
+
+<style>
+  #scena-canvas {
+    width: 100%;
+    height: 100%;
+  }
+  #scena-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(70vw, 46vh);
+    height: auto;
+    opacity: 0.9;
+  }
+  @media (min-width: 821px) {
+    #scena-fallback {
+      left: 74%;
+      width: min(30vw, 56vh);
+    }
+  }
+
+  /* Sul menu il calice vive SOLO nell'hero e scorre via con la pagina:
+     le liste (dense di testo) restano pulite e a piena larghezza. */
+  #scena {
+    position: absolute;
+    height: 100svh;
+  }
+  @media (min-width: 821px) {
+    .menu-hero .wrap {
+      max-width: 60%;
+    }
+    /* annulla la colonna al 62% ereditata dalla home: qui liste piene */
+    main > section.cat > .wrap {
+      max-width: var(--maxw);
+      margin-inline: auto;
+    }
+  }
+
+  .topbar {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem var(--gutter);
+    max-width: var(--maxw);
+    margin-inline: auto;
+  }
+  .topbar-back {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    display: inline-flex;
+    gap: 0.5rem;
+    color: var(--schiuma);
+  }
+  .topbar-back:hover { color: var(--oro); }
+  .topbar-cta {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--notte);
+    background: var(--oro);
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+  }
+
+  .menu-hero {
+    padding-block: clamp(3rem, 10vh, 7rem) clamp(2rem, 5vh, 3rem);
+  }
+  .menu-h1 {
+    font-size: var(--fs-h1);
+    max-width: 16ch;
+    margin-top: 1rem;
+  }
+  .menu-lead {
+    margin-top: 1.25rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+    font-size: 1.2rem;
+  }
+
+  /* Tab sticky */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: color-mix(in srgb, var(--notte) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-block: 1px solid var(--linea);
+  }
+  .tabs-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-block: 0.85rem;
+    scrollbar-width: none;
+  }
+  .tabs-row::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: color 0.3s, border-color 0.3s, background 0.3s;
+  }
+  .tab:hover { color: var(--schiuma); border-color: var(--schiuma-soft); }
+  .tab.is-active {
+    color: var(--notte);
+    background: var(--oro);
+    border-color: var(--oro);
+  }
+  .tab-soon {
+    margin-left: 0.4rem;
+    opacity: 0.5;
+    font-size: 0.6rem;
+  }
+
+  .cat {
+    padding-block: clamp(3.5rem, 9vh, 7rem);
+    scroll-margin-top: 70px;
+  }
+  .cat-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  .cat-titolo--sub {
+    margin-top: clamp(3rem, 8vh, 5rem);
+  }
+  .cat-slogan {
+    margin-top: 1rem;
+    max-width: 48ch;
+    color: var(--schiuma-soft);
+  }
+
+  /* Spina */
+  .spina-tabella {
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    display: grid;
+    gap: 0;
+  }
+  .spina-riga {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+    padding-block: 1.75rem;
+    border-top: 1px solid var(--linea);
+  }
+  .spina-riga:last-child { border-bottom: 1px solid var(--linea); }
+  .spina-nome {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .spina-stile {
+    font-size: var(--fs-small);
+    color: var(--oro);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    margin-top: 0.45rem;
+  }
+  .spina-nota {
+    margin-top: 0.55rem;
+    color: var(--schiuma-soft);
+    max-width: 48ch;
+  }
+  .spina-formati {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.75rem;
+  }
+  .spina-formati div { display: flex; flex-direction: column; gap: 0.15rem; }
+  .spina-formati dt {
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+    opacity: 0.7;
+  }
+  .spina-formati dd { font-size: 1rem; color: var(--schiuma); }
+
+  /* Bottiglie */
+  .bottiglie {
+    list-style: none;
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 clamp(2rem, 5vw, 4rem);
+  }
+  .bottiglia {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 1.15rem;
+    border-top: 1px solid var(--linea);
+  }
+  .bottiglia-nome {
+    font-size: 1.15rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .bottiglia-meta {
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+  }
+  .bottiglia-prezzo {
+    color: var(--oro);
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--notte);
+    background: var(--oro);
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+  }
+
+  .cat--soon { opacity: 0.9; }
+  .soon-nota {
+    margin-top: 1.5rem;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+
+  @media (max-width: 720px) {
+    .bottiglie { grid-template-columns: 1fr; }
+  }
+</style>

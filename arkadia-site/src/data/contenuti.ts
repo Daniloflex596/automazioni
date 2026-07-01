@@ -85,51 +85,74 @@ export const storia = {
 export const birre = {
   occhiello: 'La Spina',
   titolo: 'La selezione',
+  slogan: 'Gusta la nostra selezione dalla più amara a quella più alcolica',
   intro:
-    'La casa è franco-belga, il cuore è artigianale. Etichette scelte a mano, più una rotazione di craft italiane. Gluten-free su richiesta.',
-  lista: [
+    'La casa è franco-belga, il cuore è artigianale: birre alla spina e oltre diciotto etichette in bottiglia, più una rotazione di craft. Dal chiaro al forte, ce n’è una per ogni serata.',
+  // Formati disponibili per le birre alla spina (stesso ordine dei prezzi sotto).
+  formati: ['25cl', '33cl', '50cl', '100cl', 'Tower 2L', 'Tower 3L'],
+  spina: [
     {
-      nome: 'Ambrata di Fiandra',
-      stile: 'Belgian Amber Ale',
-      origine: 'Belgio',
-      abv: '6.5',
-      ibu: '22',
-      prezzo: '7,00',
-      nota: 'Caramello, frutta secca, finale asciutto. La nostra bandiera.',
-      glutenFree: false,
+      nome: 'Bionda',
+      stile: 'Chiara',
+      nota: 'Fresca e dritta, la più facile da bere.',
+      prezzi: ['4,50', '5,50', '7,00', '13,00', '27,00', '40,50'],
     },
     {
-      nome: 'Bionda di Abbazia',
-      stile: 'Belgian Blond Ale',
-      origine: 'Belgio',
-      abv: '6.8',
-      ibu: '18',
-      prezzo: '7,00',
-      nota: 'Miele, spezie leggere, beva pericolosamente facile.',
-      glutenFree: false,
+      nome: 'Rossa',
+      stile: 'Ambrata',
+      nota: 'Maltata, tostata, dal carattere pieno.',
+      prezzi: ['5,30', '7,00', '8,00', '15,00', '28,00', '42,00'],
     },
     {
-      nome: 'Craft del Mese',
-      stile: 'Italian Pale Ale',
-      origine: 'Italia',
-      abv: '5.2',
-      ibu: '40',
-      prezzo: '6,00',
-      nota: 'La rotazione italiana: chiedi cosa c’è alla spina stasera.',
-      glutenFree: false,
+      nome: 'IPA',
+      stile: 'India Pale Ale',
+      nota: 'Luppolata e amara, per chi la vuole decisa.',
+      prezzi: ['5,00', '6,50', '7,50', '14,00', '26,00', '39,00'],
     },
     {
-      nome: 'Senza Glutine',
-      stile: 'Gluten-Free Lager',
-      origine: 'Italia',
-      abv: '5.0',
-      ibu: '20',
-      prezzo: '6,50',
-      nota: 'Tutto il gusto, zero glutine. Perché a casa ci sta chiunque.',
-      glutenFree: true,
+      nome: 'Birra del Mese',
+      stile: 'Rotazione',
+      novita: true,
+      nota: 'Cambia di continuo: chiedi qual è quella di stasera.',
+      prezzi: ['—', '5,50', '4,50 / 7,00', '—', '—', '—'],
     },
   ],
 };
+
+// BIRRE IN BOTTIGLIA — la selezione completa (18 etichette). Tutte 33cl · €7,00
+// salvo dove indicato. Ordine come sul menu.
+export const birreBottiglia = [
+  { nome: 'Baladin Nazionale', stile: 'Chiara', grad: '6.5°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Baladin IPPA', stile: 'I.P.A.', grad: '5.5°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Vetra Pale Ale', stile: 'Pale Ale', grad: '5.4°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Baladin ISAAC', stile: 'Blanche', grad: '5°', formato: '50cl', prezzo: '7,00' },
+  { nome: 'Piraat Red Lambic', stile: 'Lambic', grad: '10.5°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Baladin LEON', stile: 'Dark Ale', grad: '9°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Sidro Mela', stile: 'Sidro', grad: '4.5°', formato: '50cl', prezzo: '6,50' },
+  { nome: 'Baladin NORA', stile: 'Chiara', grad: '6.8°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Baladin SUPER Bitter', stile: 'Ambrata', grad: '8°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Baladin Rock & Roll', stile: 'Ale', grad: '7.5°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Sidro Fragola & Lime', stile: 'Sidro', grad: '5.2°', formato: '50cl', prezzo: '6,50' },
+  { nome: 'Spitfire', stile: 'Strong Ale', grad: '9.0°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Baladin Wayan', stile: 'Saison', grad: '5.8°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Bitburger', stile: 'Pils', grad: '4.8°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Schneider Weisse Weiss', stile: 'I.P.A.', grad: '8.2°', formato: '33cl', prezzo: '7,00', novita: true },
+  { nome: 'Schneider Weisse Aventinus', stile: 'Dark Weiss', grad: '8.5°', formato: '33cl', prezzo: '7,00' },
+  { nome: 'Brewdog Punk', stile: 'I.P.A.', grad: '5.4°', formato: '33cl', prezzo: '7,00', novita: true },
+  { nome: 'Chouffe Red', stile: 'Alla ciliegia', grad: '8°', formato: '33cl', prezzo: '7,00', novita: true },
+];
+
+// Le 7 categorie reali del menu digitale, con gli slogan del locale.
+// `pronta: true` = voci già inserite nella pagina /menu.
+export const categorieMenu = [
+  { id: 'birre', nome: 'Birre', slogan: 'Gusta la nostra selezione dalla più amara a quella più alcolica', pronta: true },
+  { id: 'fritti', nome: 'Fritti & Sfizi', slogan: 'Gli antipasti non sono tutti uguali. Il nostro è MEGLIO!', pronta: false },
+  { id: 'hamburger', nome: 'Hamburger', slogan: 'Innamorati dei nostri panini con hamburger da 200gr', pronta: false },
+  { id: 'dessert', nome: 'Dessert', slogan: 'Ogni giorno un dessert diverso, perché alla dolcezza non c’è mai fine', pronta: false },
+  { id: 'da-bere', nome: 'Da Bere', slogan: 'Bibite, analcoliche e distillati per accompagnare.', pronta: false },
+  { id: 'caffetteria', nome: 'Caffetteria', slogan: 'Per chiudere in bellezza la serata', pronta: false },
+  { id: 'cocktail', nome: 'Cocktail', slogan: 'Miscelati e signature, dallo shaker al bicchiere.', pronta: false },
+];
 
 /**
  * LA TAVOLA — Atto IV. Piatti signature.

@@ -1,6 +1,7 @@
 ---
 // ATTO IV — La Tavola. Piatti signature, uno alla volta con micro-scena.
-import { cibo, info } from '../data/contenuti';
+import { cibo } from '../data/contenuti';
+const base = import.meta.env.BASE_URL;
 ---
 
 <section id="tavola" class="tavola" data-scene-act="tavola">
@@ -24,7 +25,7 @@ import { cibo, info } from '../data/contenuti';
       }
     </div>
 
-    <a class="menu-cta" href={info.menuCompletoUrl} target="_blank" rel="noopener">
+    <a class="menu-cta" href={`${base}menu`}>
       <span>Vedi il menu completo</span>
       <span aria-hidden="true">→</span>
     </a>

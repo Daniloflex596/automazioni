@@ -11,7 +11,9 @@ import { info, meta, orariSchema } from '../data/contenuti';
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
 const asset = (p: string) => `${base}${p.replace(/^\//, '')}`;
-const canonical = new URL(base, Astro.site).toString();
+// Titolo/descrizione sovrascrivibili per pagina (default: home).
+const { title = meta.titolo, description = meta.descrizione } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImageUrl = new URL(asset(meta.ogImage), Astro.site).toString();
 
 // Schema.org Restaurant — nutre la ricerca locale e i rich result.
@@ -55,8 +57,8 @@ const schema = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="canonical" href={canonical} />
-    <title>{meta.titolo}</title>
-    <meta name="description" content={meta.descrizione} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
     <meta name="keywords" content={meta.keywords} />
     <meta name="theme-color" content="#0e0a07" />
     <meta name="author" content={`${info.nome} Pub`} />
@@ -64,8 +66,8 @@ const schema = {
     <!-- Open Graph / social -->
     <meta property="og:type" content="restaurant" />
     <meta property="og:site_name" content={`${info.nome} Pub`} />
-    <meta property="og:title" content={meta.titolo} />
-    <meta property="og:description" content={meta.descrizione} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:locale" content="it_IT" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageUrl} />
