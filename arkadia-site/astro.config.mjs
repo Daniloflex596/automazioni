@@ -1,10 +1,12 @@
 import { defineConfig } from 'astro/config';
 
-// Arkadia Pub — configurazione statica ottimizzata per Cloudflare Pages.
-// Aggiorna `site` con il dominio definitivo prima del deploy (serve per OG/canonical).
+// Arkadia Pub — configurazione statica per GitHub Pages (project page).
+// URL di pubblicazione: https://daniloflex596.github.io/automazioni/
+// Con un dominio personalizzato in futuro: rimetti base: '/' e aggiorna `site`.
 // La sitemap è statica in public/sitemap.xml (il sito è una one-page).
 export default defineConfig({
-  site: 'https://arkadiapub.it',
+  site: 'https://daniloflex596.github.io',
+  base: '/automazioni',
   compressHTML: true,
   build: {
     inlineStylesheets: 'auto',

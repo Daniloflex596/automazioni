@@ -6,7 +6,13 @@ import '@fontsource/space-mono';
 import '../styles/global.css';
 import { info, meta, orariSchema } from '../data/contenuti';
 
-const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+// Base path (es. '/automazioni/') → i file in public/ vivono sotto questo prefisso.
+// Normalizzo per avere sempre esattamente uno slash finale.
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const asset = (p: string) => `${base}${p.replace(/^\//, '')}`;
+const canonical = new URL(base, Astro.site).toString();
+const ogImageUrl = new URL(asset(meta.ogImage), Astro.site).toString();
 
 // Schema.org Restaurant — nutre la ricerca locale e i rich result.
 const schema = {
@@ -18,7 +24,7 @@ const schema = {
   priceRange: info.fasciaPrezzo,
   url: canonical,
   telephone: info.telefonoHref,
-  image: new URL(meta.ogImage, Astro.site).toString(),
+  image: ogImageUrl,
   address: {
     '@type': 'PostalAddress',
     streetAddress: info.indirizzo,
@@ -62,11 +68,11 @@ const schema = {
     <meta property="og:description" content={meta.descrizione} />
     <meta property="og:locale" content="it_IT" />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL(meta.ogImage, Astro.site).toString()} />
+    <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="icon" href={asset('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={asset('/sitemap.xml')} />
 
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
   </head>
