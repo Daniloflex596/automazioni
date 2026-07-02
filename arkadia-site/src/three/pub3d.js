@@ -26,7 +26,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0e0a07);
-  scene.fog = new THREE.FogExp2(0x0e0a07, 0.045);
+  scene.fog = new THREE.FogExp2(0x0e0a07, 0.032);
 
   const env = makeEnv(renderer);
   scene.environment = env;
@@ -46,33 +46,33 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   // ---- Pavimento: legno a doghe (texture procedurale) ----
   const woodTex = makeWood();
   woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping;
-  woodTex.repeat.set(4, 10);
+  woodTex.repeat.set(4, 12);
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(16, 40),
+    new THREE.PlaneGeometry(16, 46),
     new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.55, metalness: 0.08 })
   );
   floor.rotation.x = -Math.PI / 2;
-  floor.position.z = -8;
+  floor.position.z = -11;
   root.add(floor);
 
   // ---- Soffitto ----
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(16, 40), mat(C.muro, { r: 1 }));
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(16, 46), mat(C.muro, { r: 1 }));
   ceil.rotation.x = Math.PI / 2;
-  ceil.position.set(0, 4.2, -8);
+  ceil.position.set(0, 4.2, -11);
   root.add(ceil);
 
   // ---- Pareti ----
   const wallMat = mat(C.muroWarm, { r: 1 });
-  const wallL = new THREE.Mesh(new THREE.PlaneGeometry(40, 4.2), wallMat);
+  const wallL = new THREE.Mesh(new THREE.PlaneGeometry(46, 4.2), wallMat);
   wallL.rotation.y = Math.PI / 2;
-  wallL.position.set(-5.2, 2.1, -8);
+  wallL.position.set(-5.2, 2.1, -11);
   root.add(wallL);
   const wallR = wallL.clone();
   wallR.rotation.y = -Math.PI / 2;
   wallR.position.x = 5.2;
   root.add(wallR);
   const wallBack = new THREE.Mesh(new THREE.PlaneGeometry(10.4, 4.2), wallMat);
-  wallBack.position.set(0, 2.1, -16);
+  wallBack.position.set(0, 2.1, -33.5);
   root.add(wallBack);
 
   // ---- Portale d'ingresso (dietro la camera all'inizio) ----
@@ -157,7 +157,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
   // ---- IL BRINDISI: due boccali al séparé che si toccano (setBrindisi) ----
   const brindisi = new THREE.Group();
-  brindisi.position.set(0, 1.42, -13.35);
+  brindisi.position.set(0, 1.42, -27.35);
   root.add(brindisi);
   function makeMug(side) {
     const g = new THREE.Group();
@@ -197,7 +197,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     for (let i = 0; i < DN; i++) {
       dpos[i * 3] = (pseudo(i * 3) - 0.5) * 9;
       dpos[i * 3 + 1] = 0.6 + pseudo(i * 5) * 3.2;
-      dpos[i * 3 + 2] = -14 + pseudo(i * 7) * 24;
+      dpos[i * 3 + 2] = -30 + pseudo(i * 7) * 40;
     }
     const dgeo = new THREE.BufferGeometry();
     dgeo.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
@@ -297,7 +297,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     new THREE.MeshBasicMaterial({ map: makeDartboard() })
   );
   dart.rotation.y = -Math.PI / 2;
-  dart.position.set(5.14, 2.1, -6.5);
+  dart.position.set(5.14, 2.1, -20.5);
   root.add(dart);
 
   // ---- SET-PIECE SALA GIOCHI: freccetta che vola nel bersaglio + dadi ----
@@ -319,32 +319,199 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   dartFl.rotation.z = Math.PI / 2;
   dartFl.position.x = -0.13;
   dartArrow.add(dartFl);
-  const dartFrom = new THREE.Vector3(3.4, 1.75, -5.6);
-  const dartTo = new THREE.Vector3(4.9, 2.1, -6.5);
+  const dartFrom = new THREE.Vector3(3.4, 1.75, -19.6);
+  const dartTo = new THREE.Vector3(4.9, 2.1, -20.5);
   dartArrow.position.copy(dartFrom);
   root.add(dartArrow);
 
   // Lampada da pub sopra il bersaglio: la Sala Giochi ha la sua luce di scena.
   const dartBulb = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffd68a }));
-  dartBulb.position.set(4.55, 3.0, -6.5);
+  dartBulb.position.set(4.55, 3.0, -20.5);
   root.add(dartBulb);
   const dartWire = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 1.2, 6), mat(0x100b07));
-  dartWire.position.set(4.55, 3.6, -6.5);
+  dartWire.position.set(4.55, 3.6, -20.5);
   root.add(dartWire);
   const dartLight = new THREE.PointLight(0xffb851, isHigh ? 10 : 7, 6, 2);
-  dartLight.position.set(4.5, 2.9, -6.6);
+  dartLight.position.set(4.5, 2.9, -20.6);
   scene.add(dartLight);
+
+  // ======================================================================
+  //  LE ZONE DEL MENU — ogni categoria ha il suo fondale di animazioni
+  // ======================================================================
+  const zoneAmt = { fritti: 0, dessert: 0, bar: 0, cucina: 0 };
+
+  // ---- ANGOLO FRITTI (sinistra, z -8.7): patatine impazzite ----
+  // Si dilatano, si spezzano in due e si riuniscono, mentre gli onion ring
+  // girano su se stessi. Un bancone-friggitoria le ancora al mondo.
+  const fritGrp = new THREE.Group();
+  fritGrp.position.set(-4.25, 1.85, -8.7);
+  root.add(fritGrp);
+  const fritBase = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.12, 1.1), mat(C.legnoTop, { r: 0.5 }));
+  fritBase.position.y = -0.95;
+  fritGrp.add(fritBase);
+  const FRY_N = isHigh ? 22 : 12;
+  const fries3 = [];
+  const fryMat3 = mat(0xe8b04b, { r: 0.5, e: 0x7a4a10, ei: 0.35 });
+  for (let i = 0; i < FRY_N; i++) {
+    // ogni "patatina" è una coppia di metà: si separano (si spezzano) e si riuniscono
+    const pair = new THREE.Group();
+    const a = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.17, 0.055), fryMat3);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.17, 0.055), fryMat3);
+    a.position.y = 0.09;
+    b.position.y = -0.09;
+    pair.add(a, b);
+    pair.position.set((pseudo(i * 3) - 0.5) * 1.7, (pseudo(i * 5) - 0.5) * 1.5, (pseudo(i * 7) - 0.5) * 0.8);
+    pair.userData = { ph: pseudo(i * 11) * Math.PI * 2, a, b, baseY: pair.position.y };
+    fritGrp.add(pair);
+    fries3.push(pair);
+  }
+  const rings3 = [];
+  for (let i = 0; i < 3; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.13, 0.045, 8, 18),
+      mat(0xd8912f, { r: 0.55, e: 0x6a3a10, ei: 0.3 })
+    );
+    ring.position.set(-0.7 + i * 0.7, 0.75 - i * 0.18, 0.25);
+    ring.userData.ph = pseudo(i * 13) * 6;
+    fritGrp.add(ring);
+    rings3.push(ring);
+  }
+
+  // ---- ANGOLO DOLCI (destra, z -12.7): torte orbitanti + cacao che cade ----
+  const dolceGrp = new THREE.Group();
+  dolceGrp.position.set(4.25, 1.7, -12.7);
+  root.add(dolceGrp);
+  const alzata = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.1, 0.5, 14), mat(C.schiuma, { r: 0.4 }));
+  alzata.position.y = -0.85;
+  dolceGrp.add(alzata);
+  const fette = [];
+  for (let i = 0; i < 3; i++) {
+    const fetta = new THREE.Group();
+    // fetta = prisma triangolare (cilindro a 3 segmenti) + glassa
+    const base3 = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.13, 3), mat(0xf0e0c0, { r: 0.7 }));
+    const glassa = new THREE.Mesh(new THREE.CylinderGeometry(0.265, 0.265, 0.045, 3), mat(C.rame, { r: 0.45, e: 0x4a1a10, ei: 0.3 }));
+    glassa.position.y = 0.085;
+    const ciliegia = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 10), mat(0xa01020, { r: 0.3, e: 0x500810, ei: 0.5 }));
+    ciliegia.position.y = 0.16;
+    fetta.add(base3, glassa, ciliegia);
+    fetta.userData.ph = (i / 3) * Math.PI * 2;
+    dolceGrp.add(fetta);
+    fette.push(fetta);
+  }
+  // cacao in caduta (points in loop)
+  const CAC_N = isHigh ? 36 : 18;
+  const cacPos = new Float32Array(CAC_N * 3);
+  for (let i = 0; i < CAC_N; i++) {
+    cacPos[i * 3] = (pseudo(i * 3) - 0.5) * 1.4;
+    cacPos[i * 3 + 1] = pseudo(i * 5) * 1.6;
+    cacPos[i * 3 + 2] = (pseudo(i * 7) - 0.5) * 0.8;
+  }
+  const cacGeo = new THREE.BufferGeometry();
+  cacGeo.setAttribute('position', new THREE.BufferAttribute(cacPos, 3));
+  const cacao = new THREE.Points(cacGeo, new THREE.PointsMaterial({
+    map: makeSoftDot(), color: 0x8a5a30, size: 0.035, transparent: true,
+    opacity: 0.8, depthWrite: false,
+  }));
+  dolceGrp.add(cacao);
+
+  // ---- IL BAR (sinistra, z -16.7): shaker che shakera + Martini + tazzina ----
+  const barGrp = new THREE.Group();
+  barGrp.position.set(-4.25, 1.6, -16.7);
+  root.add(barGrp);
+  const barBase = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.12, 1.0), mat(C.legnoTop, { r: 0.5 }));
+  barBase.position.y = -0.8;
+  barGrp.add(barBase);
+  // shaker (corpo + coperchio)
+  const shaker = new THREE.Group();
+  const shBody = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.34, 14), mat(C.ottone, { r: 0.18, m: 0.95 }));
+  const shTop = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.11, 0.14, 14), mat(C.ottone, { r: 0.18, m: 0.95 }));
+  shTop.position.y = 0.24;
+  shaker.add(shBody, shTop);
+  shaker.position.set(-0.45, -0.5, 0.1);
+  barGrp.add(shaker);
+  // Martini con liquido ambrato
+  const martini = new THREE.Group();
+  const mCono = new THREE.Mesh(
+    new THREE.ConeGeometry(0.16, 0.15, 16, 1, true),
+    new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.25, side: THREE.DoubleSide, depthWrite: false })
+  );
+  mCono.rotation.x = Math.PI;
+  mCono.position.y = -0.28;
+  const mLiq = new THREE.Mesh(new THREE.ConeGeometry(0.135, 0.11, 16), mat(C.oro, { r: 0.3, e: 0x6a4a10, ei: 0.5 }));
+  mLiq.rotation.x = Math.PI;
+  mLiq.position.y = -0.3;
+  const mStelo = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.26, 8), mat(0xd9cdb4, { r: 0.2 }));
+  mStelo.position.y = -0.48;
+  martini.add(mCono, mLiq, mStelo);
+  martini.position.set(0.1, 0, 0.15);
+  barGrp.add(martini);
+  // tazzina di caffè con vapore
+  const tazzina = new THREE.Group();
+  const tzCorpo = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 0.09, 12), mat(C.schiuma, { r: 0.4 }));
+  const tzManico = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.011, 6, 10, Math.PI * 1.4), mat(C.schiuma, { r: 0.4 }));
+  tzManico.position.x = 0.085;
+  tazzina.add(tzCorpo, tzManico);
+  tazzina.position.set(0.62, -0.68, 0.05);
+  barGrp.add(tazzina);
+  const steamBar = [];
+  for (let i = 0; i < 2; i++) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: makeSoftDot(), color: 0xf4e9d0, transparent: true, opacity: 0,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    sp.scale.setScalar(0.1);
+    sp.position.copy(tazzina.position);
+    sp.userData.seed = pseudo(i * 31);
+    barGrp.add(sp);
+    steamBar.push(sp);
+  }
+
+  // ---- CUCINA (attorno al tavolo): due burger fluttuanti che si smontano
+  //      e rimontano in loop, satelliti del burger principale ----
+  const flyBurgers = [];
+  function makeFlyBurger(px, py, pz, scale) {
+    const g = new THREE.Group();
+    const seg2 = isHigh ? 14 : 10;
+    const layers = [
+      { m: new THREE.Mesh(new THREE.SphereGeometry(0.17, seg2, seg2, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat(0x9a6a30, { r: 0.75 })), off: 0 },
+      { m: new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.05, seg2), mat(0x4a2a16, { r: 0.85 })), off: 0.09 },
+      { m: new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.014, 0.25), mat(0xe8a33c, { r: 0.5, e: 0x6a4310, ei: 0.25 })), off: 0.16 },
+      { m: new THREE.Mesh(new THREE.SphereGeometry(0.17, seg2, seg2, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xa57136, { r: 0.7 })), off: 0.24 },
+    ];
+    layers.forEach((L) => g.add(L.m));
+    g.position.set(px, py, pz);
+    g.scale.setScalar(scale);
+    g.userData = { layers, ph: pseudo(px * 7 + pz) * Math.PI * 2 };
+    root.add(g);
+    flyBurgers.push(g);
+    return g;
+  }
+  makeFlyBurger(1.7, 2.1, -3.9, 0.85);
+  makeFlyBurger(3.4, 2.35, -2.4, 0.7);
+
+  // Luci di zona: ogni angolo del menu ha la sua lampada calda.
+  [[-4.0, 2.9, -8.7], [4.0, 2.9, -12.7], [-4.0, 2.9, -16.7]].forEach((pos) => {
+    const zl = new THREE.PointLight(0xffb851, isHigh ? 9 : 6, 5.5, 2);
+    zl.position.set(pos[0], pos[1], pos[2]);
+    scene.add(zl);
+    const zb = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), new THREE.MeshBasicMaterial({ color: 0xffd68a }));
+    zb.position.set(pos[0], pos[1] + 0.1, pos[2]);
+    root.add(zb);
+    const zw = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 1.1, 6), mat(0x100b07));
+    zw.position.set(pos[0], 3.6, pos[2]);
+    root.add(zw);
+  });
 
   // Barile con due dadi
   const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.32, 0.85, 14), mat(C.legno, { r: 0.75 }));
-  barrel.position.set(4.4, 0.42, -7.6);
+  barrel.position.set(4.4, 0.42, -21.6);
   root.add(barrel);
   const diceMat = mat(C.schiuma, { r: 0.5 });
   const die1 = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 0.09), diceMat);
-  die1.position.set(4.34, 0.9, -7.55);
+  die1.position.set(4.34, 0.9, -21.55);
   root.add(die1);
   const die2 = die1.clone();
-  die2.position.set(4.48, 0.9, -7.68);
+  die2.position.set(4.48, 0.9, -21.68);
   root.add(die2);
   let giochiAmt = 0;
 
@@ -396,7 +563,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending,
     })
   );
-  burst.position.set(0, 1.62, -13.35);
+  burst.position.set(0, 1.62, -27.35);
   root.add(burst);
   let burstT = -1; // -1 = inattivo; 0..1 = animazione in corso
   let burstArmed = true;
@@ -418,7 +585,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
   // Séparé in fondo (booth)
   const booth = new THREE.Mesh(new THREE.BoxGeometry(3, 1.3, 0.5), mat(C.rame, { r: 0.85 }));
-  booth.position.set(0, 0.65, -13.5);
+  booth.position.set(0, 0.65, -27.5);
   root.add(booth);
 
   // ---- Luci ----
@@ -461,13 +628,16 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   // ---- Percorso camera (stazioni) ----
   // Ogni waypoint: posizione camera + punto guardato.
   const stations = [
-    { p: [0.0, 1.7, 11.0], l: [0, 1.7, 2] },      // 0 soglia (fuori dalla porta)
-    { p: [0.6, 1.65, 5.5], l: [-1.5, 1.6, 1] },   // 1 storia (entrando, verso sinistra)
+    { p: [0.0, 1.7, 11.0], l: [0, 1.7, 2] },        // 0 soglia (fuori dalla porta)
+    { p: [0.6, 1.65, 5.5], l: [-1.5, 1.6, 1] },     // 1 storia (entrando, verso sinistra)
     { p: [-1.4, 1.55, 1.2], l: [-3.2, 1.3, -0.4] }, // 2 bancone / birre
-    { p: [1.55, 1.45, -1.85], l: [2.6, 1.18, -3] }, // 3 tavolo / cibo (vicino: burger protagonista)
-    { p: [0.4, 1.9, -5.5], l: [-2, 1.4, -6] },    // 4 sala (wide)
-    { p: [2.0, 1.75, -4.6], l: [5.2, 2.0, -6.9] }, // 5 sala giochi (bersaglio + barile)
-    { p: [0.0, 1.5, -10.5], l: [0, 1.0, -13.5] }, // 6 séparé / brindisi
+    { p: [1.55, 1.45, -1.85], l: [2.6, 1.18, -3] }, // 3 cucina (tavolo: burger protagonista)
+    { p: [-1.2, 1.7, -6.4], l: [-4.3, 1.85, -8.7] }, // 4 angolo fritti (sinistra)
+    { p: [1.3, 1.65, -10.5], l: [4.4, 1.75, -12.7] }, // 5 angolo dolci (destra)
+    { p: [-1.3, 1.7, -14.4], l: [-4.4, 1.65, -16.7] }, // 6 il bar / cocktail (sinistra)
+    { p: [2.0, 1.75, -18.6], l: [5.2, 2.0, -20.9] }, // 7 sala giochi (bersaglio + barile)
+    { p: [0.0, 2.1, -23.0], l: [0, 1.5, -3.0] },    // 8 il luogo: sguardo all'indietro su tutto il pub
+    { p: [0.0, 1.5, -24.3], l: [0, 1.05, -27.4] },  // 9 séparé / brindisi
   ];
   const posCurve = new THREE.CatmullRomCurve3(stations.map((s) => new THREE.Vector3(...s.p)), false, 'catmullrom', 0.4);
   const lookCurve = new THREE.CatmullRomCurve3(stations.map((s) => new THREE.Vector3(...s.l)), false, 'catmullrom', 0.4);
@@ -614,7 +784,76 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     // Gli anni della Storia fluttuano piano, come appesi nell'aria.
     anniPanels.forEach((p, i) => {
       p.position.y = 2.35 + Math.sin(time * 0.7 + p.userData.seed * 6) * 0.05;
-      p.rotation.y = 0.5 + Math.sin(time * 0.4 + i) * 0.05;
+      p.rotation.y = Math.PI / 2;
+    });
+
+    // ---- Fondali del menu: si accendono quando la loro sezione è centrata ----
+    // FRITTI: si dilatano (scale), si spezzano (le metà si separano) e ruotano.
+    const fA = zoneAmt.fritti;
+    fries3.forEach((pair) => {
+      const u = pair.userData;
+      const w = Math.sin(time * 2.1 + u.ph);
+      const stretch = 1 + Math.max(0, w) * 0.7 * fA;        // dilatazione
+      const split = Math.max(0, -w) * 0.16 * fA;            // spezzata
+      u.a.scale.y = stretch;
+      u.b.scale.y = stretch;
+      u.a.position.y = 0.09 * stretch + split;
+      u.b.position.y = -0.09 * stretch - split;
+      pair.rotation.z = Math.sin(time * 0.9 + u.ph) * 0.5 * fA;
+      pair.rotation.x = Math.cos(time * 0.7 + u.ph) * 0.3 * fA;
+      pair.position.y = u.baseY + Math.sin(time * 1.1 + u.ph) * 0.12 * fA;
+    });
+    rings3.forEach((r) => {
+      r.rotation.x = time * (0.6 + r.userData.ph * 0.1) * Math.max(0.15, fA);
+      r.rotation.y = time * 0.4 * Math.max(0.15, fA);
+    });
+
+    // DOLCI: le fette orbitano attorno all'alzata, il cacao cade in loop.
+    const dA = zoneAmt.dessert;
+    fette.forEach((f) => {
+      const u = f.userData;
+      const ang = time * (0.35 + 0.5 * dA) + u.ph;
+      const rOrb = 0.28 + 0.3 * dA;
+      f.position.set(Math.cos(ang) * rOrb, Math.sin(time * 0.8 + u.ph) * 0.22 * dA - 0.35, Math.sin(ang) * rOrb);
+      f.rotation.y = ang * 1.6;
+      f.rotation.z = Math.sin(time + u.ph) * 0.25 * dA;
+    });
+    {
+      const pos = cacao.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        let y = pos.getY(i) - dt * (0.25 + dA * 0.55);
+        if (y < -0.9) y = 0.9;
+        pos.setY(i, y);
+      }
+      pos.needsUpdate = true;
+      cacao.material.opacity = 0.25 + dA * 0.6;
+    }
+
+    // BAR: lo shaker shakera davvero, il Martini ondeggia, la tazzina fuma.
+    const bA = zoneAmt.bar;
+    shaker.rotation.z = Math.sin(time * 16) * 0.22 * bA;
+    shaker.position.y = -0.5 + Math.abs(Math.sin(time * 16)) * 0.1 * bA;
+    martini.rotation.z = Math.sin(time * 1.4) * 0.1 * bA;
+    martini.position.y = Math.sin(time * 1.1) * 0.1 * bA;
+    steamBar.forEach((sp, i) => {
+      const k = (time * 0.4 + sp.userData.seed + i * 0.5) % 1;
+      sp.position.y = tazzina.position.y + 0.12 + k * 0.42;
+      sp.position.x = tazzina.position.x + Math.sin((time + i) * 1.6) * 0.03;
+      sp.scale.setScalar(0.07 + k * 0.16);
+      sp.material.opacity = Math.sin(k * Math.PI) * 0.3 * Math.max(0.3, bA);
+    });
+
+    // CUCINA: i burger satelliti si smontano e rimontano in loop continuo.
+    const cA = Math.max(0.12, zoneAmt.cucina);
+    flyBurgers.forEach((g) => {
+      const u = g.userData;
+      const cyc = (Math.sin(time * 0.9 + u.ph) + 1) / 2; // 0 chiuso → 1 esploso
+      u.layers.forEach((L, li) => {
+        L.m.position.y = L.off * (0.3 + cyc * 1.6) * cA;
+        L.m.rotation.y = time * (0.3 + li * 0.15);
+      });
+      g.rotation.y = time * 0.25 + u.ph;
+      g.position.y += Math.sin(time * 1.2 + u.ph) * 0.0012;
     });
 
     renderer.render(scene, camera);
@@ -634,6 +873,9 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     setSpina: (p) => { spinaAmt = Math.max(0, Math.min(1, p)); },
     setBrindisi: (p) => { brindisiAmt = Math.max(0, Math.min(1, p)); },
     setGiochi: (p) => { giochiAmt = Math.max(0, Math.min(1, p)); },
+    setZone: (name, p) => {
+      if (name in zoneAmt) zoneAmt[name] = Math.max(0, Math.min(1, p));
+    },
     getT: () => ({ targetT, renderT, intro: introActive }),
     introRunning: () => introActive,
     dispose() {

@@ -1,0 +1,88 @@
+---
+// ZONA BAR — cocktail, distillati, vini e caffetteria. Fondale: shaker che
+// shakera, Martini che ondeggia, tazzina che fuma.
+import { cocktail, prezzoCocktail, daBere, caffetteria, categorieMenu } from '../data/contenuti';
+---
+
+<section id="bar" class="bar" data-scene-act="bar">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>Il Bar</p>
+    <h2 class="z-titolo" data-split>Cocktail & Caffetteria</h2>
+    <p class="z-slogan" data-reveal>{categorieMenu[6].slogan} — tutti i cocktail a € {prezzoCocktail}.</p>
+
+    <ul class="mlista mlista--cols" data-stagger>
+      {
+        cocktail.map((v) => (
+          <li class="mriga">
+            <div>
+              <h3 class="mnome">{v.nome}</h3>
+              <p class="mdesc">{v.desc}</p>
+            </div>
+            <span class="mprezzo mono">€ {prezzoCocktail}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h3 class="msub" data-reveal>Distillati <span>bicchiere · shot</span></h3>
+    <ul class="mlista">
+      {
+        daBere.distillati.map((v) => (
+          <li class="mriga">
+            <h3 class="mnome">{v.nome}</h3>
+            <span class="mprezzo mono">€ {v.prezzo} <em>/ {v.shot}</em></span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h3 class="msub" data-reveal>Vini <span>calice · bottiglia</span></h3>
+    <ul class="mlista">
+      {
+        daBere.vini.map((v) => (
+          <li class="mriga">
+            <h3 class="mnome">{v.nome}</h3>
+            <span class="mprezzo mono">€ {v.calice} <em>/ {v.bottiglia}</em></span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h3 class="msub" data-reveal>Caffetteria <span>per chiudere in bellezza</span></h3>
+    <ul class="mlista">
+      {
+        caffetteria.map((v) => (
+          <li class="mriga">
+            <div>
+              <h3 class="mnome">{v.nome}</h3>
+              {v.desc && <p class="mdesc">{v.desc}</p>}
+            </div>
+            <span class="mprezzo mono">€ {v.prezzo}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .z-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  .z-slogan {
+    margin-top: 1rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+  }
+  .mlista--cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 clamp(1.5rem, 4vw, 3rem);
+  }
+  @media (max-width: 720px) {
+    .mlista--cols {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

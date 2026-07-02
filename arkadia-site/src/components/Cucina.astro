@@ -1,0 +1,43 @@
+---
+// ZONA CUCINA — gli hamburger reali (tutti con patatine). Dietro: il burger
+// del tavolo che si scompone + burger satelliti che si smontano in loop.
+import { hamburger, categorieMenu } from '../data/contenuti';
+---
+
+<section id="cucina" class="cucina" data-scene-act="cucina">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>La Cucina</p>
+    <h2 class="z-titolo" data-split>Hamburger</h2>
+    <p class="z-slogan" data-reveal>{categorieMenu[2].slogan} — tutti serviti con patatine.</p>
+
+    <ul class="mlista" data-stagger>
+      {
+        hamburger.map((v) => (
+          <li class="mriga">
+            <div>
+              <h3 class="mnome">
+                {v.nome}
+                {v.badge && <span class="mtag">{v.badge}</span>}
+                {v.tag?.includes('piccante') && <span class="mtag">piccante</span>}
+              </h3>
+              {v.desc && <p class="mdesc">{v.desc}</p>}
+            </div>
+            <span class="mprezzo mono">€ {v.prezzo}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .z-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  .z-slogan {
+    margin-top: 1rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+  }
+</style>

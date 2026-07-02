@@ -356,3 +356,87 @@ body[data-ready='true'] #pinta-progress {
   left: 1rem;
   top: 1rem;
 }
+
+/* --- Liste menu nel mondo 3D (zone della home) --- */
+.mlista {
+  list-style: none;
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+  display: grid;
+  gap: 0;
+}
+.mriga {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.25rem;
+  padding: 1.1rem 0.75rem;
+  margin-inline: -0.75rem;
+  border-top: 1px solid var(--linea);
+  border-radius: var(--radius);
+  transition: background 0.35s, box-shadow 0.35s;
+}
+.mriga:last-child {
+  border-bottom: 1px solid var(--linea);
+}
+.mriga:hover {
+  background: linear-gradient(90deg, rgba(232, 176, 75, 0.07), transparent 70%);
+  box-shadow: inset 2px 0 0 var(--oro);
+}
+.mriga:hover .mnome {
+  color: var(--oro);
+}
+.mnome {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.3s;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.mdesc {
+  margin-top: 0.25rem;
+  color: var(--schiuma-soft);
+  font-size: 0.92rem;
+  max-width: 46ch;
+}
+.mprezzo {
+  color: var(--oro);
+  font-size: 0.98rem;
+  white-space: nowrap;
+}
+.mprezzo em {
+  font-style: normal;
+  color: var(--schiuma-soft);
+  font-size: 0.85rem;
+}
+.msub {
+  margin-top: 2.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--oro);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.msub span {
+  color: var(--schiuma-soft);
+  letter-spacing: var(--tracking-mono);
+}
+.mtag {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--notte);
+  background: var(--oro);
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+}
+.mtag--verde {
+  background: var(--luppolo);
+  color: var(--schiuma);
+}

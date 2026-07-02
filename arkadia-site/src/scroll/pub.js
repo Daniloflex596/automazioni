@@ -108,10 +108,13 @@ async function boot() {
   // Prossimità di una sezione al centro del viewport (0 lontana → 1 centrata):
   // pilota le micro-scene 3D (burger, mescita, brindisi) dalla narrazione DOM.
   const sects = {
-    tavola: document.getElementById('tavola'),
+    cucina: document.getElementById('cucina'),
     spina: document.getElementById('spina'),
     brindisi: document.getElementById('brindisi'),
     giochi: document.getElementById('giochi'),
+    fritti: document.getElementById('fritti'),
+    dessert: document.getElementById('dessert'),
+    bar: document.getElementById('bar'),
   };
   function proximity(el) {
     if (!el) return 0;
@@ -134,11 +137,12 @@ async function boot() {
   // stazione sul percorso (0..5). Il progresso è interpolato tra i CENTRI
   // delle sezioni, così la camera è sempre nel punto giusto della scena
   // quando quella sezione è al centro dello schermo.
-  // 7 stazioni sul percorso (0..6): ogni sezione DOM ha la sua inquadratura.
-  const LAST_ST = 6;
+  // 10 stazioni sul percorso (0..9): ogni sezione DOM ha la sua inquadratura.
+  const LAST_ST = 9;
   const ROUTE = [
-    ['soglia', 0], ['rifugio', 1], ['spina', 2], ['tavola', 3],
-    ['luogo', 4], ['giochi', 5], ['brindisi', 6],
+    ['soglia', 0], ['rifugio', 1], ['spina', 2], ['cucina', 3],
+    ['fritti', 4], ['dessert', 5], ['bar', 6], ['giochi', 7],
+    ['luogo', 8], ['brindisi', 9],
   ].map(([id, st]) => ({ el: document.getElementById(id), st }));
 
   function narrativeT() {
@@ -168,10 +172,14 @@ async function boot() {
       if (location.search.includes('debug')) {
         window.__arkadia = { narrT: narrativeT(), ...pub.getT?.() };
       }
-      pub.setBurger?.(proximity(sects.tavola));
+      pub.setBurger?.(proximity(sects.cucina));
       pub.setSpina?.(proximity(sects.spina));
       pub.setBrindisi?.(proximity(sects.brindisi));
       pub.setGiochi?.(proximity(sects.giochi));
+      pub.setZone?.('cucina', proximity(sects.cucina));
+      pub.setZone?.('fritti', proximity(sects.fritti));
+      pub.setZone?.('dessert', proximity(sects.dessert));
+      pub.setZone?.('bar', proximity(sects.bar));
     }
     // La pinta di progresso si riempie con lo scroll.
     const pct = Math.round(t * 100);

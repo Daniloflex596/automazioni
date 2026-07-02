@@ -1,0 +1,38 @@
+---
+// ZONA DOLCI — fondale: fette di torta orbitanti + cacao che cade.
+import { dessert, categorieMenu } from '../data/contenuti';
+---
+
+<section id="dessert" class="dessert" data-scene-act="dessert">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>L'Angolo Dolce</p>
+    <h2 class="z-titolo" data-split>Dessert</h2>
+    <p class="z-slogan" data-reveal>{categorieMenu[3].slogan}</p>
+
+    <ul class="mlista" data-stagger>
+      {
+        dessert.map((v) => (
+          <li class="mriga">
+            <div>
+              <h3 class="mnome">{v.nome}</h3>
+              {v.desc && <p class="mdesc">{v.desc}</p>}
+            </div>
+            {v.prezzo && <span class="mprezzo mono">€ {v.prezzo}</span>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .z-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  .z-slogan {
+    margin-top: 1rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+  }
+</style>

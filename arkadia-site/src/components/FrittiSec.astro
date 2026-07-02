@@ -1,0 +1,42 @@
+---
+// ZONA FRITTI — fondale: patatine che si dilatano, si spezzano e si riuniscono.
+import { fritti, categorieMenu } from '../data/contenuti';
+---
+
+<section id="fritti" class="fritti" data-scene-act="fritti">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>L'Angolo Fritti</p>
+    <h2 class="z-titolo" data-split>Fritti & Sfizi</h2>
+    <p class="z-slogan" data-reveal>{categorieMenu[1].slogan}</p>
+
+    <ul class="mlista" data-stagger>
+      {
+        fritti.map((v) => (
+          <li class="mriga">
+            <div>
+              <h3 class="mnome">
+                {v.nome}
+                {v.tag?.includes('veg') && <span class="mtag mtag--verde">veg</span>}
+                {v.tag?.includes('chef') && <span class="mtag">consigliato</span>}
+              </h3>
+              {v.desc && <p class="mdesc">{v.desc}</p>}
+            </div>
+            <span class="mprezzo mono">€ {v.prezzo}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .z-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  .z-slogan {
+    margin-top: 1rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+  }
+</style>
