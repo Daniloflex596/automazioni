@@ -13,7 +13,7 @@ const base = import.meta.env.BASE_URL.endsWith('/')
     <p class="occhiello" data-reveal>{birre.occhiello}</p>
     <h2 class="spina-titolo" data-split>Le tre del momento</h2>
     <p class="spina-intro" data-reveal>
-      Quelle che stiamo spillando e stappando di più — passa col dito (o tocca) e le vedi sul bancone.
+      Quelle che stiamo spillando e stappando di più: le trovi sotto le spine — scrollando si riempiono davanti a te.
     </p>
 
     <ul class="taplist" data-stagger>
@@ -22,8 +22,8 @@ const base = import.meta.env.BASE_URL.endsWith('/')
           { nome: 'Birra del Mese', stile: 'La novità in spina', prezzo: '4,50 – 7,00', novita: true, nota: 'Cambia di continuo: chiedi qual è quella di stasera.' },
           { nome: 'La Rossa', stile: 'Ambrata alla spina', prezzo: '5,30 – 8,00', nota: 'Maltata e tostata, il carattere del bancone.' },
           { nome: 'Chouffe Red', stile: 'Alla ciliegia · 8° · 33cl', prezzo: '7,00', novita: true, nota: 'La più particolare in bottiglia: rossa, belga, alla ciliegia.' },
-        ].map((b, i) => (
-          <li class="tap tap--pov" data-birra={i} tabindex="0">
+        ].map((b) => (
+          <li class="tap">
             <div class="tap-head">
               <h3 class="tap-nome">
                 {b.nome}

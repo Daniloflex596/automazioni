@@ -162,23 +162,9 @@ async function boot() {
     return 1;
   }
 
-  // POV birre: hover/click sulle righe → la camera va sull'oggetto esatto.
-  const povRows = [...document.querySelectorAll('#spina [data-birra]')];
-  povRows.forEach((row) => {
-    const i = +row.dataset.birra;
-    row.addEventListener('mouseenter', () => pub?.setBirraFocus?.(i));
-    row.addEventListener('mouseleave', () => pub?.setBirraFocus?.(-1));
-    row.addEventListener('click', () => pub?.setBirraFocus?.(i));
-    row.addEventListener('focus', () => pub?.setBirraFocus?.(i));
-    row.addEventListener('blur', () => pub?.setBirraFocus?.(-1));
-  });
 
-  // Il POV non deve MAI bloccare lo scroll: appena scrolli, si sgancia.
-  let lastScrollY = window.scrollY;
   function raf(time) {
     lenis.raf(time);
-    if (Math.abs(window.scrollY - lastScrollY) > 3) pub?.setBirraFocus?.(-1);
-    lastScrollY = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const t = max > 0 ? window.scrollY / max : 0;
     if (pub) {

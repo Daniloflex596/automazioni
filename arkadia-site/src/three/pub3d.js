@@ -127,95 +127,44 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     taps.add(handle);
   }
 
-  // LE TRE DEL MOMENTO sul bancone: pinta del mese, calice di rossa,
-  // bottiglia Chouffe Red. Il POV le raggiunge una a una (setBirraFocus).
-  function birraMomento(z, build) {
+
+  // ---- LE TRE DEL MOMENTO sotto le spine: si riempiono IN SINCRONIA con
+  //      lo scroll (la grafica della vecchia pinta, moltiplicata per tre).
+  //      Oro (Birra del Mese) · rosso ambrato (La Rossa) · rubino (Chouffe Red).
+  const TRIO_COL = [0xe8b04b, 0x8a2012, 0xa81424];
+  const trio = [];
+  [0.07, 0.49, 0.91].forEach((z, i) => {
     const g = new THREE.Group();
-    g.position.set(-0.3, 1.22, z);
-    build(g);
+    g.position.set(0.08, 1.22, z); // esattamente sotto lo spout del rubinetto
+    const glassM = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.085, 0.07, 0.3, 16, 1, true),
+      new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false })
+    );
+    glassM.position.y = 0.15;
+    const liq = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.078, 0.064, 1, 14),
+      mat(TRIO_COL[i], { r: 0.32, e: TRIO_COL[i], ei: 0.25 })
+    );
+    liq.scale.y = 0.001;
+    const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.026, 14), mat(0xf4e9d0, { r: 0.95 }));
+    foam.visible = false;
+    const jet = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.011, 0.015, 1, 8, 1, true),
+      new THREE.MeshBasicMaterial({ color: TRIO_COL[i], transparent: true, opacity: 0 })
+    );
+    g.add(glassM, liq, foam, jet);
     bar.add(g);
-    return g;
-  }
-  // 0 · Birra del Mese: pinta dorata con schiuma
-  birraMomento(-1.1, (g) => {
-    const gl = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.075, 0.3, 16, 1, true),
-      new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
-    gl.position.y = 0.15;
-    const liq = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.068, 0.24, 14), mat(0xe8b04b, { r: 0.3, e: 0x6a4a10, ei: 0.5 }));
-    liq.position.y = 0.13;
-    const fo = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.085, 0.03, 14), mat(0xf4e9d0, { r: 0.95 }));
-    fo.position.y = 0.27;
-    g.add(gl, liq, fo);
+    trio.push({ liq, foam, jet });
   });
-  // 1 · La Rossa: calice a stelo con liquido rosso-ambrato
-  birraMomento(-1.7, (g) => {
-    const st = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.14, 8), mat(0xd9cdb4, { r: 0.2 }));
-    st.position.y = 0.07;
-    const cup = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12, 0, Math.PI * 2, 0, Math.PI / 1.8),
-      new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.24, side: THREE.DoubleSide, depthWrite: false }));
-    cup.position.y = 0.2;
-    const liq = new THREE.Mesh(new THREE.SphereGeometry(0.095, 14, 10, 0, Math.PI * 2, 0, Math.PI / 1.9), mat(0x8a2a12, { r: 0.3, e: 0x4a1006, ei: 0.55 }));
-    liq.position.y = 0.19;
-    const fo = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.026, 14), mat(0xf4e9d0, { r: 0.95 }));
-    fo.position.y = 0.3;
-    g.add(st, cup, liq, fo);
-  });
-  // 2 · Chouffe Red: bottiglia rossa alla ciliegia + ciliegina
-  birraMomento(-2.3, (g) => {
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.075, 0.3, 14), mat(0x6a1015, { r: 0.25, e: 0x300508, ei: 0.5 }));
-    body.position.y = 0.15;
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.05, 0.16, 10), mat(0x6a1015, { r: 0.25, e: 0x300508, ei: 0.5 }));
-    neck.position.y = 0.38;
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.03, 10), mat(0xb02030, { r: 0.4, e: 0x500810, ei: 0.4 }));
-    cap.position.y = 0.47;
-    const cher = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 10), mat(0xc01828, { r: 0.3, e: 0x600810, ei: 0.6 }));
-    cher.position.set(0.12, 0.035, 0.05);
-    g.add(body, neck, cap, cher);
-  });
-
-  // POV birre: posizioni camera ravvicinate davanti a ciascun oggetto (mondo).
-  const BIRRA_POV = [
-    { p: [-2.0, 1.62, -1.6], l: [-3.4, 1.45, -1.6] },
-    { p: [-2.0, 1.62, -2.2], l: [-3.4, 1.45, -2.2] },
-    { p: [-2.0, 1.66, -2.8], l: [-3.4, 1.5, -2.8] },
-  ];
-  let birraFocus = -1;
-  let focusAmt = 0;
-  const focusP = new THREE.Vector3();
-  const focusL = new THREE.Vector3();
-
-  // ---- LA MESCITA: pinta sotto la spina centrale che si riempie (setSpina) ----
-  // Il momento-firma della sezione Birre: getto ambrato + livello che sale + schiuma.
-  const pinta = new THREE.Group();
-  pinta.position.set(0.08, 1.22, 0.49); // sotto lo spout del rubinetto centrale
-  bar.add(pinta);
-  const pintaGlass = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.085, 0.075, 0.26, 18, 1, true),
-    new THREE.MeshPhysicalMaterial({
-      color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.22,
-      clearcoat: 0.4, side: THREE.DoubleSide, depthWrite: false,
-    })
-  );
-  pintaGlass.position.y = 0.13;
-  pinta.add(pintaGlass);
-  const pintaLiquid = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.075, 0.066, 1, 16),
-    new THREE.MeshStandardMaterial({ color: 0xc77b29, emissive: 0x5a2e0e, emissiveIntensity: 0.5, roughness: 0.35 })
-  );
-  pintaLiquid.scale.y = 0.001;
-  pinta.add(pintaLiquid);
-  const pintaFoam = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.078, 0.078, 0.024, 16),
-    new THREE.MeshStandardMaterial({ color: 0xf4e9d0, roughness: 0.95 })
-  );
-  pintaFoam.visible = false;
-  pinta.add(pintaFoam);
-  // getto dal rubinetto centrale (spout a y≈0.22+0.5-1.22-... calcolato in locale pinta)
-  const pour = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.011, 0.016, 1, 8, 1, true),
-    new THREE.MeshBasicMaterial({ color: 0xe8b04b, transparent: true, opacity: 0 })
-  );
-  pinta.add(pour);
+  // Bottiglietta Chouffe accanto al suo bicchiere (firma della terza)
+  const chBot = new THREE.Group();
+  chBot.position.set(0.08, 1.22, 1.18);
+  const chBody = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.2, 12), mat(0x4a1016, { r: 0.4, e: 0x200409, ei: 0.4 }));
+  chBody.position.y = 0.1;
+  const chNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.032, 0.11, 10), mat(0x4a1016, { r: 0.4, e: 0x200409, ei: 0.4 }));
+  chNeck.position.y = 0.25;
+  chBot.add(chBody, chNeck);
+  bar.add(chBot);
   let spinaAmt = 0; // 0..1 dal DOM (sezione Birre centrata)
 
   // ---- IL BRINDISI: due boccali al séparé che si toccano (setBrindisi) ----
@@ -529,28 +478,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     steamBar.push(sp);
   }
 
-  // ---- CUCINA (attorno al tavolo): due burger fluttuanti che si smontano
-  //      e rimontano in loop, satelliti del burger principale ----
-  const flyBurgers = [];
-  function makeFlyBurger(px, py, pz, scale) {
-    const g = new THREE.Group();
-    const seg2 = isHigh ? 14 : 10;
-    const layers = [
-      { m: new THREE.Mesh(new THREE.SphereGeometry(0.17, seg2, seg2, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat(0x9a6a30, { r: 0.75 })), off: 0 },
-      { m: new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.05, seg2), mat(0x4a2a16, { r: 0.85 })), off: 0.09 },
-      { m: new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.014, 0.25), mat(0xe8a33c, { r: 0.5, e: 0x6a4310, ei: 0.25 })), off: 0.16 },
-      { m: new THREE.Mesh(new THREE.SphereGeometry(0.17, seg2, seg2, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xa57136, { r: 0.7 })), off: 0.24 },
-    ];
-    layers.forEach((L) => g.add(L.m));
-    g.position.set(px, py, pz);
-    g.scale.setScalar(scale);
-    g.userData = { layers, ph: pseudo(px * 7 + pz) * Math.PI * 2 };
-    root.add(g);
-    flyBurgers.push(g);
-    return g;
-  }
-  makeFlyBurger(1.7, 2.1, -3.9, 0.85);
-  makeFlyBurger(3.4, 2.35, -2.4, 0.7);
 
   // Luci di zona: ogni angolo del menu ha la sua lampada calda.
   [[-4.0, 2.9, -8.7], [4.0, 2.9, -12.7], [-4.0, 2.9, -16.7]].forEach((pos) => {
@@ -692,9 +619,9 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   // ---- Percorso camera (stazioni) ----
   // Ogni waypoint: posizione camera + punto guardato.
   const stations = [
-    { p: [0.0, 1.7, 11.0], l: [0, 1.7, 2] },        // 0 soglia (fuori dalla porta)
+    { p: [0.0, 2.35, 8.6], l: [0, 1.1, -10] },      // 0 soglia: TUTTO il locale in vista
     { p: [0.6, 1.65, 5.5], l: [-1.5, 1.6, 1] },     // 1 storia (entrando, verso sinistra)
-    { p: [-1.3, 1.55, 0.6], l: [-3.3, 1.38, -2.0] }, // 2 bancone / le tre del momento
+    { p: [-1.8, 1.55, 1.7], l: [-3.35, 1.33, 0.45] }, // 2 bancone: vicino alle tre sotto le spine
     { p: [1.55, 1.45, -1.85], l: [2.6, 1.18, -3] }, // 3 cucina (tavolo: burger protagonista)
     { p: [-1.2, 1.7, -6.4], l: [-4.3, 1.85, -8.7] }, // 4 angolo fritti (sinistra)
     { p: [1.3, 1.65, -10.5], l: [4.4, 1.75, -12.7] }, // 5 angolo dolci (destra)
@@ -714,7 +641,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const clock = new THREE.Clock();
   const INTRO_DUR = 2.6;
   let introElapsed = 0;
-  let introActive = true;
+  let introActive = false; // si parte già dentro: locale intero in vista
 
   const camPos = new THREE.Vector3();
   const camLook = new THREE.Vector3();
@@ -750,17 +677,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       renderT += (targetT - renderT) * s;
     }
     applyCamera(renderT);
-    // POV birra: la camera plana sull'oggetto della birra scelta (hover/click/scroll).
-    const wantFocus = birraFocus >= 0 ? 1 : 0;
-    focusAmt += (wantFocus - focusAmt) * (1 - Math.pow(0.9, Math.min(dtRaw, 0.25) * 60));
-    if (focusAmt > 0.002 && birraFocus >= 0) {
-      const F = BIRRA_POV[birraFocus];
-      focusP.set(F.p[0], F.p[1], F.p[2]);
-      focusL.set(F.l[0], F.l[1], F.l[2]);
-      camera.position.lerp(focusP, focusAmt);
-      lastLook.lerp(focusL, focusAmt);
-      camera.lookAt(lastLook);
-    }
 
     // micro-vita: bagliore lampade + leggerissimo bob
     lamps.forEach((L) => {
@@ -780,23 +696,23 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     burger.position.y += (1.11 + explode * 0.34 - burger.position.y) * 0.1;
     burger.rotation.y += 0.003 + explode * 0.02;
 
-    // La mescita: livello della pinta = spinaAmt; getto visibile mentre versa.
-    const level = 0.02 + spinaAmt * 0.2;
-    pintaLiquid.scale.y += (Math.max(0.001, level) - pintaLiquid.scale.y) * 0.1;
-    pintaLiquid.position.y = pintaLiquid.scale.y / 2 + 0.01;
-    const liqTop = pintaLiquid.scale.y + 0.01;
-    pintaFoam.visible = spinaAmt > 0.12;
-    pintaFoam.position.y = liqTop + 0.012;
-    const pouring = spinaAmt > 0.06 && spinaAmt < 0.985;
-    pour.material.opacity += ((pouring ? 0.85 : 0) - pour.material.opacity) * 0.12;
-    pour.visible = pour.material.opacity > 0.02;
-    if (pour.visible) {
-      // dallo spout (y≈0.44 in locale pinta) al pelo del liquido
-      const spoutY = 0.44;
-      const h = Math.max(0.03, spoutY - liqTop);
-      pour.scale.y = h;
-      pour.position.y = liqTop + h / 2;
-    }
+    // Le tre si riempiono in sincronia: livello = spinaAmt, getto per ognuna.
+    const level3 = 0.02 + spinaAmt * 0.24;
+    const pouring3 = spinaAmt > 0.06 && spinaAmt < 0.985;
+    trio.forEach((t3) => {
+      t3.liq.scale.y += (Math.max(0.001, level3) - t3.liq.scale.y) * 0.1;
+      t3.liq.position.y = t3.liq.scale.y / 2 + 0.01;
+      const top3 = t3.liq.scale.y + 0.01;
+      t3.foam.visible = spinaAmt > 0.12;
+      t3.foam.position.y = top3 + 0.013;
+      t3.jet.material.opacity += ((pouring3 ? 0.85 : 0) - t3.jet.material.opacity) * 0.12;
+      t3.jet.visible = t3.jet.material.opacity > 0.02;
+      if (t3.jet.visible) {
+        const h3 = Math.max(0.03, 0.44 - top3);
+        t3.jet.scale.y = h3;
+        t3.jet.position.y = top3 + h3 / 2;
+      }
+    });
 
     // Il brindisi: i boccali si inclinano l'uno verso l'altro e si toccano.
     const cheer = brindisiAmt * brindisiAmt;
@@ -919,18 +835,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       sp.material.opacity = Math.sin(k * Math.PI) * 0.3 * Math.max(0.3, bA);
     });
 
-    // CUCINA: i burger satelliti si smontano e rimontano in loop continuo.
-    const cA = Math.max(0.12, zoneAmt.cucina);
-    flyBurgers.forEach((g) => {
-      const u = g.userData;
-      const cyc = (Math.sin(time * 0.9 + u.ph) + 1) / 2; // 0 chiuso → 1 esploso
-      u.layers.forEach((L, li) => {
-        L.m.position.y = L.off * (0.3 + cyc * 1.6) * cA;
-        L.m.rotation.y = time * (0.3 + li * 0.15);
-      });
-      g.rotation.y = time * 0.25 + u.ph;
-      g.position.y += Math.sin(time * 1.2 + u.ph) * 0.0012;
-    });
 
     renderer.render(scene, camera);
   }
@@ -949,7 +853,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     setSpina: (p) => { spinaAmt = Math.max(0, Math.min(1, p)); },
     setBrindisi: (p) => { brindisiAmt = Math.max(0, Math.min(1, p)); },
     setGiochi: (p) => { giochiAmt = Math.max(0, Math.min(1, p)); },
-    setBirraFocus: (i) => { birraFocus = Number.isInteger(i) && i >= 0 && i <= 2 ? i : -1; },
     setZone: (name, p) => {
       if (name in zoneAmt) zoneAmt[name] = Math.max(0, Math.min(1, p));
     },
