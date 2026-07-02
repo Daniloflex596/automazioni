@@ -29,7 +29,7 @@ export const info = {
   cellulare: '379 159 7103',
   // Numero usato per il pulsante WhatsApp delle prenotazioni (formato internazionale, solo cifre).
   whatsapp: '393791597103',
-  email: 'info@arkadiapub.it', // ⚠️ DA CONFERMARE
+  email: 'crepapelleciampino@gmail.com', // confermata dal menu digitale
   partitaIva: '00000000000', // ⚠️ DA CONFERMARE
   geo: { lat: 41.7998, lng: 12.6015 }, // ⚠️ DA CONFERMARE (coordinate approssimative di Ciampino)
   rating: { valore: '4.6', recensioni: 172 },
@@ -146,13 +146,87 @@ export const birreBottiglia = [
 // `pronta: true` = voci già inserite nella pagina /menu.
 export const categorieMenu = [
   { id: 'birre', nome: 'Birre', slogan: 'Gusta la nostra selezione dalla più amara a quella più alcolica', pronta: true },
-  { id: 'fritti', nome: 'Fritti & Sfizi', slogan: 'Gli antipasti non sono tutti uguali. Il nostro è MEGLIO!', pronta: false },
-  { id: 'hamburger', nome: 'Hamburger', slogan: 'Innamorati dei nostri panini con hamburger da 200gr', pronta: false },
-  { id: 'dessert', nome: 'Dessert', slogan: 'Ogni giorno un dessert diverso, perché alla dolcezza non c’è mai fine', pronta: false },
-  { id: 'da-bere', nome: 'Da Bere', slogan: 'Bibite, analcoliche e distillati per accompagnare.', pronta: false },
-  { id: 'caffetteria', nome: 'Caffetteria', slogan: 'Per chiudere in bellezza la serata', pronta: false },
-  { id: 'cocktail', nome: 'Cocktail', slogan: 'Miscelati e signature, dallo shaker al bicchiere.', pronta: false },
+  { id: 'fritti', nome: 'Fritti & Sfizi', slogan: 'Gli antipasti non sono tutti uguali. Il nostro è MEGLIO!', pronta: true },
+  { id: 'hamburger', nome: 'Hamburger', slogan: 'Innamorati dei nostri panini con hamburger da 200gr', pronta: true },
+  { id: 'dessert', nome: 'Dessert', slogan: 'Ogni giorno un dessert diverso, perché alla dolcezza non c’è mai fine', pronta: true },
+  { id: 'da-bere', nome: 'Da Bere', slogan: 'Distillati, vini e bibite per accompagnare la serata', pronta: true },
+  { id: 'caffetteria', nome: 'Caffetteria', slogan: 'Per chiudere in bellezza la serata', pronta: true },
+  { id: 'cocktail', nome: 'Cocktail', slogan: 'Miscelati e classici, dallo shaker al bicchiere', pronta: true },
 ];
+
+/** FRITTI & SFIZI */
+export const fritti = [
+  { nome: 'Tagliere "Colesterolo"', prezzo: '16,00', desc: 'Gran trionfo di fritti', tag: ['surgelato'] },
+  { nome: 'Patatine "Montparnasse"', prezzo: '5,80', desc: 'Patatine fritte con formaggio, cheddar e bacon croccante', tag: ['chef'] },
+  { nome: 'Onion Rings', prezzo: '6,00', desc: 'Anelli di cipolla', tag: ['surgelato', 'veg'] },
+  { nome: 'Nuggets di Pollo', prezzo: '6,00', desc: '', tag: ['surgelato'] },
+  { nome: 'Palline di Melanzana', prezzo: '6,00', desc: 'Pasta lievitata con melanzane a pezzi', tag: [] },
+  { nome: 'Patatine Cacio e Pepe', prezzo: '5,80', desc: '', tag: ['surgelato'] },
+  { nome: 'Patate Stick', prezzo: '4,80', desc: '', tag: ['surgelato', 'veg'] },
+];
+
+/** HAMBURGER — tutti serviti con patatine */
+export const hamburger = [
+  { nome: 'Brexit', prezzo: '10,00', desc: 'Hamburger, insalata, bacon, cheddar, anelli di cipolla e salsa barbeque', badge: 'il più scelto' },
+  { nome: 'Hellfire Club', prezzo: '10,00', desc: 'Hamburger, insalata, stracciatella e bomba calabra', tag: ['piccante'] },
+  { nome: 'Cocò', prezzo: '10,00', desc: 'Cotoletta di pollo, pomodori secchi, stracciatella e insalata', tag: [] },
+  { nome: 'Cheeseburger', prezzo: '10,00', desc: 'Hamburger, bacon, tomino e cheddar', tag: [] },
+  { nome: 'Insalatona Arkadia', prezzo: '10,00', desc: 'Olive, nachos, cotoletta di pollo, insalata, bacon, salsa yogurt e pomodori secchi', tag: [] },
+  { nome: 'Peppa Pig', prezzo: '9,00', desc: 'Salsiccia di Genzano con salsa a scelta', tag: [] },
+  { nome: 'Bimbo Burger', prezzo: '6,00', desc: 'Hamburger semplice, per i più piccoli', tag: [] },
+];
+
+/** DESSERT */
+export const dessert = [
+  { nome: 'Crêpe alla Nutella', prezzo: '6,00', desc: '', tag: [] },
+  { nome: 'Pannacotta', prezzo: '6,00', desc: 'Chiedi il tuo topping', tag: [] },
+  { nome: 'Dolce del Giorno', prezzo: '', desc: 'Ne prepariamo uno diverso ogni sera: chiedi qual è quello di oggi.', tag: [] },
+];
+
+/** DA BERE — distillati (bicchiere/shot) e vini (calice/bottiglia) */
+export const daBere = {
+  distillati: [
+    { nome: 'Whisky', prezzo: '7,50', shot: '3,50' },
+    { nome: 'Rum', prezzo: '6,00', shot: '3,50' },
+    { nome: 'Grappe / Gin', prezzo: '5,50', shot: '3,00' },
+    { nome: 'Amari', prezzo: '4,50', shot: '2,00' },
+  ],
+  vini: [
+    { nome: 'Vino Bianco', calice: '4,00', bottiglia: '10,00' },
+    { nome: 'Vino Rosso', calice: '5,00', bottiglia: '12,00' },
+  ],
+};
+
+/** CAFFETTERIA */
+export const caffetteria = [
+  { nome: 'Caffè Invernale', prezzo: '5,00', desc: 'Una bevanda che ti scalda il cuore: caffè, whisky e sciroppo d’acero' },
+  { nome: 'Tè / Camomilla / Infusi', prezzo: '3,00', desc: '' },
+  { nome: 'Caffè', prezzo: '1,20', desc: '' },
+];
+
+/** COCKTAIL — tutti a 6,00 */
+export const cocktail = [
+  { nome: 'Spritz', desc: 'Scegli il tuo Spritz' },
+  { nome: 'Negroni', desc: 'Campari, Vermouth, Gin' },
+  { nome: 'Negroni Sbagliato', desc: 'Prosecco, Bitter, Vermouth' },
+  { nome: 'Americano', desc: 'Bitter, Vermouth, soda' },
+  { nome: 'Boulevardier', desc: 'Bourbon, Vermouth, Bitter' },
+  { nome: 'Mojito', desc: 'Rum, menta, limone, Angostura' },
+  { nome: 'Cuba Libre', desc: 'Rum, limone, Coca Cola' },
+  { nome: 'Piña Colada', desc: 'Rum al cocco, succo d’ananas, limone' },
+  { nome: 'Gin Tonic', desc: 'Gin, acqua tonica' },
+  { nome: 'Gin Lemon', desc: 'Gin, lemon soda' },
+  { nome: 'Vodka Tonic', desc: 'Vodka, acqua tonica' },
+  { nome: 'Vodka Lemon', desc: 'Vodka, lemon soda' },
+  { nome: 'Caipiroska Fragola', desc: 'Vodka, limone, top alle fragole' },
+  { nome: 'Sex on the Beach', desc: 'Vodka, pesca, arancia, mirtilli' },
+  { nome: 'Long Island', desc: 'Tequila, gin, vodka, rum, Coca Cola' },
+  { nome: 'Alexander', desc: 'Gin, vodka, rum, tequila, Blue Curaçao' },
+  { nome: 'Japanese Ice Tea', desc: 'Vodka, rum, gin, Midori, sweet&sour, limone' },
+  { nome: 'Samu', desc: 'Aperol, limoncello, Fuoco dell’Etna' },
+];
+
+export const prezzoCocktail = '6,00';
 
 /**
  * LA TAVOLA — Atto IV. Piatti signature.

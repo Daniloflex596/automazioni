@@ -2,9 +2,13 @@
 import Base from '../layouts/Base.astro';
 import Preloader from '../components/Preloader.astro';
 import Footer from '../components/Footer.astro';
-import { birre, birreBottiglia, categorieMenu, info } from '../data/contenuti';
+import {
+  birre, birreBottiglia, categorieMenu, info,
+  fritti, hamburger, dessert, daBere, caffetteria, cocktail, prezzoCocktail,
+} from '../data/contenuti';
 
 const base = import.meta.env.BASE_URL;
+const tagLabel = { surgelato: 'abbattuto', veg: 'veg', piccante: 'piccante', chef: 'consigliato', noCarne: 'no carne' };
 const menuTitolo = `Menu · ${info.nome} Pub — Birre, hamburger e cocktail a Ciampino`;
 const menuDesc =
   'Il menu completo di Arkadia Pub: birre alla spina e in bottiglia (belghe, italiane, artigianali), hamburger da 200gr, fritti, dessert, cocktail e caffetteria.';
@@ -141,21 +145,141 @@ const menuDesc =
       </div>
     </section>
 
-    <!-- ============ ALTRE CATEGORIE (in arrivo) ============ -->
-    {
-      categorieMenu
-        .filter((c) => !c.pronta)
-        .map((c) => (
-          <section class="cat cat--soon" id={`cat-${c.id}`}>
-            <div class="wrap">
-              <p class="occhiello" data-reveal>{c.nome}</p>
-              <h2 class="cat-titolo" data-split>{c.nome}</h2>
-              <p class="cat-slogan" data-reveal>{c.slogan}</p>
-              <p class="soon-nota mono" data-reveal>In arrivo — stiamo impiattando questa sezione.</p>
-            </div>
-          </section>
-        ))
-    }
+    <!-- ===================== FRITTI & SFIZI ===================== -->
+    <section class="cat" id="cat-fritti" data-scene-act="tavola">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Fritti & Sfizi</p>
+        <h2 class="cat-titolo" data-split>Fritti & Sfizi</h2>
+        <p class="cat-slogan" data-reveal>{categorieMenu[1].slogan}</p>
+        <ul class="menu-list">
+          {fritti.map((v) => (
+            <li class="menu-item" data-reveal>
+              <div class="mi-main">
+                <h3 class="mi-nome">
+                  {v.nome}
+                  {v.tag?.map((t) => <span class:list={['tag', `tag--${t}`]}>{tagLabel[t]}</span>)}
+                </h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              <span class="mi-prezzo mono">€ {v.prezzo}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== HAMBURGER ===================== -->
+    <section class="cat" id="cat-hamburger" data-scene-act="tavola">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Hamburger</p>
+        <h2 class="cat-titolo" data-split>Hamburger</h2>
+        <p class="cat-slogan" data-reveal>{categorieMenu[2].slogan} — tutti serviti con patatine.</p>
+        <ul class="menu-list">
+          {hamburger.map((v) => (
+            <li class="menu-item" data-reveal>
+              <div class="mi-main">
+                <h3 class="mi-nome">
+                  {v.nome}
+                  {v.badge && <span class="tag tag--chef">{v.badge}</span>}
+                  {v.tag?.map((t) => <span class:list={['tag', `tag--${t}`]}>{tagLabel[t]}</span>)}
+                </h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              <span class="mi-prezzo mono">€ {v.prezzo}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== DESSERT ===================== -->
+    <section class="cat" id="cat-dessert" data-scene-act="tavola">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Dessert</p>
+        <h2 class="cat-titolo" data-split>Dessert</h2>
+        <p class="cat-slogan" data-reveal>{categorieMenu[3].slogan}</p>
+        <ul class="menu-list">
+          {dessert.map((v) => (
+            <li class="menu-item" data-reveal>
+              <div class="mi-main">
+                <h3 class="mi-nome">{v.nome}</h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              {v.prezzo && <span class="mi-prezzo mono">€ {v.prezzo}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== DA BERE ===================== -->
+    <section class="cat" id="cat-da-bere" data-scene-act="luogo">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Da Bere</p>
+        <h2 class="cat-titolo" data-split>Da bere</h2>
+        <p class="cat-slogan" data-reveal>{categorieMenu[4].slogan}</p>
+
+        <h3 class="sub-h mono" data-reveal>Distillati <span>bicchiere · shot</span></h3>
+        <ul class="menu-list">
+          {daBere.distillati.map((v) => (
+            <li class="menu-item" data-reveal>
+              <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
+              <span class="mi-prezzo mono">€ {v.prezzo} <em>/ {v.shot}</em></span>
+            </li>
+          ))}
+        </ul>
+
+        <h3 class="sub-h mono" data-reveal>Vini <span>calice · bottiglia</span></h3>
+        <ul class="menu-list">
+          {daBere.vini.map((v) => (
+            <li class="menu-item" data-reveal>
+              <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
+              <span class="mi-prezzo mono">€ {v.calice} <em>/ {v.bottiglia}</em></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== CAFFETTERIA ===================== -->
+    <section class="cat" id="cat-caffetteria" data-scene-act="brindisi">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Caffetteria</p>
+        <h2 class="cat-titolo" data-split>Caffetteria</h2>
+        <p class="cat-slogan" data-reveal>{categorieMenu[5].slogan}</p>
+        <ul class="menu-list">
+          {caffetteria.map((v) => (
+            <li class="menu-item" data-reveal>
+              <div class="mi-main">
+                <h3 class="mi-nome">{v.nome}</h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              <span class="mi-prezzo mono">€ {v.prezzo}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== COCKTAIL ===================== -->
+    <section class="cat" id="cat-cocktail" data-scene-act="brindisi">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Cocktail</p>
+        <h2 class="cat-titolo" data-split>Cocktail</h2>
+        <p class="cat-slogan" data-reveal>{categorieMenu[6].slogan} — tutti a € {prezzoCocktail}.</p>
+        <ul class="menu-list menu-list--cols">
+          {cocktail.map((v) => (
+            <li class="menu-item" data-reveal>
+              <div class="mi-main">
+                <h3 class="mi-nome">{v.nome}</h3>
+                <p class="mi-desc">{v.desc}</p>
+              </div>
+              <span class="mi-prezzo mono">€ {prezzoCocktail}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   </main>
 
   <Footer />
@@ -403,16 +527,80 @@ const menuDesc =
     border-radius: 999px;
   }
 
-  .cat--soon { opacity: 0.9; }
-  .soon-nota {
-    margin-top: 1.5rem;
+  /* Liste voci (fritti, hamburger, dessert, da bere, caffetteria, cocktail) */
+  .menu-list {
+    list-style: none;
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+    display: grid;
+    gap: 0;
+  }
+  .menu-list--cols {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: clamp(2rem, 5vw, 4rem);
+  }
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1.5rem;
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--linea);
+  }
+  .mi-nome {
+    font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+    font-family: var(--font-display);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+  .mi-desc {
+    margin-top: 0.4rem;
+    color: var(--schiuma-soft);
+    max-width: 52ch;
+    font-size: 0.98rem;
+  }
+  .mi-prezzo {
+    color: var(--oro);
+    font-size: 1.05rem;
+    white-space: nowrap;
+  }
+  .mi-prezzo em {
+    color: var(--schiuma-soft);
+    font-style: normal;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.14rem 0.45rem;
+    border-radius: 999px;
+    background: var(--schiuma-faint);
+    color: var(--schiuma-soft);
+  }
+  .tag--chef { background: var(--oro); color: var(--notte); }
+  .tag--piccante { background: var(--rame); color: var(--schiuma); }
+  .tag--veg { background: var(--luppolo); color: var(--schiuma); }
+  .sub-h {
+    margin-top: clamp(2.5rem, 6vh, 4rem);
     font-size: var(--fs-small);
-    letter-spacing: var(--tracking-mono);
+    letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
     color: var(--oro);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .sub-h span {
+    color: var(--schiuma-soft);
+    opacity: 0.7;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
   }
 
   @media (max-width: 720px) {
     .bottiglie { grid-template-columns: 1fr; }
+    .menu-list--cols { grid-template-columns: 1fr; }
   }
 </style>
