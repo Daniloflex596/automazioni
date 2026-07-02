@@ -10,7 +10,7 @@
  *  scroll la fa percorrere un path fermandola alle "stazioni":
  *    0 soglia · 1 storia · 2 bancone(birre) · 3 tavolo(cibo) · 4 sala · 5 séparé
  *
- *  API: initPub(canvas, {quality}) -> { setProgress(t), dispose, introRunning() }
+ *  API: initPub(canvas, {quality}) -> { setProgress(t), setBurger(p), dispose, introRunning() }
  * ============================================================================
  */
 import * as THREE from 'three';
@@ -162,14 +162,41 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const tLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 1, 12), mat(0x201510, { r: 0.8 }));
   tLeg.position.y = 0.5;
   table.add(tLeg);
-  // un piatto/burger stilizzato sul tavolo
-  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.03, 20), mat(C.schiuma, { r: 0.6 }));
+  // Piatto + burger a strati: si SCOMPONE a mezz'aria quando la sezione
+  // "La Tavola" è al centro del viewport e si ricompone andando via.
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.03, 22), mat(C.schiuma, { r: 0.6 }));
   plate.position.set(0, 1.09, 0);
   table.add(plate);
-  const bun = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(0x8a5a2a, { r: 0.7 }));
-  bun.position.set(0, 1.16, 0);
-  bun.scale.y = 0.7;
-  table.add(bun);
+
+  const burger = new THREE.Group();
+  burger.position.set(0, 1.11, 0);
+  table.add(burger);
+  // Intensità dell'esplosione del burger (0..1), pilotata da setBurger().
+  let burgerAmt = 0;
+  const seg = isHigh ? 20 : 12;
+  // [geometria, colore, baseY, offsetEsploso]
+  const burgerLayers = [
+    { m: new THREE.Mesh(new THREE.SphereGeometry(0.17, seg, seg, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat(0x9a6a30, { r: 0.75 })), y: 0.045, off: 0 },   // pane sotto (mezza sfera capovolta)
+    { m: new THREE.Mesh(new THREE.CylinderGeometry(0.175, 0.175, 0.02, seg), mat(0x4a7a30, { r: 0.9 })), y: 0.062, off: 0.09 },   // insalata
+    { m: new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.05, seg), mat(0x4a2a16, { r: 0.85 })), y: 0.1, off: 0.18 },      // hamburger 200gr
+    { m: new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.014, 0.26), mat(0xe8a33c, { r: 0.5, e: 0x6a4310, ei: 0.25 })), y: 0.132, off: 0.27 }, // cheddar
+    { m: new THREE.Mesh(new THREE.CylinderGeometry(0.155, 0.155, 0.024, seg), mat(0xa03020, { r: 0.7 })), y: 0.152, off: 0.36 },  // pomodoro
+    { m: new THREE.Mesh(new THREE.SphereGeometry(0.175, seg, seg, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xa57136, { r: 0.7 })), y: 0.165, off: 0.48 }, // pane sopra
+  ];
+  burgerLayers[3].m.rotation.y = Math.PI / 5; // cheddar leggermente ruotato
+  burgerLayers.forEach((L) => {
+    L.m.position.y = L.y;
+    burger.add(L.m);
+  });
+
+  // Bersaglio freccette sulla parete destra (la Sala Giochi esiste anche in 3D)
+  const dart = new THREE.Mesh(
+    new THREE.CircleGeometry(0.42, 28),
+    new THREE.MeshBasicMaterial({ map: makeDartboard() })
+  );
+  dart.rotation.y = -Math.PI / 2;
+  dart.position.set(5.14, 2.1, -6.5);
+  root.add(dart);
 
   // Séparé in fondo (booth)
   const booth = new THREE.Mesh(new THREE.BoxGeometry(3, 1.3, 0.5), mat(C.rame, { r: 0.85 }));
@@ -219,7 +246,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     { p: [0.0, 1.7, 11.0], l: [0, 1.7, 2] },      // 0 soglia (fuori dalla porta)
     { p: [0.6, 1.65, 5.5], l: [-1.5, 1.6, 1] },   // 1 storia (entrando, verso sinistra)
     { p: [-1.4, 1.55, 1.2], l: [-3.2, 1.3, -0.4] }, // 2 bancone / birre
-    { p: [1.2, 1.6, -1.2], l: [2.6, 1.1, -3] },   // 3 tavolo / cibo
+    { p: [1.55, 1.45, -1.85], l: [2.6, 1.18, -3] }, // 3 tavolo / cibo (vicino: burger protagonista)
     { p: [0.4, 1.9, -5.5], l: [-2, 1.4, -6] },    // 4 sala (wide)
     { p: [0.0, 1.5, -10.5], l: [0, 1.0, -13.5] }, // 5 séparé / brindisi
   ];
@@ -273,6 +300,17 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     });
     camera.position.y += Math.sin(time * 0.8) * 0.01;
 
+    // Burger esploso: pilotato dalla pagina (setBurger) quando la sezione
+    // "La Tavola" è al centro del viewport. Gli strati si separano e il
+    // panino LEVITA sopra il tavolo, così lo stacco si legge anche da lontano.
+    const explode = burgerAmt * burgerAmt; // ease-in per uno stacco netto
+    burgerLayers.forEach((L, i) => {
+      L.m.position.y += (L.y + L.off * explode - L.m.position.y) * 0.12;
+      L.m.rotation.y += 0.002 + i * 0.002 * explode;
+    });
+    burger.position.y += (1.11 + explode * 0.34 - burger.position.y) * 0.1;
+    burger.rotation.y += 0.003 + explode * 0.02;
+
     renderer.render(scene, camera);
   }
   frame();
@@ -286,6 +324,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
   return {
     setProgress: (t) => { targetT = Math.max(0, Math.min(1, t)); },
+    setBurger: (p) => { burgerAmt = Math.max(0, Math.min(1, p)); },
     introRunning: () => introActive,
     dispose() {
       running = false;
@@ -339,6 +378,46 @@ function makeEnv(renderer) {
   const rt = pmrem.fromEquirectangular(tex);
   tex.dispose(); pmrem.dispose();
   return rt.texture;
+}
+
+function makeDartboard() {
+  // Bersaglio stilizzato in palette: anelli concentrici + spicchi alternati.
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const ctx = c.getContext('2d');
+  const cx = 64, cy = 64;
+  ctx.fillStyle = '#17100b';
+  ctx.fillRect(0, 0, 128, 128);
+  // spicchi alternati
+  for (let i = 0; i < 20; i++) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, 58, (i / 20) * Math.PI * 2, ((i + 1) / 20) * Math.PI * 2);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 ? '#2a1d12' : '#f4e9d0';
+    ctx.fill();
+  }
+  // anelli
+  const rings = [
+    [58, '#7a2e1e', 3], [44, '#e8b04b', 3], [30, '#7a2e1e', 3], [16, '#e8b04b', 3],
+  ];
+  rings.forEach(([r, col, w]) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = w;
+    ctx.stroke();
+  });
+  // centro
+  ctx.beginPath();
+  ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#7a2e1e';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3.2, 0, Math.PI * 2);
+  ctx.fillStyle = '#e8b04b';
+  ctx.fill();
+  return new THREE.CanvasTexture(c);
 }
 
 function makeNeon() {
