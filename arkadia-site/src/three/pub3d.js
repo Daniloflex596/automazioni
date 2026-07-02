@@ -10,7 +10,7 @@
  *  scroll la fa percorrere un path fermandola alle "stazioni":
  *    0 soglia · 1 storia · 2 bancone(birre) · 3 tavolo(cibo) · 4 sala · 5 séparé
  *
- *  API: initPub(canvas, {quality}) -> { setProgress(t), setBurger(p), dispose, introRunning() }
+ *  API: initPub(canvas, {quality}) -> { setProgress(t), dispose, introRunning() }
  * ============================================================================
  */
 import * as THREE from 'three';
@@ -115,6 +115,96 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   glass.scale.setScalar(0.9);
   bar.add(glass);
 
+  // ---- LA MESCITA: pinta sotto la spina centrale che si riempie (setSpina) ----
+  // Il momento-firma della sezione Birre: getto ambrato + livello che sale + schiuma.
+  const pinta = new THREE.Group();
+  pinta.position.set(0.08, 1.22, 0.49); // sotto lo spout del rubinetto centrale
+  bar.add(pinta);
+  const pintaGlass = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.085, 0.075, 0.26, 18, 1, true),
+    new THREE.MeshPhysicalMaterial({
+      color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.22,
+      clearcoat: 0.4, side: THREE.DoubleSide, depthWrite: false,
+    })
+  );
+  pintaGlass.position.y = 0.13;
+  pinta.add(pintaGlass);
+  const pintaLiquid = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.075, 0.066, 1, 16),
+    new THREE.MeshStandardMaterial({ color: 0xc77b29, emissive: 0x5a2e0e, emissiveIntensity: 0.5, roughness: 0.35 })
+  );
+  pintaLiquid.scale.y = 0.001;
+  pinta.add(pintaLiquid);
+  const pintaFoam = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.078, 0.078, 0.024, 16),
+    new THREE.MeshStandardMaterial({ color: 0xf4e9d0, roughness: 0.95 })
+  );
+  pintaFoam.visible = false;
+  pinta.add(pintaFoam);
+  // getto dal rubinetto centrale (spout a y≈0.22+0.5-1.22-... calcolato in locale pinta)
+  const pour = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.011, 0.016, 1, 8, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0xe8b04b, transparent: true, opacity: 0 })
+  );
+  pinta.add(pour);
+  let spinaAmt = 0; // 0..1 dal DOM (sezione Birre centrata)
+
+  // ---- IL BRINDISI: due boccali al séparé che si toccano (setBrindisi) ----
+  const brindisi = new THREE.Group();
+  brindisi.position.set(0, 1.42, -13.35);
+  root.add(brindisi);
+  function makeMug(side) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.11, 0.3, 16),
+      new THREE.MeshStandardMaterial({ color: 0xc77b29, emissive: 0x6a3a12, emissiveIntensity: 0.45, roughness: 0.3 })
+    );
+    g.add(body);
+    const foamTop = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.125, 0.125, 0.05, 16),
+      new THREE.MeshStandardMaterial({ color: 0xf4e9d0, roughness: 0.95 })
+    );
+    foamTop.position.y = 0.17;
+    g.add(foamTop);
+    const handle = new THREE.Mesh(
+      new THREE.TorusGeometry(0.07, 0.017, 8, 14, Math.PI * 1.3),
+      new THREE.MeshStandardMaterial({ color: 0xd9cdb4, roughness: 0.4 })
+    );
+    handle.position.x = side * 0.12;
+    handle.rotation.z = side > 0 ? -Math.PI / 2.6 : Math.PI - Math.PI / 2.6;
+    g.add(handle);
+    return g;
+  }
+  const mugL = makeMug(-1);
+  mugL.position.set(-0.38, 0, 0);
+  brindisi.add(mugL);
+  const mugR = makeMug(1);
+  mugR.position.set(0.38, 0, 0);
+  brindisi.add(mugR);
+  let brindisiAmt = 0; // 0..1 dal DOM (sezione Prenotazione centrata)
+
+  // ---- Polvere dorata nell'aria (solo tier high): atmosfera da luce di lampada ----
+  let dust = null;
+  if (isHigh) {
+    const DN = 130;
+    const dpos = new Float32Array(DN * 3);
+    for (let i = 0; i < DN; i++) {
+      dpos[i * 3] = (pseudo(i * 3) - 0.5) * 9;
+      dpos[i * 3 + 1] = 0.6 + pseudo(i * 5) * 3.2;
+      dpos[i * 3 + 2] = -14 + pseudo(i * 7) * 24;
+    }
+    const dgeo = new THREE.BufferGeometry();
+    dgeo.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
+    dust = new THREE.Points(
+      dgeo,
+      new THREE.PointsMaterial({
+        map: makeSoftDot(), color: 0xe8b04b, size: 0.045, transparent: true,
+        opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+      })
+    );
+    root.add(dust);
+  }
+
   // ---- Retro-bancone: mensola con bottiglie (instanced) ----
   const shelfX = -4.7;
   for (let s = 0; s < 3; s++) {
@@ -162,8 +252,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const tLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 1, 12), mat(0x201510, { r: 0.8 }));
   tLeg.position.y = 0.5;
   table.add(tLeg);
-  // Piatto + burger a strati: si SCOMPONE a mezz'aria quando la sezione
-  // "La Tavola" è al centro del viewport e si ricompone andando via.
+  // Piatto + burger a strati: si SCOMPONE a mezz'aria quando la camera
+  // arriva al tavolo (la stazione "La Tavola") e si ricompone andando via.
   const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.03, 22), mat(C.schiuma, { r: 0.6 }));
   plate.position.set(0, 1.09, 0);
   table.add(plate);
@@ -311,6 +401,38 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     burger.position.y += (1.11 + explode * 0.34 - burger.position.y) * 0.1;
     burger.rotation.y += 0.003 + explode * 0.02;
 
+    // La mescita: livello della pinta = spinaAmt; getto visibile mentre versa.
+    const level = 0.02 + spinaAmt * 0.2;
+    pintaLiquid.scale.y += (Math.max(0.001, level) - pintaLiquid.scale.y) * 0.1;
+    pintaLiquid.position.y = pintaLiquid.scale.y / 2 + 0.01;
+    const liqTop = pintaLiquid.scale.y + 0.01;
+    pintaFoam.visible = spinaAmt > 0.12;
+    pintaFoam.position.y = liqTop + 0.012;
+    const pouring = spinaAmt > 0.06 && spinaAmt < 0.985;
+    pour.material.opacity += ((pouring ? 0.85 : 0) - pour.material.opacity) * 0.12;
+    pour.visible = pour.material.opacity > 0.02;
+    if (pour.visible) {
+      // dallo spout (y≈0.44 in locale pinta) al pelo del liquido
+      const spoutY = 0.44;
+      const h = Math.max(0.03, spoutY - liqTop);
+      pour.scale.y = h;
+      pour.position.y = liqTop + h / 2;
+    }
+
+    // Il brindisi: i boccali si inclinano l'uno verso l'altro e si toccano.
+    const cheer = brindisiAmt * brindisiAmt;
+    mugL.rotation.z += (-0.5 * cheer - mugL.rotation.z) * 0.1;
+    mugR.rotation.z += (0.5 * cheer - mugR.rotation.z) * 0.1;
+    mugL.position.x += (-0.38 + 0.19 * cheer - mugL.position.x) * 0.1;
+    mugR.position.x += (0.38 - 0.19 * cheer - mugR.position.x) * 0.1;
+    brindisi.position.y = 1.42 + Math.sin(time * 1.6) * 0.015 * cheer;
+
+    // Polvere dorata: deriva lenta nell'aria calda.
+    if (dust) {
+      dust.rotation.y = time * 0.014;
+      dust.position.y = Math.sin(time * 0.25) * 0.12;
+    }
+
     renderer.render(scene, camera);
   }
   frame();
@@ -325,6 +447,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   return {
     setProgress: (t) => { targetT = Math.max(0, Math.min(1, t)); },
     setBurger: (p) => { burgerAmt = Math.max(0, Math.min(1, p)); },
+    setSpina: (p) => { spinaAmt = Math.max(0, Math.min(1, p)); },
+    setBrindisi: (p) => { brindisiAmt = Math.max(0, Math.min(1, p)); },
     introRunning: () => introActive,
     dispose() {
       running = false;
@@ -378,6 +502,20 @@ function makeEnv(renderer) {
   const rt = pmrem.fromEquirectangular(tex);
   tex.dispose(); pmrem.dispose();
   return rt.texture;
+}
+
+function makeSoftDot() {
+  // Puntino morbido per la polvere dorata (sprite radiale sfumato).
+  const c = document.createElement('canvas');
+  c.width = c.height = 32;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(16, 16, 1, 16, 16, 16);
+  g.addColorStop(0, 'rgba(255,235,190,0.9)');
+  g.addColorStop(0.5, 'rgba(232,176,75,0.35)');
+  g.addColorStop(1, 'rgba(232,176,75,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 32, 32);
+  return new THREE.CanvasTexture(c);
 }
 
 function makeDartboard() {

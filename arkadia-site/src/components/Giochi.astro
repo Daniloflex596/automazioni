@@ -10,10 +10,10 @@ import { giochi } from '../data/contenuti';
     <h2 class="giochi-titolo" data-split>{giochi.titolo}</h2>
     <p class="giochi-intro" data-reveal>{giochi.intro}</p>
 
-    <ul class="giochi-grid">
+    <ul class="giochi-grid" data-stagger>
       {
         giochi.lista.map((g) => (
-          <li class="gioco" data-reveal>
+          <li class="gioco">
             <span class="gioco-icona" aria-hidden="true">
               {g.icona === 'dado' && (
                 <svg viewBox="0 0 48 48" fill="none">
@@ -94,6 +94,42 @@ import { giochi } from '../data/contenuti';
     display: inline-block;
     width: 48px;
     height: 48px;
+  }
+  .gioco-icona svg {
+    transition: transform 0.5s var(--ease-out);
+    transform-origin: 50% 50%;
+  }
+  /* Ogni gioco prende vita all'hover della card */
+  .gioco:nth-child(1):hover .gioco-icona svg {
+    transform: rotate(360deg); /* il dado tira */
+  }
+  .gioco:nth-child(2):hover .gioco-icona svg {
+    animation: dart-hit 0.5s var(--ease-out); /* la freccetta colpisce */
+  }
+  .gioco:nth-child(3):hover .gioco-icona svg {
+    animation: joycon 0.45s var(--ease-inout); /* i joy-con vibrano */
+  }
+  .gioco:nth-child(4):hover .gioco-icona svg {
+    transform: rotate(-9deg) scale(1.08); /* le carte si aprono a ventaglio */
+  }
+  @keyframes dart-hit {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.22); }
+    70% { transform: scale(0.96); }
+    100% { transform: scale(1); }
+  }
+  @keyframes joycon {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2.5px) rotate(-2deg); }
+    75% { transform: translateX(2.5px) rotate(2deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gioco-icona svg,
+    .gioco:hover .gioco-icona svg {
+      transition: none;
+      animation: none;
+      transform: none;
+    }
   }
   .gioco-nome {
     margin-top: 1rem;

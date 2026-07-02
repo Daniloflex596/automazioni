@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Preloader from '../components/Preloader.astro';
 import Footer from '../components/Footer.astro';
+import IconaCategoria from '../components/IconaCategoria.astro';
 import {
   birre, birreBottiglia, categorieMenu, info,
   fritti, hamburger, dessert, daBere, caffetteria, cocktail, prezzoCocktail,
@@ -89,7 +90,10 @@ const menuDesc =
     <section class="cat" id="cat-birre" data-scene-act="spina">
       <div class="wrap">
         <p class="occhiello" data-reveal>Birre</p>
-        <h2 class="cat-titolo" data-split>Alla spina</h2>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="birre" />
+          <h2 class="cat-titolo" data-split>Alla spina</h2>
+        </div>
         <p class="cat-slogan" data-reveal>{birre.slogan}</p>
 
         <div class="spina-tabella">
@@ -149,7 +153,10 @@ const menuDesc =
     <section class="cat" id="cat-fritti" data-scene-act="tavola">
       <div class="wrap">
         <p class="occhiello" data-reveal>Fritti & Sfizi</p>
-        <h2 class="cat-titolo" data-split>Fritti & Sfizi</h2>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="fritti" />
+          <h2 class="cat-titolo" data-split>Fritti & Sfizi</h2>
+        </div>
         <p class="cat-slogan" data-reveal>{categorieMenu[1].slogan}</p>
         <ul class="menu-list">
           {fritti.map((v) => (
@@ -172,7 +179,10 @@ const menuDesc =
     <section class="cat" id="cat-hamburger" data-scene-act="tavola">
       <div class="wrap">
         <p class="occhiello" data-reveal>Hamburger</p>
-        <h2 class="cat-titolo" data-split>Hamburger</h2>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="hamburger" />
+          <h2 class="cat-titolo" data-split>Hamburger</h2>
+        </div>
         <p class="cat-slogan" data-reveal>{categorieMenu[2].slogan} — tutti serviti con patatine.</p>
         <ul class="menu-list">
           {hamburger.map((v) => (
@@ -196,7 +206,10 @@ const menuDesc =
     <section class="cat" id="cat-dessert" data-scene-act="tavola">
       <div class="wrap">
         <p class="occhiello" data-reveal>Dessert</p>
-        <h2 class="cat-titolo" data-split>Dessert</h2>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="dessert" />
+          <h2 class="cat-titolo" data-split>Dessert</h2>
+        </div>
         <p class="cat-slogan" data-reveal>{categorieMenu[3].slogan}</p>
         <ul class="menu-list">
           {dessert.map((v) => (
@@ -216,7 +229,10 @@ const menuDesc =
     <section class="cat" id="cat-da-bere" data-scene-act="luogo">
       <div class="wrap">
         <p class="occhiello" data-reveal>Da Bere</p>
-        <h2 class="cat-titolo" data-split>Da bere</h2>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="da-bere" />
+          <h2 class="cat-titolo" data-split>Da bere</h2>
+        </div>
         <p class="cat-slogan" data-reveal>{categorieMenu[4].slogan}</p>
 
         <h3 class="sub-h mono" data-reveal>Distillati <span>bicchiere · shot</span></h3>
@@ -245,7 +261,10 @@ const menuDesc =
     <section class="cat" id="cat-caffetteria" data-scene-act="brindisi">
       <div class="wrap">
         <p class="occhiello" data-reveal>Caffetteria</p>
-        <h2 class="cat-titolo" data-split>Caffetteria</h2>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="caffetteria" />
+          <h2 class="cat-titolo" data-split>Caffetteria</h2>
+        </div>
         <p class="cat-slogan" data-reveal>{categorieMenu[5].slogan}</p>
         <ul class="menu-list">
           {caffetteria.map((v) => (
@@ -265,7 +284,10 @@ const menuDesc =
     <section class="cat" id="cat-cocktail" data-scene-act="brindisi">
       <div class="wrap">
         <p class="occhiello" data-reveal>Cocktail</p>
-        <h2 class="cat-titolo" data-split>Cocktail</h2>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="cocktail" />
+          <h2 class="cat-titolo" data-split>Cocktail</h2>
+        </div>
         <p class="cat-slogan" data-reveal>{categorieMenu[6].slogan} — tutti a € {prezzoCocktail}.</p>
         <ul class="menu-list menu-list--cols">
           {cocktail.map((v) => (
@@ -423,6 +445,16 @@ const menuDesc =
     font-size: var(--fs-h2);
     margin-top: 1.25rem;
   }
+  /* Intestazione con icona illustrata della categoria */
+  .cat-head {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.9rem, 2.5vw, 1.4rem);
+    margin-top: 1.25rem;
+  }
+  .cat-head .cat-titolo {
+    margin-top: 0;
+  }
   .cat-titolo--sub {
     margin-top: clamp(3rem, 8vh, 5rem);
   }
@@ -544,7 +576,37 @@ const menuDesc =
     align-items: baseline;
     gap: 1.5rem;
     padding-block: 1.25rem;
+    padding-inline: 0.75rem;
+    margin-inline: -0.75rem;
     border-top: 1px solid var(--linea);
+    border-radius: var(--radius);
+    transition: background 0.35s, box-shadow 0.35s;
+  }
+  /* Hover: la voce si accende come sotto la lampada del pub */
+  .menu-item:hover {
+    background: linear-gradient(90deg, rgba(232, 176, 75, 0.07), transparent 70%);
+    box-shadow: inset 2px 0 0 var(--oro);
+  }
+  .menu-item:hover .mi-nome {
+    color: var(--oro);
+  }
+  .mi-nome {
+    transition: color 0.3s;
+  }
+  /* Il badge "novità" respira */
+  .badge,
+  .tag--chef {
+    animation: badge-glow 2.8s var(--ease-inout) infinite;
+  }
+  @keyframes badge-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 176, 75, 0.4); }
+    55% { box-shadow: 0 0 0 6px rgba(232, 176, 75, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .badge,
+    .tag--chef {
+      animation: none;
+    }
   }
   .mi-nome {
     font-size: clamp(1.15rem, 2.6vw, 1.5rem);

@@ -11,10 +11,10 @@ const base = import.meta.env.BASE_URL;
     <h2 class="spina-titolo" data-split>{birre.titolo}</h2>
     <p class="spina-intro" data-reveal>{birre.slogan}</p>
 
-    <ul class="taplist">
+    <ul class="taplist" data-stagger>
       {
         birre.spina.map((b) => (
-          <li class="tap" data-reveal>
+          <li class="tap">
             <div class="tap-head">
               <h3 class="tap-nome">
                 {b.nome}
@@ -66,10 +66,25 @@ const base = import.meta.env.BASE_URL;
     flex-direction: column;
     gap: 1.25rem;
     padding-block: 1.75rem;
+    padding-inline: 0.75rem;
+    margin-inline: -0.75rem;
     border-top: 1px solid var(--linea);
+    border-radius: var(--radius);
+    transition: background 0.35s, box-shadow 0.35s;
   }
   .tap:last-of-type {
     border-bottom: 1px solid var(--linea);
+  }
+  /* Hover: la riga si accende come sotto la luce della lampada */
+  .tap:hover {
+    background: linear-gradient(90deg, rgba(232, 176, 75, 0.07), transparent 70%);
+    box-shadow: inset 2px 0 0 var(--oro);
+  }
+  .tap:hover .tap-nome {
+    color: var(--oro);
+  }
+  .tap-nome {
+    transition: color 0.3s;
   }
   .tap-nome {
     font-size: clamp(1.5rem, 4vw, 2.25rem);

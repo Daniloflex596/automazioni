@@ -157,15 +157,112 @@ section {
 }
 
 /* --- Reveal di base (progressive enhancement) --- */
+/* Blur-in cinematografico: gli elementi "mettono a fuoco" entrando in scena. */
 [data-reveal] {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
-  will-change: opacity, transform;
+  filter: blur(6px);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 0.9s var(--ease-out),
+    filter 0.9s var(--ease-out);
+  will-change: opacity, transform, filter;
 }
 [data-reveal].is-visible {
   opacity: 1;
   transform: none;
+  filter: blur(0);
+}
+/* Stagger: i figli diretti di un contenitore [data-stagger] entrano a cascata. */
+[data-stagger] > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+[data-stagger].is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+[data-stagger].is-visible > *:nth-child(1) { transition-delay: 0.05s; }
+[data-stagger].is-visible > *:nth-child(2) { transition-delay: 0.13s; }
+[data-stagger].is-visible > *:nth-child(3) { transition-delay: 0.21s; }
+[data-stagger].is-visible > *:nth-child(4) { transition-delay: 0.29s; }
+[data-stagger].is-visible > *:nth-child(5) { transition-delay: 0.37s; }
+[data-stagger].is-visible > *:nth-child(6) { transition-delay: 0.45s; }
+[data-stagger].is-visible > *:nth-child(7) { transition-delay: 0.53s; }
+[data-stagger].is-visible > *:nth-child(8) { transition-delay: 0.61s; }
+
+/* --- Progress "pinta": indicatore di scroll a bordo destro --- */
+/* La pinta si riempie con lo scroll: la firma del sito anche nella UI. */
+#pinta-progress {
+  position: fixed;
+  right: clamp(0.6rem, 2vw, 1.4rem);
+  bottom: clamp(1rem, 4vh, 2rem);
+  width: 26px;
+  height: 40px;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+body[data-ready='true'] #pinta-progress {
+  opacity: 0.9;
+}
+#pinta-progress .pp-glass {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--schiuma-soft);
+  border-radius: 3px 3px 9px 9px;
+  overflow: hidden;
+  background: rgba(23, 16, 11, 0.55);
+  backdrop-filter: blur(3px);
+}
+#pinta-progress .pp-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0%;
+  background: linear-gradient(180deg, var(--oro), var(--ambra));
+}
+#pinta-progress .pp-foam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--schiuma);
+  border-radius: 50%;
+  transform: translateY(-1.5px);
+  opacity: 0;
+}
+
+/* --- CTA sheen: bagliore che attraversa i bottoni primari all'hover --- */
+.btn-primary,
+.topbar-cta {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after,
+.topbar-cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -80%;
+  width: 55%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.55s var(--ease-out);
+  pointer-events: none;
+}
+.btn-primary:hover::after,
+.topbar-cta:hover::after {
+  left: 125%;
 }
 
 /* Split-text: ogni parola sale come schiuma quando la sezione entra in scena */
@@ -197,10 +294,19 @@ section {
 /* --- Rispetto di prefers-reduced-motion --- */
 @media (prefers-reduced-motion: reduce) {
   [data-reveal],
+  [data-stagger] > *,
   .split-inner {
     transition: none !important;
     transform: none !important;
     opacity: 1 !important;
+    filter: none !important;
+  }
+  .btn-primary::after,
+  .topbar-cta::after {
+    display: none !important;
+  }
+  #pinta-progress {
+    display: none !important;
   }
   * {
     scroll-behavior: auto !important;

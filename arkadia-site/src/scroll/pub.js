@@ -104,20 +104,72 @@ async function boot() {
 
   const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
   let pub = null;
-  const tavola = document.getElementById('tavola');
-  function raf(time) {
-    lenis.raf(time);
-    if (pub) {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      pub.setProgress(max > 0 ? window.scrollY / max : 0);
-      // Il burger si scompone quando "La Tavola" è al centro del viewport.
-      if (tavola && pub.setBurger) {
-        const r = tavola.getBoundingClientRect();
-        const center = r.top + r.height / 2;
-        const d = Math.abs(center - window.innerHeight / 2) / (window.innerHeight * 0.85);
-        pub.setBurger(Math.max(0, 1 - d));
+
+  // Prossimità di una sezione al centro del viewport (0 lontana → 1 centrata):
+  // pilota le micro-scene 3D (burger, mescita, brindisi) dalla narrazione DOM.
+  const sects = {
+    tavola: document.getElementById('tavola'),
+    spina: document.getElementById('spina'),
+    brindisi: document.getElementById('brindisi'),
+  };
+  function proximity(el) {
+    if (!el) return 0;
+    const r = el.getBoundingClientRect();
+    const center = r.top + r.height / 2;
+    const d = Math.abs(center - window.innerHeight / 2) / (window.innerHeight * 0.85);
+    return Math.max(0, 1 - d);
+  }
+
+  // Progress "pinta" (indicatore scroll a bordo destro), iniettato via JS.
+  const pp = document.createElement('div');
+  pp.id = 'pinta-progress';
+  pp.setAttribute('aria-hidden', 'true');
+  pp.innerHTML = '<div class="pp-glass"><div class="pp-fill"></div><div class="pp-foam"></div></div>';
+  document.body.appendChild(pp);
+  const ppFill = pp.querySelector('.pp-fill');
+  const ppFoam = pp.querySelector('.pp-foam');
+
+  // Sincronizzazione narrativa camera↔sezioni: ogni sezione DOM ha la sua
+  // stazione sul percorso (0..5). Il progresso è interpolato tra i CENTRI
+  // delle sezioni, così la camera è sempre nel punto giusto della scena
+  // quando quella sezione è al centro dello schermo.
+  const ROUTE = [
+    ['soglia', 0], ['rifugio', 1], ['spina', 2], ['tavola', 3],
+    ['luogo', 4], ['giochi', 4.55], ['brindisi', 5],
+  ].map(([id, st]) => ({ el: document.getElementById(id), st }));
+
+  function narrativeT() {
+    const mid = window.scrollY + window.innerHeight / 2;
+    const pts = ROUTE.filter((r) => r.el).map((r) => ({
+      y: r.el.offsetTop + r.el.offsetHeight / 2,
+      st: r.st,
+    }));
+    if (!pts.length) return 0;
+    if (mid <= pts[0].y) return (pts[0].st / 5) * Math.max(0, mid / pts[0].y);
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (mid <= pts[i + 1].y) {
+        const f = (mid - pts[i].y) / (pts[i + 1].y - pts[i].y);
+        return (pts[i].st + (pts[i + 1].st - pts[i].st) * f) / 5;
       }
     }
+    return 1;
+  }
+
+  function raf(time) {
+    lenis.raf(time);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const t = max > 0 ? window.scrollY / max : 0;
+    if (pub) {
+      pub.setProgress(narrativeT());
+      pub.setBurger?.(proximity(sects.tavola));
+      pub.setSpina?.(proximity(sects.spina));
+      pub.setBrindisi?.(proximity(sects.brindisi));
+    }
+    // La pinta di progresso si riempie con lo scroll.
+    const pct = Math.round(t * 100);
+    ppFill.style.height = pct + '%';
+    ppFoam.style.bottom = pct + '%';
+    ppFoam.style.opacity = pct > 3 ? '0.95' : '0';
     requestAnimationFrame(raf);
   }
   requestAnimationFrame(raf);

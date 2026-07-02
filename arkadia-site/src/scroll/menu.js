@@ -135,8 +135,23 @@ function initTabs() {
 function initScroll() {
   if (reduced) return;
   const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+
+  // Progress "pinta": stessa firma della home, si riempie con lo scroll.
+  const pp = document.createElement('div');
+  pp.id = 'pinta-progress';
+  pp.setAttribute('aria-hidden', 'true');
+  pp.innerHTML = '<div class="pp-glass"><div class="pp-fill"></div><div class="pp-foam"></div></div>';
+  document.body.appendChild(pp);
+  const ppFill = pp.querySelector('.pp-fill');
+  const ppFoam = pp.querySelector('.pp-foam');
+
   function raf(time) {
     lenis.raf(time);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = Math.round((max > 0 ? window.scrollY / max : 0) * 100);
+    ppFill.style.height = pct + '%';
+    ppFoam.style.bottom = pct + '%';
+    ppFoam.style.opacity = pct > 3 ? '0.95' : '0';
     requestAnimationFrame(raf);
   }
   requestAnimationFrame(raf);

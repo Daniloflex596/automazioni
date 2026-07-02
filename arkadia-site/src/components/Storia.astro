@@ -8,10 +8,10 @@ import { storia } from '../data/contenuti';
     <p class="occhiello" data-reveal>{storia.occhiello}</p>
     <h2 class="storia-titolo" data-split>{storia.titolo}</h2>
 
-    <ol class="timeline">
+    <ol class="timeline" data-stagger>
       {
         storia.blocchi.map((b) => (
-          <li class="tl-item" data-reveal>
+          <li class="tl-item">
             <span class="tl-anno mono">{b.anno}</span>
             <p class="tl-testo">{b.testo}</p>
           </li>
@@ -34,6 +34,24 @@ import { storia } from '../data/contenuti';
     display: grid;
     gap: 2.5rem;
     max-width: 62ch;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  /* La linea del tempo si "disegna" dall'alto quando la sezione entra in scena */
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 1px;
+    background: linear-gradient(180deg, var(--oro), var(--rame));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 1.6s var(--ease-inout) 0.2s;
+  }
+  .timeline.is-visible::before {
+    transform: scaleY(1);
   }
   .tl-item {
     display: grid;
@@ -42,6 +60,26 @@ import { storia } from '../data/contenuti';
     align-items: baseline;
     padding-top: 2rem;
     border-top: 1px solid var(--linea);
+    position: relative;
+  }
+  /* Pallino sulla linea per ogni tappa */
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 2.6rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--oro);
+    transform: translateX(-3px);
+    box-shadow: 0 0 12px var(--oro-glow);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .timeline::before {
+      transform: none;
+      transition: none;
+    }
   }
   .tl-anno {
     color: var(--oro);

@@ -9,10 +9,10 @@ const base = import.meta.env.BASE_URL;
     <p class="occhiello" data-reveal>{cibo.occhiello}</p>
     <h2 class="tavola-titolo" data-split>{cibo.titolo}</h2>
 
-    <div class="piatti">
+    <div class="piatti" data-stagger>
       {
         cibo.piatti.map((p, i) => (
-          <article class="piatto" data-reveal>
+          <article class="piatto">
             <span class="piatto-num mono">0{i + 1}</span>
             <div class="piatto-body">
               <p class="piatto-cat mono">{p.categoria}</p>

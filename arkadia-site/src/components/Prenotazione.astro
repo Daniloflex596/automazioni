@@ -193,9 +193,21 @@ import { prenotazione, info } from '../data/contenuti';
   .btn-primary {
     background: var(--oro);
     color: var(--notte);
+    animation: cta-pulse 2.6s var(--ease-inout) infinite;
   }
   .btn-primary:hover {
     background: var(--schiuma);
+    animation-play-state: paused;
+  }
+  /* Il climax narrativo respira: anello dorato che pulsa attorno al CTA */
+  @keyframes cta-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 176, 75, 0.45); }
+    55% { box-shadow: 0 0 0 14px rgba(232, 176, 75, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-primary {
+      animation: none;
+    }
   }
   .btn-ghost {
     background: transparent;
