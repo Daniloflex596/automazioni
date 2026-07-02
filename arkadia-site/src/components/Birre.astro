@@ -2,7 +2,10 @@
 // ATTO III — La Spina. Climax dell'elemento 3D: qui avviene la mescita.
 // Le birre alla spina reali, con la griglia formati/prezzo (tap-list vera).
 import { birre } from '../data/contenuti';
-const base = import.meta.env.BASE_URL;
+// Base path normalizzato con slash finale (BASE_URL può arrivare senza).
+const base = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
 ---
 
 <section id="spina" class="spina" data-scene-act="spina">
