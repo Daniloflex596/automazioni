@@ -960,8 +960,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   // Biliardino (calcio balilla): rosso contro blu in mezzo alla sala giochi.
   // Le stecche girano e scattano quando la sezione Giochi è al centro.
   const biliardino = new THREE.Group();
-  biliardino.position.set(2.75, 0, -22.4);
-  biliardino.rotation.y = 0.35;
+  biliardino.position.set(3.15, 0, -22.1);
+  biliardino.rotation.y = 0.5;
   root.add(biliardino);
   const bilCorpo = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.24, 0.75), mat(C.legno, { r: 0.7 }));
   bilCorpo.position.y = 0.78;
@@ -1140,7 +1140,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     { p: [-2.2, 1.6, -6.85], l: [-4.35, 1.3, -8.75] }, // 4 friggitoria: i tre in voga sul bancone
     { p: [2.15, 1.6, -11.0], l: [4.35, 1.2, -12.75] }, // 5 banco dolci: i tre dolci da vicino
     { p: [-1.95, 1.45, -4.55], l: [-3.15, 1.28, -2.85] }, // 6 cocktail bar: ritorno al bancone, lato destro
-    { p: [2.0, 1.75, -18.6], l: [5.2, 2.0, -20.9] }, // 7 sala giochi (bersaglio + barile)
+    { p: [-0.4, 1.85, -17.4], l: [3.9, 1.3, -21.4] }, // 7 sala giochi: tutta l'area in quadro (bersaglio, arcade, barile, biliardino)
     { p: [0.0, 2.1, -23.0], l: [0, 1.5, -3.0] },    // 8 il luogo: sguardo all'indietro su tutto il pub
     { p: [0.0, 1.5, -24.3], l: [0, 1.05, -27.4] },  // 9 séparé / brindisi
   ];
