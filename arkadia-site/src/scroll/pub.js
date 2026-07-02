@@ -164,7 +164,6 @@ async function boot() {
 
   // POV birre: hover/click sulle righe → la camera va sull'oggetto esatto.
   const povRows = [...document.querySelectorAll('#spina [data-birra]')];
-  const isMobile = matchMedia('(max-width: 820px)').matches;
   povRows.forEach((row) => {
     const i = +row.dataset.birra;
     row.addEventListener('mouseenter', () => pub?.setBirraFocus?.(i));
@@ -173,23 +172,13 @@ async function boot() {
     row.addEventListener('focus', () => pub?.setBirraFocus?.(i));
     row.addEventListener('blur', () => pub?.setBirraFocus?.(-1));
   });
-  function povDaScroll() {
-    // Su mobile (niente hover): mentre attraversi la sezione birre, il POV
-    // segue la riga più vicina al centro dello schermo.
-    if (!isMobile || !povRows.length) return;
-    if (proximity(sects.spina) < 0.55) { pub?.setBirraFocus?.(-1); return; }
-    let best = -1, bestD = 170;
-    povRows.forEach((row) => {
-      const r = row.getBoundingClientRect();
-      const d = Math.abs(r.top + r.height / 2 - innerHeight / 2);
-      if (d < bestD) { bestD = d; best = +row.dataset.birra; }
-    });
-    pub?.setBirraFocus?.(best);
-  }
 
+  // Il POV non deve MAI bloccare lo scroll: appena scrolli, si sgancia.
+  let lastScrollY = window.scrollY;
   function raf(time) {
     lenis.raf(time);
-    povDaScroll();
+    if (Math.abs(window.scrollY - lastScrollY) > 3) pub?.setBirraFocus?.(-1);
+    lastScrollY = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const t = max > 0 ? window.scrollY / max : 0;
     if (pub) {

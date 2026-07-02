@@ -127,12 +127,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     taps.add(handle);
   }
 
-  // Calice pieno sul bancone
-  const glass = makeGoblet();
-  glass.position.set(-0.35, 1.22, -1.6);
-  glass.scale.setScalar(0.9);
-  bar.add(glass);
-
   // LE TRE DEL MOMENTO sul bancone: pinta del mese, calice di rossa,
   // bottiglia Chouffe Red. Il POV le raggiunge una a una (setBirraFocus).
   function birraMomento(z, build) {
@@ -143,7 +137,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     return g;
   }
   // 0 · Birra del Mese: pinta dorata con schiuma
-  birraMomento(-2.6, (g) => {
+  birraMomento(-1.1, (g) => {
     const gl = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.075, 0.3, 16, 1, true),
       new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
     gl.position.y = 0.15;
@@ -154,7 +148,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     g.add(gl, liq, fo);
   });
   // 1 · La Rossa: calice a stelo con liquido rosso-ambrato
-  birraMomento(-3.4, (g) => {
+  birraMomento(-1.7, (g) => {
     const st = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.14, 8), mat(0xd9cdb4, { r: 0.2 }));
     st.position.y = 0.07;
     const cup = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12, 0, Math.PI * 2, 0, Math.PI / 1.8),
@@ -167,7 +161,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     g.add(st, cup, liq, fo);
   });
   // 2 · Chouffe Red: bottiglia rossa alla ciliegia + ciliegina
-  birraMomento(-4.2, (g) => {
+  birraMomento(-2.3, (g) => {
     const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.075, 0.3, 14), mat(0x6a1015, { r: 0.25, e: 0x300508, ei: 0.5 }));
     body.position.y = 0.15;
     const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.05, 0.16, 10), mat(0x6a1015, { r: 0.25, e: 0x300508, ei: 0.5 }));
@@ -181,9 +175,9 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
   // POV birre: posizioni camera ravvicinate davanti a ciascun oggetto (mondo).
   const BIRRA_POV = [
-    { p: [-2.0, 1.62, -3.1], l: [-3.4, 1.45, -3.1] },
-    { p: [-2.0, 1.62, -3.9], l: [-3.4, 1.45, -3.9] },
-    { p: [-2.0, 1.66, -4.7], l: [-3.4, 1.5, -4.7] },
+    { p: [-2.0, 1.62, -1.6], l: [-3.4, 1.45, -1.6] },
+    { p: [-2.0, 1.62, -2.2], l: [-3.4, 1.45, -2.2] },
+    { p: [-2.0, 1.66, -2.8], l: [-3.4, 1.5, -2.8] },
   ];
   let birraFocus = -1;
   let focusAmt = 0;
@@ -700,7 +694,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const stations = [
     { p: [0.0, 1.7, 11.0], l: [0, 1.7, 2] },        // 0 soglia (fuori dalla porta)
     { p: [0.6, 1.65, 5.5], l: [-1.5, 1.6, 1] },     // 1 storia (entrando, verso sinistra)
-    { p: [-1.4, 1.55, 1.2], l: [-3.2, 1.3, -0.4] }, // 2 bancone / birre
+    { p: [-1.3, 1.55, 0.6], l: [-3.3, 1.38, -2.0] }, // 2 bancone / le tre del momento
     { p: [1.55, 1.45, -1.85], l: [2.6, 1.18, -3] }, // 3 cucina (tavolo: burger protagonista)
     { p: [-1.2, 1.7, -6.4], l: [-4.3, 1.85, -8.7] }, // 4 angolo fritti (sinistra)
     { p: [1.3, 1.65, -10.5], l: [4.4, 1.75, -12.7] }, // 5 angolo dolci (destra)
