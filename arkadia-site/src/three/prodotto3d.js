@@ -73,8 +73,8 @@ export function initProdotto(canvas, strati) {
   renderer.toneMappingExposure = 1.5;
 
   const scene = new THREE.Scene(); // sfondo trasparente: fluttua sulla pagina
-  const camera = new THREE.PerspectiveCamera(34, canvas.clientWidth / canvas.clientHeight, 0.1, 20);
-  camera.position.set(0, 1.15, 4.4);
+  const camera = new THREE.PerspectiveCamera(36, canvas.clientWidth / canvas.clientHeight, 0.1, 20);
+  camera.position.set(0, 0, 5.6);
 
   const key = new THREE.DirectionalLight(0xffe0b0, 2.6);
   key.position.set(2.5, 4, 3);
@@ -106,11 +106,11 @@ export function initProdotto(canvas, strati) {
     const k = cyc * cyc * (3 - 2 * cyc);
     meshes.forEach((m, i) => {
       const centered = i - (n - 1) / 2;
-      m.position.y = centered * (0.16 + k * 0.5);
+      m.position.y = centered * (0.13 + k * 0.22); // apertura compatta: tutto resta in frame
       m.rotation.y = t * 0.2 * (i % 2 ? 1 : -1) * k;
     });
     g.rotation.y = t * 0.45;
-    g.position.y = Math.sin(t * 1.3) * 0.06;
+    g.position.y = Math.sin(t * 1.3) * 0.04;
     renderer.render(scene, camera);
   }
 
@@ -148,6 +148,22 @@ export const RICETTE = {
     { tipo: 'quadro', color: 0xe8a33c },            // cheddar
     { tipo: 'anello' },                             // anelli di cipolla
     { tipo: 'disco', color: 0x5a2210, h: 0.05 },    // salsa barbecue
+    { tipo: 'bun-top' },
+  ],
+  hellfire: [
+    { tipo: 'bun-bottom' },
+    { tipo: 'disco', color: 0x4a7a30, h: 0.07 },    // insalata
+    { tipo: 'patty' },                               // hamburger 200gr
+    { tipo: 'disco', color: 0xf4ecdc, h: 0.09 },     // stracciatella
+    { tipo: 'disco', color: 0xb02010, h: 0.07 },     // bomba calabra
+    { tipo: 'bun-top' },
+  ],
+  cheeseburger: [
+    { tipo: 'bun-bottom' },
+    { tipo: 'patty' },                               // hamburger 200gr
+    { tipo: 'bacon' },                               // bacon
+    { tipo: 'disco', color: 0xf0e6d0, h: 0.1 },      // tomino
+    { tipo: 'quadro', color: 0xe8a33c },             // cheddar
     { tipo: 'bun-top' },
   ],
 };

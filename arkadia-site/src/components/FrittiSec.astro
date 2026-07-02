@@ -1,6 +1,8 @@
 ---
 // ZONA FRITTI — fondale: patatine che si dilatano, si spezzano e si riuniscono.
 import { fritti, categorieMenu } from '../data/contenuti';
+const TOP = [fritti[1], fritti[0], fritti[2]]; // Montparnasse (consigliato), Tagliere, Onion Rings
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
 ---
 
 <section id="fritti" class="fritti" data-scene-act="fritti">
@@ -11,7 +13,7 @@ import { fritti, categorieMenu } from '../data/contenuti';
 
     <ul class="mlista" data-stagger>
       {
-        fritti.map((v) => (
+        TOP.map((v) => (
           <li class="mriga">
             <div>
               <h3 class="mnome">
@@ -26,6 +28,7 @@ import { fritti, categorieMenu } from '../data/contenuti';
         ))
       }
     </ul>
+    <a class="z-cta mono" href={`${base}menu#cat-fritti`}>Tutti i fritti sul menu completo →</a>
   </div>
 </section>
 
@@ -34,6 +37,17 @@ import { fritti, categorieMenu } from '../data/contenuti';
     font-size: var(--fs-h2);
     margin-top: 1.25rem;
   }
+  .z-cta {
+    display: inline-block;
+    margin-top: 2.2rem;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.3rem;
+  }
+  .z-cta:hover { color: var(--oro); }
   .z-slogan {
     margin-top: 1rem;
     max-width: 46ch;

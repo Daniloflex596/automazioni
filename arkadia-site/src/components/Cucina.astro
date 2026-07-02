@@ -2,27 +2,34 @@
 // ZONA CUCINA — gli hamburger reali (tutti con patatine). Dietro: il burger
 // del tavolo che si scompone + burger satelliti che si smontano in loop.
 import { hamburger, categorieMenu } from '../data/contenuti';
+// I tre panini più in voga del mese (evidenza in home; lista completa su /menu)
+const IN_VOGA = [
+  { ...hamburger[0], ricetta: 'brexit', frase: 'Il più scelto in assoluto: chi lo prova, lo riordina.' },
+  { ...hamburger[1], ricetta: 'hellfire', frase: 'Per chi non ha paura della bomba calabra.' },
+  { ...hamburger[3], ricetta: 'cheeseburger', frase: 'Tre formaggi e bacon: il comfort assoluto.' },
+];
+const base = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
 ---
 
 <section id="cucina" class="cucina" data-scene-act="cucina">
   <div class="wrap">
     <p class="occhiello" data-reveal>La Cucina</p>
     <h2 class="z-titolo" data-split>Hamburger</h2>
-    <p class="z-slogan" data-reveal>{categorieMenu[2].slogan} — tutti serviti con patatine.</p>
+    <p class="z-slogan" data-reveal>I tre panini più in voga del mese — tutti con hamburger da 200gr e patatine.</p>
 
     <ul class="mlista" data-stagger>
       {
-        hamburger.map((v, i) => (
-          <li class:list={['mriga', { 'mriga--3d': i === 0 }]}>
-            {i === 0 && (
-              <canvas
-                class="p3d"
-                data-ricetta="brexit"
-                width="320"
-                height="400"
-                aria-label="Brexit: il panino si scompone mostrando gli ingredienti"
-              />
-            )}
+        IN_VOGA.map((v) => (
+          <li class="mriga mriga--3d">
+            <canvas
+              class="p3d"
+              data-ricetta={v.ricetta}
+              width="320"
+              height="400"
+              aria-label={`${v.nome}: il panino si scompone mostrando gli ingredienti`}
+            />
             <div>
               <h3 class="mnome">
                 {v.nome}
@@ -30,12 +37,15 @@ import { hamburger, categorieMenu } from '../data/contenuti';
                 {v.tag?.includes('piccante') && <span class="mtag">piccante</span>}
               </h3>
               {v.desc && <p class="mdesc">{v.desc}</p>}
+              <p class="mfrase">«{v.frase}»</p>
             </div>
             <span class="mprezzo mono">€ {v.prezzo}</span>
           </li>
         ))
       }
     </ul>
+
+    <a class="z-cta mono" href={`${base}menu#cat-hamburger`}>Tutti gli hamburger sul menu completo →</a>
   </div>
 </section>
 
@@ -49,31 +59,54 @@ import { hamburger, categorieMenu } from '../data/contenuti';
     max-width: 46ch;
     color: var(--schiuma-soft);
   }
-  /* L'ologramma del prodotto: fluttua accanto alla voce */
+  .mfrase {
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--oro);
+    font-size: 0.95rem;
+  }
+  .z-cta {
+    display: inline-block;
+    margin-top: 2.2rem;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.3rem;
+  }
+  .z-cta:hover { color: var(--oro); }
+  /* L'ologramma del prodotto: fluttua TRA gli ingredienti e il prezzo,
+     senza toccare la colonna prezzi (che resta allineata a destra). */
   .mriga--3d {
     position: relative;
-    min-height: 150px;
-    padding-right: 150px;
+    min-height: 168px;
+  }
+  .mriga--3d > div:first-of-type {
+    max-width: calc(100% - 300px); /* il testo si ferma prima dell'ologramma */
   }
   .p3d {
     position: absolute;
-    right: 4.5rem;
+    right: 130px; /* tra il testo e la colonna prezzi */
     top: 50%;
     transform: translateY(-50%);
-    width: 128px;
-    height: 160px;
+    width: 118px;
+    height: 158px;
     pointer-events: none;
     filter: drop-shadow(0 10px 24px rgba(232, 176, 75, 0.18));
   }
   @media (max-width: 640px) {
     .mriga--3d {
-      padding-right: 0;
-      padding-bottom: 150px;
+      padding-bottom: 155px;
+    }
+    .mriga--3d > div:first-of-type {
+      max-width: 100%;
     }
     .p3d {
       right: 50%;
       top: auto;
-      bottom: -10px;
+      bottom: -6px;
       transform: translateX(50%);
     }
   }
