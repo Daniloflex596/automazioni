@@ -104,11 +104,19 @@ async function boot() {
 
   const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
   let pub = null;
+  const tavola = document.getElementById('tavola');
   function raf(time) {
     lenis.raf(time);
     if (pub) {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       pub.setProgress(max > 0 ? window.scrollY / max : 0);
+      // Il burger si scompone quando "La Tavola" è al centro del viewport.
+      if (tavola && pub.setBurger) {
+        const r = tavola.getBoundingClientRect();
+        const center = r.top + r.height / 2;
+        const d = Math.abs(center - window.innerHeight / 2) / (window.innerHeight * 0.85);
+        pub.setBurger(Math.max(0, 1 - d));
+      }
     }
     requestAnimationFrame(raf);
   }
