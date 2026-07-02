@@ -50,6 +50,50 @@ const fallback = document.getElementById('scena-fallback');
 const fallbackFill = fallback?.querySelector('.fb-fill');
 const fallbackFoam = fallback?.querySelector('.fb-foam');
 let scene3d = null;
+let pub = null; // scena pub condivisa con la home
+
+// Route menu→stazioni del pub: le sezioni bevande vivono tutte al Bar.
+const MROUTE = [
+  ['cat-birre', 2], ['cat-fritti', 4], ['cat-hamburger', 3],
+  ['cat-dessert', 5], ['cat-da-bere', 6], ['cat-caffetteria', 6], ['cat-cocktail', 6],
+];
+function proximity(el) {
+  if (!el) return 0;
+  const r = el.getBoundingClientRect();
+  const c = r.top + r.height / 2;
+  return Math.max(0, 1 - Math.abs(c - innerHeight / 2) / (innerHeight * 0.85));
+}
+function menuT() {
+  const mid = scrollY + innerHeight / 2;
+  const pts = MROUTE.map(([id, st]) => {
+    const el = document.getElementById(id);
+    return el ? { y: el.offsetTop + el.offsetHeight / 2, st } : null;
+  }).filter(Boolean);
+  if (!pts.length) return 0;
+  if (mid <= pts[0].y) return (pts[0].st / 9) * Math.max(0, mid / pts[0].y);
+  for (let i = 0; i < pts.length - 1; i++) {
+    if (mid <= pts[i + 1].y) {
+      const f = (mid - pts[i].y) / (pts[i + 1].y - pts[i].y);
+      return (pts[i].st + (pts[i + 1].st - pts[i].st) * f) / 9;
+    }
+  }
+  return pts[pts.length - 1].st / 9;
+}
+function drivePub() {
+  if (!pub) return;
+  pub.setProgress(menuT());
+  pub.setSpina?.(proximity(document.getElementById('cat-birre')));
+  pub.setBurger?.(proximity(document.getElementById('cat-hamburger')));
+  pub.setZone?.('cucina', proximity(document.getElementById('cat-hamburger')));
+  pub.setZone?.('fritti', proximity(document.getElementById('cat-fritti')));
+  pub.setZone?.('dessert', proximity(document.getElementById('cat-dessert')));
+  const barP = Math.max(
+    proximity(document.getElementById('cat-da-bere')),
+    proximity(document.getElementById('cat-caffetteria')),
+    proximity(document.getElementById('cat-cocktail'))
+  );
+  pub.setZone?.('bar', barP);
+}
 
 function driveFill(p) {
   const f = clamp01(p);
@@ -160,6 +204,7 @@ function initScroll() {
 
   function raf(time) {
     lenis.raf(time);
+    drivePub();
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const pct = Math.round((max > 0 ? window.scrollY / max : 0) * 100);
     ppFill.style.height = pct + '%';
@@ -204,9 +249,14 @@ async function boot() {
   fallback?.style.setProperty('display', 'none');
   try {
     setPreload(0.65);
-    const { initCalice } = await import('../three/calice3d.js');
-    scene3d = initCalice(canvas, { quality: tier === 'high' ? 'high' : 'low' });
-    pourIn();
+    const { initPub } = await import('../three/pub3d.js');
+    const scena = document.getElementById('scena');
+    if (scena) {
+      scena.style.position = 'fixed';
+      scena.style.height = '100%';
+    }
+    pub = initPub(canvas, { quality: tier === 'high' ? 'high' : 'low' });
+    drivePub();
     setPreload(0.95);
     requestAnimationFrame(hidePreloader);
   } catch (err) {
