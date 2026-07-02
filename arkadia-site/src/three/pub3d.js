@@ -638,7 +638,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   // ---- IL BANCO DELLE DOLCEZZE (destra, z -12.7) — metodo immersivo:
   //      i TRE dolci reali del menu ricostruiti uno per uno.
   //      Crêpe alla Nutella · Pannacotta (il topping cambia: "chiedi il tuo")
-  //      · Dolce del Giorno sotto la cloche, che si solleva scrollando.
+  //      · Dolce del Giorno che gira in vetrina sull'alzata.
   const dolceGrp = new THREE.Group();
   dolceGrp.position.set(4.25, 1.7, -12.7);
   root.add(dolceGrp);
@@ -657,14 +657,23 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     const piatto = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.02, 18), mat(C.schiuma, { r: 0.6 }));
     piatto.position.y = 0.01;
     crepe.add(piatto);
-    const wedgeM = mat(0xe0b060, { r: 0.65, e: 0x5a3a10, ei: 0.2 });
-    const w1 = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.032, 20, 1, false, 0, Math.PI / 2), wedgeM);
-    w1.position.y = 0.036;
+    // pasta dorata con i bordi brunati della piastra
+    const wedgeM = mat(0xcf9038, { r: 0.6, e: 0x4a2808, ei: 0.3 });
+    const w1 = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.155, 0.03, 22, 1, false, 0, Math.PI / 2), wedgeM);
+    w1.position.y = 0.035;
     w1.rotation.y = Math.PI * 0.75; // la punta verso il centro del banco
-    const w2 = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.03, 20, 1, false, 0, Math.PI / 2), wedgeM);
-    w2.position.y = 0.066;
+    const w2 = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.145, 0.028, 22, 1, false, 0, Math.PI / 2), wedgeM);
+    w2.position.y = 0.064;
     w2.rotation.y = Math.PI * 0.75 + 0.18;
     crepe.add(w1, w2);
+    // bruniture da piastra sul bordo
+    for (let i = 0; i < 4; i++) {
+      const brun = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 6), mat(0x8a5218, { r: 0.8 }));
+      const a = Math.PI * 0.75 + 0.2 + i * 0.28;
+      brun.position.set(Math.cos(a) * 0.145, 0.052, Math.sin(a) * 0.145);
+      brun.scale.y = 0.3;
+      crepe.add(brun);
+    }
     const nutMat = mat(0x3a1e0c, { r: 0.25, e: 0x1a0c04, ei: 0.6 });
     for (let i = 0; i < 3; i++) {
       const filo = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.006, 0.014), nutMat);
@@ -712,38 +721,36 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     pannacotta.add(bacca);
   }
   dolceGrp.add(pannacotta);
-  // 3) Dolce del Giorno: sull'alzata, nascosto sotto la cloche d'ottone che
-  //    si solleva quando la sezione è al centro ("chiedi qual è quello di oggi").
+  // 3) Dolce del Giorno: sull'alzata, gira su se stesso come in vetrina
+  //    ("chiedi qual è quello di oggi": ogni sera è diverso).
   const alzata = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.06, 0.26, 14), mat(C.schiuma, { r: 0.4 }));
   alzata.position.set(0.32, DTOP + 0.13, 0.45);
   dolceGrp.add(alzata);
   const alzataPiano = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.018, 18), mat(C.schiuma, { r: 0.4 }));
   alzataPiano.position.set(0.32, DTOP + 0.265, 0.45);
   dolceGrp.add(alzataPiano);
+  // Torta al cioccolato a strati: pan di spagna scuro e crema alternati,
+  //  glassa lucida che cola e ciliegia — ben diversa da crêpe e pannacotta.
   const dolceFetta = new THREE.Group();
   {
-    const base3 = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.075, 3), mat(0xf0e0c0, { r: 0.7 }));
-    const glassa = new THREE.Mesh(new THREE.CylinderGeometry(0.133, 0.133, 0.028, 3), mat(C.rame, { r: 0.45, e: 0x4a1a10, ei: 0.3 }));
-    glassa.position.y = 0.05;
-    const ciliegia = new THREE.Mesh(new THREE.SphereGeometry(0.026, 10, 10), mat(0xa01020, { r: 0.3, e: 0x500810, ei: 0.5 }));
-    ciliegia.position.y = 0.09;
-    dolceFetta.add(base3, glassa, ciliegia);
+    const cioccoM = mat(0x38200e, { r: 0.75 });
+    const cremaM = mat(0xf2e6cc, { r: 0.7 });
+    [[cioccoM, 0.03, 0.015], [cremaM, 0.018, 0.039], [cioccoM, 0.03, 0.063], [cremaM, 0.018, 0.087], [cioccoM, 0.026, 0.109]].forEach(([lm, lh, ly]) => {
+      const strato = new THREE.Mesh(new THREE.CylinderGeometry(0.125, 0.125, lh, 3), lm);
+      strato.position.y = ly - 0.062;
+      dolceFetta.add(strato);
+    });
+    const glassa = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.13, 0.128, 0.02, 3),
+      new THREE.MeshPhysicalMaterial({ color: 0x2a1206, roughness: 0.2, clearcoat: 0.8, clearcoatRoughness: 0.2 })
+    );
+    glassa.position.y = 0.07;
+    const ciliegia = new THREE.Mesh(new THREE.SphereGeometry(0.024, 10, 10), mat(0xa01020, { r: 0.3, e: 0x500810, ei: 0.5 }));
+    ciliegia.position.y = 0.098;
+    dolceFetta.add(glassa, ciliegia);
   }
   dolceFetta.position.set(0.32, DTOP + 0.315, 0.45);
   dolceGrp.add(dolceFetta);
-  const cloche = new THREE.Group();
-  {
-    const cupola = new THREE.Mesh(
-      new THREE.SphereGeometry(0.2, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2),
-      mat(C.ottone, { r: 0.25, m: 0.9 })
-    );
-    const pomello = new THREE.Mesh(new THREE.SphereGeometry(0.028, 10, 10), mat(C.ottone, { r: 0.25, m: 0.9 }));
-    pomello.position.y = 0.21;
-    cloche.add(cupola, pomello);
-  }
-  cloche.position.set(0.32, DTOP + 0.275, 0.45);
-  cloche.userData.baseY = DTOP + 0.275;
-  dolceGrp.add(cloche);
   // cacao in caduta sopra il banco (sottile, non tocca i dolci)
   const CAC_N = isHigh ? 30 : 16;
   const cacPos = new Float32Array(CAC_N * 3);
@@ -764,61 +771,93 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   dolceLight.position.set(3.85, 1.85, -12.7);
   scene.add(dolceLight);
 
-  // ---- IL BAR (sinistra, z -16.7): shaker che shakera + Martini + tazzina ----
-  const barGrp = new THREE.Group();
-  barGrp.position.set(-4.25, 1.6, -16.7);
-  root.add(barGrp);
-  const barBase = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.12, 1.0), mat(C.legnoTop, { r: 0.5 }));
-  barBase.position.y = -0.8;
-  barGrp.add(barBase);
-  // shaker (corpo + coperchio)
-  const shaker = new THREE.Group();
-  const shBody = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.34, 14), mat(C.ottone, { r: 0.18, m: 0.95 }));
-  const shTop = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.11, 0.14, 14), mat(C.ottone, { r: 0.18, m: 0.95 }));
-  shTop.position.y = 0.24;
-  shaker.add(shBody, shTop);
-  shaker.position.set(-0.45, -0.5, 0.1);
-  barGrp.add(shaker);
-  // Martini con liquido ambrato
-  const martini = new THREE.Group();
-  const mCono = new THREE.Mesh(
-    new THREE.ConeGeometry(0.16, 0.15, 16, 1, true),
-    new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.25, side: THREE.DoubleSide, depthWrite: false })
-  );
-  mCono.rotation.x = Math.PI;
-  mCono.position.y = -0.28;
-  const mLiq = new THREE.Mesh(new THREE.ConeGeometry(0.135, 0.11, 16), mat(C.oro, { r: 0.3, e: 0x6a4a10, ei: 0.5 }));
-  mLiq.rotation.x = Math.PI;
-  mLiq.position.y = -0.3;
-  const mStelo = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.26, 8), mat(0xd9cdb4, { r: 0.2 }));
-  mStelo.position.y = -0.48;
-  martini.add(mCono, mLiq, mStelo);
-  martini.position.set(0.1, 0, 0.15);
-  barGrp.add(martini);
-  // tazzina di caffè con vapore
-  const tazzina = new THREE.Group();
-  const tzCorpo = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 0.09, 12), mat(C.schiuma, { r: 0.4 }));
-  const tzManico = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.011, 6, 10, Math.PI * 1.4), mat(C.schiuma, { r: 0.4 }));
-  tzManico.position.x = 0.085;
-  tazzina.add(tzCorpo, tzManico);
-  tazzina.position.set(0.62, -0.68, 0.05);
-  barGrp.add(tazzina);
-  const steamBar = [];
-  for (let i = 0; i < 2; i++) {
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: makeSoftDot(), color: 0xf4e9d0, transparent: true, opacity: 0,
-      depthWrite: false, blending: THREE.AdditiveBlending,
-    }));
-    sp.scale.setScalar(0.1);
-    sp.position.copy(tazzina.position);
-    sp.userData.seed = pseudo(i * 31);
-    barGrp.add(sp);
-    steamBar.push(sp);
+  // ---- IL COCKTAIL BAR — metodo immersivo, SUL BANCONE lato destro
+  //      (lo spazio vuoto oltre le spine): i tre più chiesti, ognuno col suo
+  //      bicchiere e il suo colore. Spritz (calice, arancio) · Negroni
+  //      (tumbler, rosso scuro) · Negroni Sbagliato (flûte, col prosecco).
+  //      Scrollando si riempiono davanti a te, come le birre.
+  const glassMat = () =>
+    new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
+  const drinks = [];
+  // 1) SPRITZ: calice a stelo, arancio vivo, fetta d'arancia sul bordo, ghiaccio.
+  {
+    const g = new THREE.Group();
+    g.position.set(0.1, 1.22, -2.0); // bar-locale: lato destro del bancone
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.055, 0.012, 14), glassMat());
+    foot.position.y = 0.006;
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.07, 8), glassMat());
+    stem.position.y = 0.045;
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.04, 0.1, 16, 1, true), glassMat());
+    bowl.position.y = 0.13;
+    const liq = new THREE.Mesh(new THREE.CylinderGeometry(0.056, 0.038, 1, 14), mat(0xe06010, { r: 0.3, e: 0x702806, ei: 0.4 }));
+    liq.scale.y = 0.001;
+    liq.userData = { base: 0.082, maxH: 0.085 };
+    const iceM = new THREE.MeshPhysicalMaterial({ color: 0xf8fbff, roughness: 0.15, transparent: true, opacity: 0.5 });
+    const ice1 = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.028, 0.028), iceM);
+    ice1.position.set(0.012, 0.15, 0.008);
+    ice1.rotation.set(0.4, 0.6, 0.2);
+    const slice = new THREE.Group();
+    const polpa = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.006, 16), mat(0xe89030, { r: 0.5, e: 0x6a3a08, ei: 0.35 }));
+    const buccia = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.004, 6, 16), mat(0xc05a10, { r: 0.5 }));
+    buccia.rotation.x = Math.PI / 2;
+    slice.add(polpa, buccia);
+    slice.position.set(0.055, 0.185, 0);
+    slice.rotation.z = 0.9;
+    g.add(foot, stem, bowl, liq, ice1, slice);
+    bar.add(g);
+    drinks.push({ grp: g, liq, garnish: slice, seed: 0.4 });
+  }
+  // 2) NEGRONI: tumbler basso, rosso scuro, cubo di ghiaccio e twist d'arancia.
+  {
+    const g = new THREE.Group();
+    g.position.set(0.1, 1.22, -2.7);
+    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.046, 0.095, 16, 1, true), glassMat());
+    glass.position.y = 0.048;
+    const fondo = new THREE.Mesh(new THREE.CylinderGeometry(0.046, 0.046, 0.012, 16), glassMat());
+    fondo.position.y = 0.006;
+    const liq = new THREE.Mesh(new THREE.CylinderGeometry(0.046, 0.043, 1, 14), mat(0x8e1420, { r: 0.3, e: 0x3a0810, ei: 0.45 }));
+    liq.scale.y = 0.001;
+    liq.userData = { base: 0.014, maxH: 0.065 };
+    const iceM2 = new THREE.MeshPhysicalMaterial({ color: 0xf8fbff, roughness: 0.15, transparent: true, opacity: 0.5 });
+    const cube = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.036, 0.036), iceM2);
+    cube.position.set(0, 0.062, 0);
+    cube.rotation.set(0.3, 0.8, 0.1);
+    const twist = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.005, 6, 14, Math.PI * 1.4), mat(0xe08020, { r: 0.5, e: 0x6a3208, ei: 0.3 }));
+    twist.position.set(0.035, 0.1, 0.01);
+    twist.rotation.set(0.6, 0.4, 1.2);
+    g.add(glass, fondo, liq, cube, twist);
+    bar.add(g);
+    drinks.push({ grp: g, liq, garnish: twist, seed: 2.3 });
+  }
+  // 3) NEGRONI SBAGLIATO: flûte alta col prosecco — bollicine che salgono.
+  const bolle = [];
+  {
+    const g = new THREE.Group();
+    g.position.set(0.1, 1.22, -3.4);
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.048, 0.01, 14), glassMat());
+    foot.position.y = 0.005;
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.055, 8), glassMat());
+    stem.position.y = 0.037;
+    const flute = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.024, 0.13, 14, 1, true), glassMat());
+    flute.position.y = 0.13;
+    const liq = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.022, 1, 12), mat(0xc84838, { r: 0.28, e: 0x501410, ei: 0.4 }));
+    liq.scale.y = 0.001;
+    liq.userData = { base: 0.067, maxH: 0.115 };
+    g.add(foot, stem, flute, liq);
+    for (let i = 0; i < 4; i++) {
+      const bolla = new THREE.Mesh(new THREE.SphereGeometry(0.0045, 6, 6), mat(0xffd8c0, { r: 0.3, e: 0xffb090, ei: 0.8 }));
+      bolla.position.set((pseudo(i * 9) - 0.5) * 0.03, 0.08, (pseudo(i * 13) - 0.5) * 0.03);
+      bolla.userData = { ph: pseudo(i * 17), liq };
+      bolla.visible = false;
+      g.add(bolla);
+      bolle.push(bolla);
+    }
+    bar.add(g);
+    drinks.push({ grp: g, liq, garnish: null, seed: 4.1 });
   }
 
-
   // Luci di zona: ogni angolo del menu ha la sua lampada calda.
-  [[-4.0, 2.9, -8.7], [4.0, 2.9, -12.7], [-4.0, 2.9, -16.7]].forEach((pos) => {
+  [[-4.0, 2.9, -8.7], [4.0, 2.9, -12.7]].forEach((pos) => {
     const zl = new THREE.PointLight(0xffb851, isHigh ? 9 : 6, 5.5, 2);
     zl.position.set(pos[0], pos[1], pos[2]);
     scene.add(zl);
@@ -1054,7 +1093,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     { p: [1.0, 1.8, -1.05], l: [2.6, 1.15, -3.0] }, // 3 cucina: i tre panini affiancati in quadro
     { p: [-2.2, 1.6, -6.85], l: [-4.35, 1.3, -8.75] }, // 4 friggitoria: i tre in voga sul bancone
     { p: [2.15, 1.6, -11.0], l: [4.35, 1.2, -12.75] }, // 5 banco dolci: i tre dolci da vicino
-    { p: [-1.3, 1.7, -14.4], l: [-4.4, 1.65, -16.7] }, // 6 il bar / cocktail (sinistra)
+    { p: [-1.95, 1.45, -4.55], l: [-3.15, 1.28, -2.85] }, // 6 cocktail bar: ritorno al bancone, lato destro
     { p: [2.0, 1.75, -18.6], l: [5.2, 2.0, -20.9] }, // 7 sala giochi (bersaglio + barile)
     { p: [0.0, 2.1, -23.0], l: [0, 1.5, -3.0] },    // 8 il luogo: sguardo all'indietro su tutto il pub
     { p: [0.0, 1.5, -24.3], l: [0, 1.05, -27.4] },  // 9 séparé / brindisi
@@ -1244,7 +1283,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     });
 
     // DOLCI: la pannacotta trema, il topping cambia colore ("chiedi il tuo"),
-    // la cloche si solleva e svela il Dolce del Giorno, il cacao cade.
+    // il Dolce del Giorno gira in vetrina, il cacao cade.
     const dA = zoneAmt.dessert;
     const wob = Math.sin(time * 5.5) * 0.05 * dA;
     pannaBody.scale.set(1 + wob, 1 - wob * 0.8, 1 + wob);
@@ -1260,9 +1299,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       toppingMat.emissive.copy(toppingMat.color).multiplyScalar(0.4);
     }
     crepe.rotation.z = Math.sin(time * 1.1) * 0.04 * dA;
-    const dSm = dA * dA * (3 - 2 * dA); // smoothstep: la cloche si alza pulita
-    cloche.position.y = cloche.userData.baseY + dSm * 0.3;
-    cloche.rotation.z = dSm * 0.22;
     dolceFetta.rotation.y = time * 0.5; // il dolce del giorno gira come in vetrina
     {
       const pos = cacao.geometry.attributes.position;
@@ -1275,18 +1311,27 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       cacao.material.opacity = 0.25 + dA * 0.6;
     }
 
-    // BAR: lo shaker shakera davvero, il Martini ondeggia, la tazzina fuma.
+    // COCKTAIL BAR: i tre drink sul bancone si riempiono in sincronia con
+    // lo scroll (come le birre); guarnizioni che ondeggiano, bollicine nel
+    // prosecco dello Sbagliato quando il bicchiere è pieno.
     const bA = zoneAmt.bar;
-    shaker.rotation.z = Math.sin(time * 16) * 0.22 * bA;
-    shaker.position.y = -0.5 + Math.abs(Math.sin(time * 16)) * 0.1 * bA;
-    martini.rotation.z = Math.sin(time * 1.4) * 0.1 * bA;
-    martini.position.y = Math.sin(time * 1.1) * 0.1 * bA;
-    steamBar.forEach((sp, i) => {
-      const k = (time * 0.4 + sp.userData.seed + i * 0.5) % 1;
-      sp.position.y = tazzina.position.y + 0.12 + k * 0.42;
-      sp.position.x = tazzina.position.x + Math.sin((time + i) * 1.6) * 0.03;
-      sp.scale.setScalar(0.07 + k * 0.16);
-      sp.material.opacity = Math.sin(k * Math.PI) * 0.3 * Math.max(0.3, bA);
+    drinks.forEach((d) => {
+      const u = d.liq.userData;
+      const level = Math.max(0.001, (0.06 + bA * 0.94) * u.maxH);
+      d.liq.scale.y += (level - d.liq.scale.y) * 0.1;
+      d.liq.position.y = u.base + d.liq.scale.y / 2;
+      if (d.garnish) d.garnish.rotation.y = Math.sin(time * 1.1 + d.seed) * 0.25 * bA;
+      d.grp.rotation.y += 0.0018 * bA;
+    });
+    bolle.forEach((bl, i) => {
+      const u = bl.userData;
+      const lv = u.liq.scale.y;
+      bl.visible = lv > 0.04 && bA > 0.1;
+      if (bl.visible) {
+        const k = (time * 0.35 + u.ph + i * 0.27) % 1;
+        bl.position.y = u.liq.userData.base + k * lv;
+        bl.scale.setScalar(0.6 + k * 0.7);
+      }
     });
 
 
