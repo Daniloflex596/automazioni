@@ -635,33 +635,121 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   friggLight.position.set(-3.85, 1.75, -8.7);
   scene.add(friggLight);
 
-  // ---- ANGOLO DOLCI (destra, z -12.7): torte orbitanti + cacao che cade ----
+  // ---- IL BANCO DELLE DOLCEZZE (destra, z -12.7) — metodo immersivo:
+  //      i TRE dolci reali del menu ricostruiti uno per uno.
+  //      Crêpe alla Nutella · Pannacotta (il topping cambia: "chiedi il tuo")
+  //      · Dolce del Giorno sotto la cloche, che si solleva scrollando.
   const dolceGrp = new THREE.Group();
   dolceGrp.position.set(4.25, 1.7, -12.7);
   root.add(dolceGrp);
-  const alzata = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.1, 0.5, 14), mat(C.schiuma, { r: 0.4 }));
-  alzata.position.y = -0.85;
-  dolceGrp.add(alzata);
-  const fette = [];
-  for (let i = 0; i < 3; i++) {
-    const fetta = new THREE.Group();
-    // fetta = prisma triangolare (cilindro a 3 segmenti) + glassa
-    const base3 = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.13, 3), mat(0xf0e0c0, { r: 0.7 }));
-    const glassa = new THREE.Mesh(new THREE.CylinderGeometry(0.265, 0.265, 0.045, 3), mat(C.rame, { r: 0.45, e: 0x4a1a10, ei: 0.3 }));
-    glassa.position.y = 0.085;
-    const ciliegia = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 10), mat(0xa01020, { r: 0.3, e: 0x500810, ei: 0.5 }));
-    ciliegia.position.y = 0.16;
-    fetta.add(base3, glassa, ciliegia);
-    fetta.userData.ph = (i / 3) * Math.PI * 2;
-    dolceGrp.add(fetta);
-    fette.push(fetta);
+  const DTOP = -0.74; // quota del piano del banco (locale a dolceGrp)
+  const dolceBase = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.12, 1.1), mat(C.legnoTop, { r: 0.5 }));
+  dolceBase.position.y = -0.8;
+  dolceGrp.add(dolceBase);
+  const dolceCab = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.9, 0.9), mat(C.legno, { r: 0.75 }));
+  dolceCab.position.y = -1.25;
+  dolceGrp.add(dolceCab);
+  // 1) Crêpe alla Nutella: due quarti piegati sul piatto, colata di nutella
+  //    a zig-zag e zucchero a velo.
+  const crepe = new THREE.Group();
+  crepe.position.set(-0.32, DTOP, -0.45);
+  {
+    const piatto = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.02, 18), mat(C.schiuma, { r: 0.6 }));
+    piatto.position.y = 0.01;
+    crepe.add(piatto);
+    const wedgeM = mat(0xe0b060, { r: 0.65, e: 0x5a3a10, ei: 0.2 });
+    const w1 = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.032, 20, 1, false, 0, Math.PI / 2), wedgeM);
+    w1.position.y = 0.036;
+    w1.rotation.y = Math.PI * 0.75; // la punta verso il centro del banco
+    const w2 = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.03, 20, 1, false, 0, Math.PI / 2), wedgeM);
+    w2.position.y = 0.066;
+    w2.rotation.y = Math.PI * 0.75 + 0.18;
+    crepe.add(w1, w2);
+    const nutMat = mat(0x3a1e0c, { r: 0.25, e: 0x1a0c04, ei: 0.6 });
+    for (let i = 0; i < 3; i++) {
+      const filo = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.006, 0.014), nutMat);
+      filo.position.set(-0.03 + i * 0.02, 0.084, -0.03 + i * 0.03);
+      filo.rotation.y = 0.6 + i * 0.5;
+      crepe.add(filo);
+    }
+    const goccia = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 8), nutMat);
+    goccia.position.set(-0.09, 0.03, -0.06);
+    crepe.add(goccia);
+    for (let i = 0; i < 5; i++) {
+      const zucch = new THREE.Mesh(new THREE.SphereGeometry(0.005, 6, 6), mat(0xffffff, { r: 1 }));
+      zucch.position.set((pseudo(i * 7) - 0.5) * 0.14, 0.086, (pseudo(i * 11) - 0.5) * 0.14);
+      crepe.add(zucch);
+    }
   }
-  // cacao in caduta (points in loop)
-  const CAC_N = isHigh ? 36 : 18;
+  dolceGrp.add(crepe);
+  // 2) Pannacotta: tronco di cono che TREMA come vera pannacotta; il topping
+  //    cola e cambia colore piano piano (caramello → cioccolato → frutti rossi).
+  const pannacotta = new THREE.Group();
+  pannacotta.position.set(0, DTOP, 0);
+  const pannaBody = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.062, 0.08, 0.095, 18),
+    mat(0xf6efdc, { r: 0.45, e: 0x554a30, ei: 0.15 })
+  );
+  const toppingMat = mat(0xa01020, { r: 0.3, e: 0x400810, ei: 0.5 });
+  {
+    const piatto = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.02, 18), mat(C.schiuma, { r: 0.6 }));
+    piatto.position.y = 0.01;
+    pannacotta.add(piatto);
+    pannaBody.position.y = 0.068;
+    pannacotta.add(pannaBody);
+    const colata = new THREE.Mesh(new THREE.SphereGeometry(0.06, 14, 10), toppingMat);
+    colata.scale.set(1.05, 0.35, 1.05);
+    colata.position.y = 0.118;
+    pannacotta.add(colata);
+    for (let i = 0; i < 2; i++) {
+      const drip = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.013, 0.045, 8), toppingMat);
+      const a = i * 2.4 + 0.5;
+      drip.position.set(Math.cos(a) * 0.06, 0.098, Math.sin(a) * 0.06);
+      pannacotta.add(drip);
+    }
+    const bacca = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), mat(0x6a1020, { r: 0.3, e: 0x300810, ei: 0.5 }));
+    bacca.position.y = 0.135;
+    pannacotta.add(bacca);
+  }
+  dolceGrp.add(pannacotta);
+  // 3) Dolce del Giorno: sull'alzata, nascosto sotto la cloche d'ottone che
+  //    si solleva quando la sezione è al centro ("chiedi qual è quello di oggi").
+  const alzata = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.06, 0.26, 14), mat(C.schiuma, { r: 0.4 }));
+  alzata.position.set(0.32, DTOP + 0.13, 0.45);
+  dolceGrp.add(alzata);
+  const alzataPiano = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.018, 18), mat(C.schiuma, { r: 0.4 }));
+  alzataPiano.position.set(0.32, DTOP + 0.265, 0.45);
+  dolceGrp.add(alzataPiano);
+  const dolceFetta = new THREE.Group();
+  {
+    const base3 = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.075, 3), mat(0xf0e0c0, { r: 0.7 }));
+    const glassa = new THREE.Mesh(new THREE.CylinderGeometry(0.133, 0.133, 0.028, 3), mat(C.rame, { r: 0.45, e: 0x4a1a10, ei: 0.3 }));
+    glassa.position.y = 0.05;
+    const ciliegia = new THREE.Mesh(new THREE.SphereGeometry(0.026, 10, 10), mat(0xa01020, { r: 0.3, e: 0x500810, ei: 0.5 }));
+    ciliegia.position.y = 0.09;
+    dolceFetta.add(base3, glassa, ciliegia);
+  }
+  dolceFetta.position.set(0.32, DTOP + 0.315, 0.45);
+  dolceGrp.add(dolceFetta);
+  const cloche = new THREE.Group();
+  {
+    const cupola = new THREE.Mesh(
+      new THREE.SphereGeometry(0.2, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+      mat(C.ottone, { r: 0.25, m: 0.9 })
+    );
+    const pomello = new THREE.Mesh(new THREE.SphereGeometry(0.028, 10, 10), mat(C.ottone, { r: 0.25, m: 0.9 }));
+    pomello.position.y = 0.21;
+    cloche.add(cupola, pomello);
+  }
+  cloche.position.set(0.32, DTOP + 0.275, 0.45);
+  cloche.userData.baseY = DTOP + 0.275;
+  dolceGrp.add(cloche);
+  // cacao in caduta sopra il banco (sottile, non tocca i dolci)
+  const CAC_N = isHigh ? 30 : 16;
   const cacPos = new Float32Array(CAC_N * 3);
   for (let i = 0; i < CAC_N; i++) {
     cacPos[i * 3] = (pseudo(i * 3) - 0.5) * 1.4;
-    cacPos[i * 3 + 1] = pseudo(i * 5) * 1.6;
+    cacPos[i * 3 + 1] = 0.1 + pseudo(i * 5) * 1.1;
     cacPos[i * 3 + 2] = (pseudo(i * 7) - 0.5) * 0.8;
   }
   const cacGeo = new THREE.BufferGeometry();
@@ -671,6 +759,10 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     opacity: 0.8, depthWrite: false,
   }));
   dolceGrp.add(cacao);
+  // Luce calda bassa sul banco dei dolci.
+  const dolceLight = new THREE.PointLight(0xffc06a, isHigh ? 5 : 4, 3.5, 2);
+  dolceLight.position.set(3.85, 1.85, -12.7);
+  scene.add(dolceLight);
 
   // ---- IL BAR (sinistra, z -16.7): shaker che shakera + Martini + tazzina ----
   const barGrp = new THREE.Group();
@@ -961,7 +1053,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     { p: [-1.8, 1.55, 1.7], l: [-3.35, 1.33, 0.45] }, // 2 bancone: vicino alle tre sotto le spine
     { p: [1.0, 1.8, -1.05], l: [2.6, 1.15, -3.0] }, // 3 cucina: i tre panini affiancati in quadro
     { p: [-2.2, 1.6, -6.85], l: [-4.35, 1.3, -8.75] }, // 4 friggitoria: i tre in voga sul bancone
-    { p: [1.3, 1.65, -10.5], l: [4.4, 1.75, -12.7] }, // 5 angolo dolci (destra)
+    { p: [2.15, 1.6, -11.0], l: [4.35, 1.2, -12.75] }, // 5 banco dolci: i tre dolci da vicino
     { p: [-1.3, 1.7, -14.4], l: [-4.4, 1.65, -16.7] }, // 6 il bar / cocktail (sinistra)
     { p: [2.0, 1.75, -18.6], l: [5.2, 2.0, -20.9] }, // 7 sala giochi (bersaglio + barile)
     { p: [0.0, 2.1, -23.0], l: [0, 1.5, -3.0] },    // 8 il luogo: sguardo all'indietro su tutto il pub
@@ -1151,21 +1243,32 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       }
     });
 
-    // DOLCI: le fette orbitano attorno all'alzata, il cacao cade in loop.
+    // DOLCI: la pannacotta trema, il topping cambia colore ("chiedi il tuo"),
+    // la cloche si solleva e svela il Dolce del Giorno, il cacao cade.
     const dA = zoneAmt.dessert;
-    fette.forEach((f) => {
-      const u = f.userData;
-      const ang = time * (0.35 + 0.5 * dA) + u.ph;
-      const rOrb = 0.28 + 0.3 * dA;
-      f.position.set(Math.cos(ang) * rOrb, Math.sin(time * 0.8 + u.ph) * 0.22 * dA - 0.35, Math.sin(ang) * rOrb);
-      f.rotation.y = ang * 1.6;
-      f.rotation.z = Math.sin(time + u.ph) * 0.25 * dA;
-    });
+    const wob = Math.sin(time * 5.5) * 0.05 * dA;
+    pannaBody.scale.set(1 + wob, 1 - wob * 0.8, 1 + wob);
+    {
+      // topping in dissolvenza tra caramello, cioccolato e frutti rossi
+      const stops = [0xc07018, 0x4a2410, 0xa01020];
+      const k = (time * 0.12) % 3;
+      const i0 = Math.floor(k);
+      const f = k - i0;
+      const a = new THREE.Color(stops[i0]);
+      const b = new THREE.Color(stops[(i0 + 1) % 3]);
+      toppingMat.color.copy(a).lerp(b, f);
+      toppingMat.emissive.copy(toppingMat.color).multiplyScalar(0.4);
+    }
+    crepe.rotation.z = Math.sin(time * 1.1) * 0.04 * dA;
+    const dSm = dA * dA * (3 - 2 * dA); // smoothstep: la cloche si alza pulita
+    cloche.position.y = cloche.userData.baseY + dSm * 0.3;
+    cloche.rotation.z = dSm * 0.22;
+    dolceFetta.rotation.y = time * 0.5; // il dolce del giorno gira come in vetrina
     {
       const pos = cacao.geometry.attributes.position;
       for (let i = 0; i < pos.count; i++) {
         let y = pos.getY(i) - dt * (0.25 + dA * 0.55);
-        if (y < -0.9) y = 0.9;
+        if (y < 0.05) y = 1.2;
         pos.setY(i, y);
       }
       pos.needsUpdate = true;
