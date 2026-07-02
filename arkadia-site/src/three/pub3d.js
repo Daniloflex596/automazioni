@@ -521,6 +521,10 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const fritBase = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.12, 1.1), mat(C.legnoTop, { r: 0.5 }));
   fritBase.position.y = -0.95;
   fritGrp.add(fritBase);
+  // corpo del bancone fino al pavimento (il piano non galleggia)
+  const fritCab = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.9, 0.9), mat(C.legno, { r: 0.75 }));
+  fritCab.position.y = -1.4;
+  fritGrp.add(fritCab);
   const FRY_N = isHigh ? 22 : 12;
   const fries3 = [];
   const fryMat3 = mat(0xe8b04b, { r: 0.5, e: 0x7a4a10, ei: 0.35 });
@@ -532,7 +536,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     a.position.y = 0.09;
     b.position.y = -0.09;
     pair.add(a, b);
-    pair.position.set((pseudo(i * 3) - 0.5) * 1.7, (pseudo(i * 5) - 0.5) * 1.5, (pseudo(i * 7) - 0.5) * 0.8);
+    // nuvola alzata: lascia libero il bancone dove stanno i tre in voga
+    pair.position.set((pseudo(i * 3) - 0.5) * 1.7, (pseudo(i * 5) - 0.5) * 1.1 + 0.25, (pseudo(i * 7) - 0.5) * 0.8);
     pair.userData = { ph: pseudo(i * 11) * Math.PI * 2, a, b, baseY: pair.position.y };
     fritGrp.add(pair);
     fries3.push(pair);
@@ -548,6 +553,116 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     fritGrp.add(ring);
     rings3.push(ring);
   }
+
+  // ---- I TRE IN VOGA della friggitoria SUL BANCONE (metodo immersivo):
+  //      Patatine "Montparnasse" (formaggio fuso, cheddar e bacon) · Tagliere
+  //      "Colesterolo" (gran trionfo di fritti) · Onion Rings impilati.
+  //      In fila lungo lo sguardo della stazione 4; scrollando sfrigolano
+  //      appena usciti dal fritto. Nessun lock.
+  const CTOP = -0.89; // quota del piano del bancone friggitoria (locale a fritGrp)
+  const friggFries = [];   // patatine nella coppetta
+  const friggItems = [];   // pezzi sul tagliere
+  const friggStack = [];   // anelli impilati
+  // 1) Patatine Montparnasse: coppetta di carta, patatine cariche, colata di
+  //    formaggio e briciole di bacon croccante.
+  {
+    const g = new THREE.Group();
+    g.position.set(-0.36, CTOP, 0.42);
+    const cup = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.075, 0.18, 14, 1, true),
+      mat(C.rame, { r: 0.7, side: THREE.DoubleSide })
+    );
+    cup.position.y = 0.09;
+    g.add(cup);
+    for (let i = 0; i < 12; i++) {
+      const fry = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.17, 0.022), mat(0xe8b04b, { r: 0.55, e: 0x6a4310, ei: 0.2 }));
+      const a = pseudo(i * 7) * Math.PI * 2;
+      const rr = pseudo(i * 3) * 0.06;
+      fry.position.set(Math.cos(a) * rr, 0.16 + pseudo(i * 5) * 0.05, Math.sin(a) * rr);
+      fry.rotation.z = (pseudo(i * 11) - 0.5) * 0.5;
+      fry.rotation.x = (pseudo(i * 13) - 0.5) * 0.5;
+      fry.userData = { baseY: fry.position.y, ph: pseudo(i * 17) * Math.PI * 2 };
+      g.add(fry);
+      friggFries.push(fry);
+    }
+    const cheeseM = mat(0xf0b23c, { r: 0.35, e: 0x7a4a08, ei: 0.5 });
+    const cheese = new THREE.Mesh(new THREE.SphereGeometry(0.085, 14, 10), cheeseM);
+    cheese.scale.set(1.15, 0.4, 1.15);
+    cheese.position.y = 0.2;
+    g.add(cheese);
+    for (let i = 0; i < 3; i++) {
+      const drip = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.02, 0.07, 8), cheeseM);
+      const a = (i / 3) * Math.PI * 2 + 0.5;
+      drip.position.set(Math.cos(a) * 0.105, 0.13, Math.sin(a) * 0.105);
+      g.add(drip);
+    }
+    for (let i = 0; i < 6; i++) {
+      const bit = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.008, 0.014), mat(0x8a3020, { r: 0.6 }));
+      const a = pseudo(i * 19) * Math.PI * 2;
+      bit.position.set(Math.cos(a) * 0.05, 0.226, Math.sin(a) * 0.05);
+      bit.rotation.y = pseudo(i * 23) * Math.PI;
+      g.add(bit);
+    }
+    fritGrp.add(g);
+  }
+  // 2) Tagliere Colesterolo: tavola di legno col manico e il gran trionfo —
+  //    mozzarelline, olive ascolane, crocchette e la ciotolina di salsa.
+  {
+    const g = new THREE.Group();
+    g.position.set(0, CTOP, 0);
+    const board = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.03, 0.3), mat(0x8a5a28, { r: 0.6 }));
+    board.position.y = 0.015;
+    const manico = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 12), mat(0x8a5a28, { r: 0.6 }));
+    manico.position.set(0.27, 0.015, 0);
+    g.add(board, manico);
+    const addItem = (m, x, y, z) => {
+      m.position.set(x, y, z);
+      m.userData = { baseY: y, ph: pseudo((x * 13 + z * 7) * 31) * Math.PI * 2 };
+      g.add(m);
+      friggItems.push(m);
+    };
+    for (let i = 0; i < 2; i++)
+      addItem(new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.05, 12), mat(0xd8912f, { r: 0.55, e: 0x6a3a10, ei: 0.25 })), -0.16 + i * 0.075, 0.055, 0.08);
+    for (let i = 0; i < 3; i++)
+      addItem(new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 10), mat(0xb87a20, { r: 0.6, e: 0x4a2a08, ei: 0.3 })), -0.03 + i * 0.062, 0.058, -0.08);
+    for (let i = 0; i < 2; i++) {
+      const cro = new THREE.Mesh(new THREE.BoxGeometry(0.095, 0.04, 0.045), mat(0xcf8828, { r: 0.6, e: 0x5a3208, ei: 0.25 }));
+      cro.rotation.y = 0.5 + i * 0.9;
+      addItem(cro, 0.1 + i * 0.06, 0.05, 0.05 - i * 0.11);
+    }
+    const ciotola = new THREE.Group();
+    const cioC = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.03, 0.035, 12), mat(C.schiuma, { r: 0.5 }));
+    const cioS = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.008, 12), mat(0xa03020, { r: 0.4, e: 0x400a08, ei: 0.4 }));
+    cioS.position.y = 0.018;
+    ciotola.add(cioC, cioS);
+    addItem(ciotola, -0.17, 0.048, -0.08);
+    fritGrp.add(g);
+  }
+  // 3) Onion Rings: pila dorata sul piattino + uno appoggiato di sbieco.
+  {
+    const g = new THREE.Group();
+    g.position.set(0.36, CTOP, -0.42);
+    const piatto = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.02, 18), mat(C.schiuma, { r: 0.6 }));
+    piatto.position.y = 0.01;
+    g.add(piatto);
+    for (let i = 0; i < 4; i++) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.026, 10, 20), mat(0xd8912f, { r: 0.5, e: 0x6a3a10, ei: 0.25 }));
+      ring.rotation.x = Math.PI / 2;
+      ring.position.set((pseudo(i * 5) - 0.5) * 0.02, 0.046 + i * 0.052, (pseudo(i * 7) - 0.5) * 0.02);
+      ring.userData = { baseY: ring.position.y, top: i === 3 };
+      g.add(ring);
+      friggStack.push(ring);
+    }
+    const lean = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.026, 10, 20), mat(0xd8912f, { r: 0.5, e: 0x6a3a10, ei: 0.25 }));
+    lean.position.set(0.12, 0.055, 0.06);
+    lean.rotation.set(1.15, 0, 0.45);
+    g.add(lean);
+    fritGrp.add(g);
+  }
+  // Luce calda bassa sul bancone: i tre prodotti ben definiti.
+  const friggLight = new THREE.PointLight(0xffc06a, isHigh ? 5 : 4, 3.5, 2);
+  friggLight.position.set(-3.85, 1.75, -8.7);
+  scene.add(friggLight);
 
   // ---- ANGOLO DOLCI (destra, z -12.7): torte orbitanti + cacao che cade ----
   const dolceGrp = new THREE.Group();
@@ -783,7 +898,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     { p: [0.6, 1.65, 5.5], l: [-1.5, 1.6, 1] },     // 1 storia (entrando, verso sinistra)
     { p: [-1.8, 1.55, 1.7], l: [-3.35, 1.33, 0.45] }, // 2 bancone: vicino alle tre sotto le spine
     { p: [1.0, 1.8, -1.05], l: [2.6, 1.15, -3.0] }, // 3 cucina: i tre panini affiancati in quadro
-    { p: [-1.2, 1.7, -6.4], l: [-4.3, 1.85, -8.7] }, // 4 angolo fritti (sinistra)
+    { p: [-2.2, 1.6, -6.85], l: [-4.35, 1.3, -8.75] }, // 4 friggitoria: i tre in voga sul bancone
     { p: [1.3, 1.65, -10.5], l: [4.4, 1.75, -12.7] }, // 5 angolo dolci (destra)
     { p: [-1.3, 1.7, -14.4], l: [-4.4, 1.65, -16.7] }, // 6 il bar / cocktail (sinistra)
     { p: [2.0, 1.75, -18.6], l: [5.2, 2.0, -20.9] }, // 7 sala giochi (bersaglio + barile)
@@ -962,6 +1077,23 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     rings3.forEach((r) => {
       r.rotation.x = time * (0.6 + r.userData.ph * 0.1) * Math.max(0.15, fA);
       r.rotation.y = time * 0.4 * Math.max(0.15, fA);
+    });
+    // I tre in voga sfrigolano appena usciti dal fritto: le patatine saltano
+    // nella coppetta, i pezzi del tagliere ballonzolano a turno, l'anello in
+    // cima alla pila si solleva e ondeggia.
+    friggFries.forEach((f) => {
+      f.position.y = f.userData.baseY + Math.max(0, Math.sin(time * 3 + f.userData.ph)) * 0.02 * fA;
+    });
+    friggItems.forEach((it) => {
+      it.position.y = it.userData.baseY + Math.abs(Math.sin(time * 2.4 + it.userData.ph)) * 0.025 * fA;
+      it.rotation.y += 0.004 * fA;
+    });
+    friggStack.forEach((r) => {
+      if (r.userData.top) {
+        r.position.y = r.userData.baseY + (0.05 + Math.sin(time * 1.6) * 0.02) * fA;
+        r.rotation.x = Math.PI / 2 + Math.sin(time * 1.3) * 0.3 * fA;
+        r.rotation.z = time * 0.5 * fA;
+      }
     });
 
     // DOLCI: le fette orbitano attorno all'alzata, il cacao cade in loop.
