@@ -112,15 +112,15 @@ canvas {
   inset: 0;
   background:
     /* vignettatura cinematografica */
-    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(8, 5, 3, 0.55) 100%),
+    radial-gradient(ellipse at 50% 50%, transparent 62%, rgba(8, 5, 3, 0.38) 100%),
     linear-gradient(
       90deg,
-      rgba(14, 10, 7, 0.9) 0%,
-      rgba(14, 10, 7, 0.6) 38%,
+      rgba(14, 10, 7, 0.78) 0%,
+      rgba(14, 10, 7, 0.45) 38%,
       rgba(14, 10, 7, 0.05) 66%,
       rgba(14, 10, 7, 0.3) 100%
     ),
-    radial-gradient(ellipse at 72% 50%, transparent 40%, rgba(14, 10, 7, 0.5) 100%);
+    radial-gradient(ellipse at 72% 50%, transparent 48%, rgba(14, 10, 7, 0.35) 100%);
   pointer-events: none;
 }
 
@@ -174,13 +174,13 @@ section {
   #scena::after {
     background: linear-gradient(
       180deg,
-      rgba(14, 10, 7, 0.55) 0%,
-      rgba(14, 10, 7, 0.35) 40%,
-      rgba(14, 10, 7, 0.6) 100%
+      rgba(14, 10, 7, 0.42) 0%,
+      rgba(14, 10, 7, 0.25) 40%,
+      rgba(14, 10, 7, 0.48) 100%
     );
   }
   #scena-canvas {
-    opacity: 0.55;
+    opacity: 0.75;
   }
 }
 

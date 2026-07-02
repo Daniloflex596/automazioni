@@ -22,11 +22,11 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, isHigh ? 2 : 1.5));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.45;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0e0a07);
-  scene.fog = new THREE.FogExp2(0x0e0a07, 0.032);
+  scene.fog = new THREE.FogExp2(0x0e0a07, 0.024);
 
   const env = makeEnv(renderer);
   scene.environment = env;
@@ -589,7 +589,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   root.add(booth);
 
   // ---- Luci ----
-  scene.add(new THREE.AmbientLight(0x3a2a18, 1.2));
+  scene.add(new THREE.AmbientLight(0x5a4228, 2.0));
+  scene.add(new THREE.HemisphereLight(0x6a4e2e, 0x241608, 1.1));
   const lampPositions = [
     [-3, 3.2, 1.5], [-3, 3.2, -3], [1.5, 3.2, -3], [0, 3.2, -8], [0, 3.0, -13],
   ];

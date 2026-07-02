@@ -12,8 +12,17 @@ import { hamburger, categorieMenu } from '../data/contenuti';
 
     <ul class="mlista" data-stagger>
       {
-        hamburger.map((v) => (
-          <li class="mriga">
+        hamburger.map((v, i) => (
+          <li class:list={['mriga', { 'mriga--3d': i === 0 }]}>
+            {i === 0 && (
+              <canvas
+                class="p3d"
+                data-ricetta="brexit"
+                width="320"
+                height="400"
+                aria-label="Brexit: il panino si scompone mostrando gli ingredienti"
+              />
+            )}
             <div>
               <h3 class="mnome">
                 {v.nome}
@@ -40,4 +49,50 @@ import { hamburger, categorieMenu } from '../data/contenuti';
     max-width: 46ch;
     color: var(--schiuma-soft);
   }
+  /* L'ologramma del prodotto: fluttua accanto alla voce */
+  .mriga--3d {
+    position: relative;
+    min-height: 150px;
+    padding-right: 150px;
+  }
+  .p3d {
+    position: absolute;
+    right: 4.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 128px;
+    height: 160px;
+    pointer-events: none;
+    filter: drop-shadow(0 10px 24px rgba(232, 176, 75, 0.18));
+  }
+  @media (max-width: 640px) {
+    .mriga--3d {
+      padding-right: 0;
+      padding-bottom: 150px;
+    }
+    .p3d {
+      right: 50%;
+      top: auto;
+      bottom: -10px;
+      transform: translateX(50%);
+    }
+  }
 </style>
+
+<script>
+  // Init lazy dell'ologramma prodotto (solo se WebGL disponibile e motion ok)
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cvs = document.querySelectorAll('canvas.p3d');
+  if (cvs.length && !reduced) {
+    import('../three/prodotto3d.js')
+      .then(({ initProdotto, RICETTE }) => {
+        cvs.forEach((c) => {
+          const r = RICETTE[c.dataset.ricetta || ''];
+          if (r) initProdotto(c, r);
+        });
+      })
+      .catch(() => cvs.forEach((c) => (c.style.display = 'none')));
+  } else if (reduced) {
+    cvs.forEach((c) => (c.style.display = 'none'));
+  }
+</script>

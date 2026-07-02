@@ -149,7 +149,7 @@ function initReveals() {
     },
     { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }
   );
-  document.querySelectorAll('[data-reveal], [data-split]').forEach((el) => io.observe(el));
+  document.querySelectorAll('[data-reveal], [data-split], [data-stagger]').forEach((el) => io.observe(el));
 }
 
 /* ---------------------------------------------------------------------------
