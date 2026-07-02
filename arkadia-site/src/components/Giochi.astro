@@ -1,7 +1,10 @@
 ---
-// LA SALA GIOCHI — giochi da tavolo, freccette, Nintendo Switch, carte.
-// Icone SVG disegnate in palette (nessun asset esterno).
+// LA SALA GIOCHI — giochi da tavolo, freccette, Nintendo Switch, carte,
+// biliardino. Icone SVG disegnate in palette (nessun asset esterno).
 import { giochi } from '../data/contenuti';
+const base = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
 ---
 
 <section id="giochi" class="giochi" data-scene-act="sala">
@@ -49,6 +52,17 @@ import { giochi } from '../data/contenuti';
                   <path d="M31.5 19.5 c1.6-2.4 5.2-1.4 5.2 1.3 c0 2-2.7 3.9-5.2 5.9 c-2.5-2-5.2-3.9-5.2-5.9 c0-2.7 3.6-3.7 5.2-1.3 z" fill="var(--rame)" />
                 </svg>
               )}
+              {g.icona === 'biliardino' && (
+                <svg viewBox="0 0 48 48" fill="none">
+                  <rect x="6" y="14" width="36" height="22" rx="4" stroke="var(--oro)" stroke-width="2.5" />
+                  <path d="M2 20 h44 M2 30 h44" stroke="var(--schiuma-soft)" stroke-width="2" stroke-linecap="round" />
+                  <rect x="13" y="17" width="4.5" height="6.5" rx="1.5" fill="var(--rame)" />
+                  <rect x="28" y="17" width="4.5" height="6.5" rx="1.5" fill="var(--rame)" />
+                  <rect x="20" y="27" width="4.5" height="6.5" rx="1.5" fill="var(--luppolo)" />
+                  <rect x="34" y="27" width="4.5" height="6.5" rx="1.5" fill="var(--luppolo)" />
+                  <circle cx="25" cy="25" r="2" fill="var(--schiuma)" />
+                </svg>
+              )}
             </span>
             <h3 class="gioco-nome">{g.nome}</h3>
             <p class="gioco-desc">{g.desc}</p>
@@ -56,6 +70,8 @@ import { giochi } from '../data/contenuti';
         ))
       }
     </ul>
+
+    <a class="z-cta mono" href={`${base}menu#cat-giochi`} data-reveal>La scaffalata dei giochi, in carta →</a>
   </div>
 </section>
 
@@ -112,6 +128,20 @@ import { giochi } from '../data/contenuti';
   .gioco:nth-child(4):hover .gioco-icona svg {
     transform: rotate(-9deg) scale(1.08); /* le carte si aprono a ventaglio */
   }
+  .gioco:nth-child(5):hover .gioco-icona svg {
+    animation: joycon 0.45s var(--ease-inout); /* le stecche del biliardino */
+  }
+  .z-cta {
+    display: inline-block;
+    margin-top: 2.4rem;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.3rem;
+  }
+  .z-cta:hover { color: var(--oro); }
   @keyframes dart-hit {
     0% { transform: scale(1); }
     45% { transform: scale(1.22); }

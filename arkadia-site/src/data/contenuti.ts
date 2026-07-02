@@ -152,6 +152,7 @@ export const categorieMenu = [
   { id: 'da-bere', nome: 'Da Bere', slogan: 'Distillati, vini e bibite per accompagnare la serata', pronta: true },
   { id: 'caffetteria', nome: 'Caffetteria', slogan: 'Per chiudere in bellezza la serata', pronta: true },
   { id: 'cocktail', nome: 'Cocktail', slogan: 'Miscelati e classici, dallo shaker al bicchiere', pronta: true },
+  { id: 'giochi', nome: 'Sala Giochi', slogan: 'Giochi da tavolo, freccette, biliardino e serate che non vogliono finire', pronta: true },
 ];
 
 /** FRITTI & SFIZI */
@@ -257,8 +258,21 @@ export const giochi = {
       desc: 'Napoletane, romagnole, francesi: qualunque sia la tua partita, il mazzo ce l’abbiamo.',
       icona: 'carte',
     },
+    {
+      nome: 'Biliardino',
+      desc: 'Rosso contro blu, niente scuse: chi perde offre il giro.',
+      icona: 'biliardino',
+    },
   ],
 };
+
+/**
+ * LA SCAFFALATA — i giochi da tavolo disponibili al bancone.
+ * ⚠️ LISTA IN ARRIVO dal titolare: aggiungere qui ogni scatola con
+ * { nome, desc?, giocatori?, durata? }. Finché è vuota, /menu mostra
+ * una nota "chiedi al bancone".
+ */
+export const giochiTavolo: { nome: string; desc?: string; giocatori?: string; durata?: string }[] = [];
 
 /**
  * LA TAVOLA — Atto IV. Piatti signature.

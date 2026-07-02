@@ -957,6 +957,52 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     meeples.push(mp);
   });
 
+  // Biliardino (calcio balilla): rosso contro blu in mezzo alla sala giochi.
+  // Le stecche girano e scattano quando la sezione Giochi è al centro.
+  const biliardino = new THREE.Group();
+  biliardino.position.set(2.75, 0, -22.4);
+  biliardino.rotation.y = 0.35;
+  root.add(biliardino);
+  const bilCorpo = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.24, 0.75), mat(C.legno, { r: 0.7 }));
+  bilCorpo.position.y = 0.78;
+  biliardino.add(bilCorpo);
+  const bilCampo = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.02, 0.62), mat(0x2f6a3a, { r: 0.9 }));
+  bilCampo.position.y = 0.9;
+  biliardino.add(bilCampo);
+  const bilLinea = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.005, 0.62), mat(0xf4e9d0, { r: 0.9 }));
+  bilLinea.position.y = 0.912;
+  biliardino.add(bilLinea);
+  [[-0.55, -0.28], [0.55, -0.28], [-0.55, 0.28], [0.55, 0.28]].forEach(([lx, lz]) => {
+    const gamba = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.66, 8), mat(0x201510, { r: 0.8 }));
+    gamba.position.set(lx, 0.33, lz);
+    biliardino.add(gamba);
+  });
+  const bilAste = [];
+  for (let i = 0; i < 6; i++) {
+    const asta = new THREE.Group();
+    asta.position.set(-0.45 + i * 0.18, 0.97, 0);
+    const tubo = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.95, 8), mat(0xd9cdb4, { r: 0.25, m: 0.7 }));
+    tubo.rotation.x = Math.PI / 2;
+    asta.add(tubo);
+    const manopola = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.09, 10), mat(0x100b07, { r: 0.6 }));
+    manopola.rotation.x = Math.PI / 2;
+    manopola.position.z = 0.46;
+    asta.add(manopola);
+    const squadra = i % 2 ? 0x2858c8 : 0xc22a1e; // blu contro rosso
+    const nOmini = i === 0 || i === 5 ? 1 : i === 1 || i === 4 ? 2 : 3;
+    for (let k = 0; k < nOmini; k++) {
+      const omino = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.11, 0.035), mat(squadra, { r: 0.5, e: squadra, ei: 0.12 }));
+      omino.position.set(0, -0.075, (k - (nOmini - 1) / 2) * 0.17);
+      asta.add(omino);
+    }
+    asta.userData = { ph: pseudo(i * 29) * Math.PI * 2, baseZ: 0 };
+    biliardino.add(asta);
+    bilAste.push(asta);
+  }
+  const bilPalla = new THREE.Mesh(new THREE.SphereGeometry(0.024, 10, 10), mat(0xf4e9d0, { r: 0.4 }));
+  bilPalla.position.set(0.1, 0.935, 0.05);
+  biliardino.add(bilPalla);
+
   // Ventaglio di carte da gioco sul barile (si apre con lo scroll)
   const cardFan = new THREE.Group();
   cardFan.position.set(4.26, 0.86, -21.4);
@@ -1223,6 +1269,14 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     meeples.forEach((mp) => {
       mp.position.y = mp.userData.baseY + Math.max(0, Math.sin(time * 2.2 + mp.userData.ph)) * 0.035 * g;
     });
+    // Biliardino: le stecche ruotano a scatti e scorrono, la pallina rimbalza.
+    bilAste.forEach((asta, i) => {
+      asta.rotation.x = Math.sin(time * 2.6 + asta.userData.ph) * 0.8 * g;
+      asta.position.z = Math.sin(time * 1.9 + asta.userData.ph * 2) * 0.05 * g;
+      if (i === 2) asta.rotation.x += Math.max(0, Math.sin(time * 5)) * 1.2 * g; // il tiro
+    });
+    bilPalla.position.x = Math.sin(time * 2.2) * 0.42 * Math.max(0.05, g) + 0.05;
+    bilPalla.position.z = Math.cos(time * 1.7) * 0.16 * g;
 
     // Vapore del burger: sale, si allarga e svanisce in loop.
     steam.forEach((s, i) => {

@@ -56,6 +56,7 @@ let pub = null; // scena pub condivisa con la home
 const MROUTE = [
   ['cat-birre', 2], ['cat-fritti', 4], ['cat-hamburger', 3],
   ['cat-dessert', 5], ['cat-da-bere', 6], ['cat-caffetteria', 6], ['cat-cocktail', 6],
+  ['cat-giochi', 7],
 ];
 function proximity(el) {
   if (!el) return 0;
@@ -93,6 +94,7 @@ function drivePub() {
     proximity(document.getElementById('cat-cocktail'))
   );
   pub.setZone?.('bar', barP);
+  pub.setGiochi?.(proximity(document.getElementById('cat-giochi')));
 }
 
 function driveFill(p) {

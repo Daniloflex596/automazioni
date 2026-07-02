@@ -6,6 +6,7 @@ import IconaCategoria from '../components/IconaCategoria.astro';
 import {
   birre, birreBottiglia, categorieMenu, info,
   fritti, hamburger, dessert, daBere, caffetteria, cocktail, prezzoCocktail,
+  giochiTavolo,
 } from '../data/contenuti';
 
 // Base path normalizzato con slash finale (BASE_URL può arrivare senza).
@@ -398,6 +399,46 @@ const menuDesc =
         </ul>
       </div>
     </section>
+
+    <!-- ===================== SALA GIOCHI ===================== -->
+    <section class="cat" id="cat-giochi" data-scene-act="sala">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Sala Giochi</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="giochi" />
+          <h2 class="cat-titolo" data-split>La scaffalata dei giochi</h2>
+        </div>
+        <p class="cat-slogan" data-reveal>{categorieMenu[7].slogan}.</p>
+
+        {
+          giochiTavolo.length > 0 ? (
+            <ul class="menu-list">
+              {giochiTavolo.map((g) => (
+                <li class="menu-item" data-reveal>
+                  <div class="mi-main">
+                    <h3 class="mi-nome">{g.nome}</h3>
+                    {g.desc && <p class="mi-desc">{g.desc}</p>}
+                    {(g.giocatori || g.durata) && (
+                      <p class="mi-desc mono gioco-meta">
+                        {g.giocatori && <span>{g.giocatori} giocatori</span>}
+                        {g.giocatori && g.durata && ' · '}
+                        {g.durata && <span>{g.durata}</span>}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="giochi-nota" data-reveal>
+              La lista completa della scaffalata sta arrivando qui, scatola per scatola.
+              Intanto chiedi al bancone: la scelta è ampia e cambia spesso — e freccette,
+              biliardino, Nintendo Switch e carte non aspettano nessuno.
+            </p>
+          )
+        }
+      </div>
+    </section>
   </main>
 
   <Footer />
@@ -755,6 +796,19 @@ const menuDesc =
     opacity: 0.7;
     font-size: 0.65rem;
     letter-spacing: 0.12em;
+  }
+  .giochi-nota {
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+    max-width: 52ch;
+    color: var(--schiuma-soft);
+    border-left: 2px solid var(--oro);
+    padding-left: 1.1rem;
+  }
+  .gioco-meta {
+    color: var(--oro);
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
   }
 
   @media (max-width: 720px) {
