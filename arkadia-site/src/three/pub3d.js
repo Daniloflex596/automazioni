@@ -76,12 +76,24 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   root.add(wallBack);
 
   // ---- Portale d'ingresso (dietro la camera all'inizio) ----
-  const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.4, 0.3), mat(0x120c08, { r: 0.9 }));
-  doorFrame.position.set(0, 1.7, 9.4);
-  root.add(doorFrame);
-  const nightGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.9), new THREE.MeshBasicMaterial({ color: 0x24170c }));
-  nightGlow.position.set(0, 1.7, 9.35);
+  // Portale APERTO: due stipiti + architrave, il varco è libero (la camera
+  // ci passa dentro senza mai andare a nero) e una luce calda sulla soglia.
+  const jambMat = mat(0x1a110a, { r: 0.85 });
+  const jambL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 3.4, 0.3), jambMat);
+  jambL.position.set(-1.5, 1.7, 9.4);
+  root.add(jambL);
+  const jambR = jambL.clone();
+  jambR.position.x = 1.5;
+  root.add(jambR);
+  const lintel = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.4, 0.3), jambMat);
+  lintel.position.set(0, 3.2, 9.4);
+  root.add(lintel);
+  const nightGlow = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 3.4), new THREE.MeshBasicMaterial({ color: 0x3a2413 }));
+  nightGlow.position.set(0, 1.7, 9.62);
   root.add(nightGlow);
+  const soglia = new THREE.PointLight(0xffc06a, 9, 7, 2);
+  soglia.position.set(0, 2.9, 8.6);
+  scene.add(soglia);
 
   // ---- Bancone (a sinistra, lungo z) ----
   const bar = new THREE.Group();
@@ -120,6 +132,63 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   glass.position.set(-0.35, 1.22, -1.6);
   glass.scale.setScalar(0.9);
   bar.add(glass);
+
+  // LE TRE DEL MOMENTO sul bancone: pinta del mese, calice di rossa,
+  // bottiglia Chouffe Red. Il POV le raggiunge una a una (setBirraFocus).
+  function birraMomento(z, build) {
+    const g = new THREE.Group();
+    g.position.set(-0.3, 1.22, z);
+    build(g);
+    bar.add(g);
+    return g;
+  }
+  // 0 · Birra del Mese: pinta dorata con schiuma
+  birraMomento(-2.6, (g) => {
+    const gl = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.075, 0.3, 16, 1, true),
+      new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+    gl.position.y = 0.15;
+    const liq = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.068, 0.24, 14), mat(0xe8b04b, { r: 0.3, e: 0x6a4a10, ei: 0.5 }));
+    liq.position.y = 0.13;
+    const fo = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.085, 0.03, 14), mat(0xf4e9d0, { r: 0.95 }));
+    fo.position.y = 0.27;
+    g.add(gl, liq, fo);
+  });
+  // 1 · La Rossa: calice a stelo con liquido rosso-ambrato
+  birraMomento(-3.4, (g) => {
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.14, 8), mat(0xd9cdb4, { r: 0.2 }));
+    st.position.y = 0.07;
+    const cup = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12, 0, Math.PI * 2, 0, Math.PI / 1.8),
+      new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.24, side: THREE.DoubleSide, depthWrite: false }));
+    cup.position.y = 0.2;
+    const liq = new THREE.Mesh(new THREE.SphereGeometry(0.095, 14, 10, 0, Math.PI * 2, 0, Math.PI / 1.9), mat(0x8a2a12, { r: 0.3, e: 0x4a1006, ei: 0.55 }));
+    liq.position.y = 0.19;
+    const fo = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.026, 14), mat(0xf4e9d0, { r: 0.95 }));
+    fo.position.y = 0.3;
+    g.add(st, cup, liq, fo);
+  });
+  // 2 · Chouffe Red: bottiglia rossa alla ciliegia + ciliegina
+  birraMomento(-4.2, (g) => {
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.075, 0.3, 14), mat(0x6a1015, { r: 0.25, e: 0x300508, ei: 0.5 }));
+    body.position.y = 0.15;
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.05, 0.16, 10), mat(0x6a1015, { r: 0.25, e: 0x300508, ei: 0.5 }));
+    neck.position.y = 0.38;
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.03, 10), mat(0xb02030, { r: 0.4, e: 0x500810, ei: 0.4 }));
+    cap.position.y = 0.47;
+    const cher = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 10), mat(0xc01828, { r: 0.3, e: 0x600810, ei: 0.6 }));
+    cher.position.set(0.12, 0.035, 0.05);
+    g.add(body, neck, cap, cher);
+  });
+
+  // POV birre: posizioni camera ravvicinate davanti a ciascun oggetto (mondo).
+  const BIRRA_POV = [
+    { p: [-2.0, 1.62, -3.1], l: [-3.4, 1.45, -3.1] },
+    { p: [-2.0, 1.62, -3.9], l: [-3.4, 1.45, -3.9] },
+    { p: [-2.0, 1.66, -4.7], l: [-3.4, 1.5, -4.7] },
+  ];
+  let birraFocus = -1;
+  let focusAmt = 0;
+  const focusP = new THREE.Vector3();
+  const focusL = new THREE.Vector3();
 
   // ---- LA MESCITA: pinta sotto la spina centrale che si riempie (setSpina) ----
   // Il momento-firma della sezione Birre: getto ambrato + livello che sale + schiuma.
@@ -656,12 +725,13 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const camPos = new THREE.Vector3();
   const camLook = new THREE.Vector3();
 
+  const lastLook = new THREE.Vector3();
   function applyCamera(t) {
     const tc = Math.max(0, Math.min(1, t));
     posCurve.getPoint(tc, camPos);
     lookCurve.getPoint(tc, camLook);
     camera.position.copy(camPos);
-    camera.lookAt(camLook);
+    lastLook.copy(camLook); camera.lookAt(lastLook);
   }
   applyCamera(0);
 
@@ -686,6 +756,17 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       renderT += (targetT - renderT) * s;
     }
     applyCamera(renderT);
+    // POV birra: la camera plana sull'oggetto della birra scelta (hover/click/scroll).
+    const wantFocus = birraFocus >= 0 ? 1 : 0;
+    focusAmt += (wantFocus - focusAmt) * (1 - Math.pow(0.9, Math.min(dtRaw, 0.25) * 60));
+    if (focusAmt > 0.002 && birraFocus >= 0) {
+      const F = BIRRA_POV[birraFocus];
+      focusP.set(F.p[0], F.p[1], F.p[2]);
+      focusL.set(F.l[0], F.l[1], F.l[2]);
+      camera.position.lerp(focusP, focusAmt);
+      lastLook.lerp(focusL, focusAmt);
+      camera.lookAt(lastLook);
+    }
 
     // micro-vita: bagliore lampade + leggerissimo bob
     lamps.forEach((L) => {
@@ -874,6 +955,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     setSpina: (p) => { spinaAmt = Math.max(0, Math.min(1, p)); },
     setBrindisi: (p) => { brindisiAmt = Math.max(0, Math.min(1, p)); },
     setGiochi: (p) => { giochiAmt = Math.max(0, Math.min(1, p)); },
+    setBirraFocus: (i) => { birraFocus = Number.isInteger(i) && i >= 0 && i <= 2 ? i : -1; },
     setZone: (name, p) => {
       if (name in zoneAmt) zoneAmt[name] = Math.max(0, Math.min(1, p));
     },

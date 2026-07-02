@@ -11,13 +11,19 @@ const base = import.meta.env.BASE_URL.endsWith('/')
 <section id="spina" class="spina" data-scene-act="spina">
   <div class="wrap">
     <p class="occhiello" data-reveal>{birre.occhiello}</p>
-    <h2 class="spina-titolo" data-split>{birre.titolo}</h2>
-    <p class="spina-intro" data-reveal>{birre.slogan}</p>
+    <h2 class="spina-titolo" data-split>Le tre del momento</h2>
+    <p class="spina-intro" data-reveal>
+      Quelle che stiamo spillando e stappando di più — passa col dito (o tocca) e le vedi sul bancone.
+    </p>
 
     <ul class="taplist" data-stagger>
       {
-        birre.spina.map((b) => (
-          <li class="tap">
+        [
+          { nome: 'Birra del Mese', stile: 'La novità in spina', prezzo: '4,50 – 7,00', novita: true, nota: 'Cambia di continuo: chiedi qual è quella di stasera.' },
+          { nome: 'La Rossa', stile: 'Ambrata alla spina', prezzo: '5,30 – 8,00', nota: 'Maltata e tostata, il carattere del bancone.' },
+          { nome: 'Chouffe Red', stile: 'Alla ciliegia · 8° · 33cl', prezzo: '7,00', novita: true, nota: 'La più particolare in bottiglia: rossa, belga, alla ciliegia.' },
+        ].map((b, i) => (
+          <li class="tap tap--pov" data-birra={i} tabindex="0">
             <div class="tap-head">
               <h3 class="tap-nome">
                 {b.nome}
@@ -26,16 +32,7 @@ const base = import.meta.env.BASE_URL.endsWith('/')
               <p class="tap-stile mono">{b.stile}</p>
               <p class="tap-nota">{b.nota}</p>
             </div>
-            <dl class="tap-formati mono" aria-label="Formati e prezzi">
-              {birre.formati.map((f, i) =>
-                b.prezzi[i] !== '—' ? (
-                  <div>
-                    <dt>{f}</dt>
-                    <dd>€ {b.prezzi[i]}</dd>
-                  </div>
-                ) : null
-              )}
-            </dl>
+            <span class="tap-prezzo mono">€ {b.prezzo}</span>
           </li>
         ))
       }
@@ -88,6 +85,17 @@ const base = import.meta.env.BASE_URL.endsWith('/')
   }
   .tap-nome {
     transition: color 0.3s;
+  }
+  .tap--pov {
+    cursor: pointer;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tap-prezzo {
+    color: var(--oro);
+    font-size: 1.05rem;
+    white-space: nowrap;
   }
   .tap-nome {
     font-size: clamp(1.5rem, 4vw, 2.25rem);
