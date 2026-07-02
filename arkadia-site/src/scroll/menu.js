@@ -67,9 +67,22 @@ function driveFill(p) {
   }
 }
 
-// Sul menu il calice è un elemento d'ingresso nell'hero (riempito e statico),
-// non serve il riempimento legato allo scroll: la pagina è densa di contenuti.
+// Sul menu il calice è un elemento d'ingresso nell'hero: all'arrivo viene
+// VERSATO (0 → 0.82 con easing), poi resta pieno. Piccolo rito di benvenuto.
 const FILL_MENU = 0.82;
+function pourIn(durationMs = 1800) {
+  if (reduced) {
+    driveFill(FILL_MENU);
+    return;
+  }
+  const t0 = performance.now();
+  (function step(now) {
+    const k = Math.min(1, (now - t0) / durationMs);
+    const eased = 1 - Math.pow(1 - k, 3); // easeOutCubic: versata decisa, chiusura dolce
+    driveFill(FILL_MENU * eased);
+    if (k < 1) requestAnimationFrame(step);
+  })(t0);
+}
 
 /* Split-text + reveal */
 function splitText(el) {
@@ -193,7 +206,7 @@ async function boot() {
     setPreload(0.65);
     const { initCalice } = await import('../three/calice3d.js');
     scene3d = initCalice(canvas, { quality: tier === 'high' ? 'high' : 'low' });
-    driveFill(FILL_MENU);
+    pourIn();
     setPreload(0.95);
     requestAnimationFrame(hidePreloader);
   } catch (err) {
@@ -201,7 +214,7 @@ async function boot() {
     scene3d = null;
     canvas?.style.setProperty('display', 'none');
     fallback?.style.setProperty('display', 'block');
-    driveFill(FILL_MENU);
+    pourIn();
     hidePreloader();
   }
 }

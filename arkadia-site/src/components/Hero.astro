@@ -39,6 +39,24 @@ import { info } from '../data/contenuti';
     text-transform: uppercase;
     color: var(--schiuma);
     filter: drop-shadow(0 8px 40px var(--oro-glow));
+    /* Accensione da insegna: il nome sfarfalla e poi resta acceso,
+       come il neon dietro il bancone. One-shot all'ingresso. */
+    animation: neon-on 2.2s steps(1, end) 0.4s both;
+  }
+  @keyframes neon-on {
+    0% { opacity: 0; }
+    7% { opacity: 1; }
+    11% { opacity: 0.25; }
+    16% { opacity: 1; }
+    20% { opacity: 0.4; }
+    24% { opacity: 1; }
+    35% { opacity: 0.85; }
+    40%, 100% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-title {
+      animation: none;
+    }
   }
   /* Riflesso dorato sul nome — applicato anche alle parti "splittate" così
      resta visibile dopo lo split-text (il background-clip va sui figli). */
