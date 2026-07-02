@@ -229,6 +229,38 @@ export const cocktail = [
 export const prezzoCocktail = '6,00';
 
 /**
+ * LA SALA GIOCHI — non solo cibo e birra: ad Arkadia si gioca.
+ */
+export const giochi = {
+  occhiello: 'La Sala Giochi',
+  titolo: 'Qui non si viene solo per bere',
+  intro:
+    'Tra una pinta e un panino, la serata continua: sfida i tuoi amici e falla durare quanto vuoi.',
+  lista: [
+    {
+      nome: 'Giochi da tavolo',
+      desc: 'Una selezione sempre pronta al bancone: scegli la scatola e occupate il tavolo.',
+      icona: 'dado',
+    },
+    {
+      nome: 'Freccette',
+      desc: 'Il bersaglio è appeso e ti aspetta. Occhio al triplo 20.',
+      icona: 'freccette',
+    },
+    {
+      nome: 'Nintendo Switch',
+      desc: 'Console a disposizione per tornei improvvisati tra amici.',
+      icona: 'console',
+    },
+    {
+      nome: 'Carte da gioco',
+      desc: 'Napoletane, romagnole, francesi: qualunque sia la tua partita, il mazzo ce l’abbiamo.',
+      icona: 'carte',
+    },
+  ],
+};
+
+/**
  * LA TAVOLA — Atto IV. Piatti signature.
  * ⚠️ DA CONFERMARE prezzi e descrizioni con la cucina.
  */
