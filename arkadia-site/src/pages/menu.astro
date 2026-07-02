@@ -13,6 +13,90 @@ const base = import.meta.env.BASE_URL.endsWith('/')
   ? import.meta.env.BASE_URL
   : import.meta.env.BASE_URL + '/';
 const tagLabel = { surgelato: 'abbattuto', veg: 'veg', piccante: 'piccante', chef: 'consigliato', noCarne: 'no carne' };
+
+// ---- ICONE 3D per ogni singola voce (spec per icone3d.js) --------------
+// Ogni prodotto ha la SUA icona: bicchiere giusto, colore giusto,
+// guarnizione giusta. j() serializza la spec nel data-attribute.
+const j = (o: object) => JSON.stringify(o);
+const icSpina: Record<string, object> = {
+  Bionda: { t: 'pinta', c: 'e8c04a' },
+  Rossa: { t: 'pinta', c: '96420f' },
+  IPA: { t: 'pinta', c: 'd07818' },
+  'Birra del Mese': { t: 'pinta', c: 'c89020' },
+};
+const icBottiglia = (b: { nome: string; stile: string }) => {
+  const s = b.stile.toLowerCase();
+  if (b.nome === 'Chouffe Red') return { t: 'bottiglia', c: '4a1016', lab: 'c01830' };
+  if (s.includes('sidro')) return { t: 'bottiglia', c: '3a5e2a', lab: b.nome.includes('Fragola') ? 'e05070' : 'b8d060' };
+  if (s.includes('pils')) return { t: 'bottiglia', c: '3a5e2a', lab: 'f0d060' };
+  if (s.includes('lambic')) return { t: 'bottiglia', c: '38160e', lab: 'a01830' };
+  if (s.includes('dark')) return { t: 'bottiglia', c: '241208', lab: '6a4a20' };
+  if (s.includes('blanche')) return { t: 'bottiglia', c: '8a6a3a', lab: 'f0e6d0' };
+  if (s.includes('strong')) return { t: 'bottiglia', c: '38160e', lab: '903020' };
+  if (s.includes('i.p.a')) return { t: 'bottiglia', c: '5a3212', lab: 'd07818' };
+  if (s.includes('ambrata') || s.includes('bitter')) return { t: 'bottiglia', c: '5a3212', lab: 'b06020' };
+  if (s.includes('saison')) return { t: 'bottiglia', c: '5a3212', lab: 'e8d080' };
+  if (s.includes('pale')) return { t: 'bottiglia', c: '5a3212', lab: 'c87830' };
+  return { t: 'bottiglia', c: '5a3212', lab: 'e8b04b' };
+};
+const icFritti: Record<string, object> = {
+  'Tagliere "Colesterolo"': { t: 'tagliere' },
+  'Patatine "Montparnasse"': { t: 'friescup', cheese: 1 },
+  'Onion Rings': { t: 'rings' },
+  'Nuggets di Pollo': { t: 'nuggets' },
+  'Palline di Melanzana': { t: 'palline' },
+  'Patatine Cacio e Pepe': { t: 'friescup', pepe: 1 },
+  'Patate Stick': { t: 'stick' },
+};
+const icBurger: Record<string, object> = {
+  Brexit: { t: 'burger', pane: 'sesamo', s: ['insalata', 'patty', 'bacon', 'cheddar', 'anelli'] },
+  'Hellfire Club': { t: 'burger', pane: 'rustico', s: ['insalata', 'patty', 'stracciatella', 'bomba'] },
+  'Cocò': { t: 'burger', pane: 'classico', s: ['insalata', 'cotoletta', 'secchi', 'stracciatella'] },
+  Cheeseburger: { t: 'burger', pane: 'brioche', s: ['patty', 'cheddar', 'bacon', 'tomino'] },
+  'Insalatona Arkadia': { t: 'bowl' },
+  'Peppa Pig': { t: 'salsiccia' },
+  'Bimbo Burger': { t: 'burger', pane: 'classico', s: ['insalata', 'patty', 'pomodoro'], mini: 1 },
+};
+const icDessert: Record<string, object> = {
+  'Crêpe alla Nutella': { t: 'crepe' },
+  Pannacotta: { t: 'pannacotta' },
+  'Dolce del Giorno': { t: 'torta' },
+};
+const icDistillati: Record<string, object> = {
+  Whisky: { t: 'tumbler', c: 'c87828', ice: 1 },
+  Rum: { t: 'tumbler', c: '7a3a14' },
+  'Grappe / Gin': { t: 'shot', c: 'e8e8e0' },
+  Amari: { t: 'shot', c: '6a3a18' },
+};
+const icVini: Record<string, object> = {
+  'Vino Bianco': { t: 'vino', c: 'e8d890' },
+  'Vino Rosso': { t: 'vino', c: '7a1626' },
+};
+const icCaffe: Record<string, object> = {
+  'Caffè Invernale': { t: 'mug', c: 'c87828' },
+  'Tè / Camomilla / Infusi': { t: 'tisana' },
+  'Caffè': { t: 'tazzina' },
+};
+const icCocktail: Record<string, object> = {
+  Spritz: { t: 'goblet', c: 'e06010', slice: 'e89030', ice: 1 },
+  Negroni: { t: 'tumbler', c: '8e1420', ice: 1, twist: 1 },
+  'Negroni Sbagliato': { t: 'flute', c: 'c84838' },
+  Americano: { t: 'highball', c: 'a02030', slice: 'e89030' },
+  Boulevardier: { t: 'coupe', c: '7a1620' },
+  Mojito: { t: 'highball', c: 'a8d080', mint: 1, lime: 1 },
+  'Cuba Libre': { t: 'highball', c: '3a1c0c', lime: 1, straw: 1 },
+  'Piña Colada': { t: 'goblet', c: 'f0e0b8', slice: 'f0d060' },
+  'Gin Tonic': { t: 'balloon', c: 'dce8e0', lime: 1 },
+  'Gin Lemon': { t: 'highball', c: 'f0d060' },
+  'Vodka Tonic': { t: 'highball', c: 'e0ecec' },
+  'Vodka Lemon': { t: 'highball', c: 'f0d860' },
+  'Caipiroska Fragola': { t: 'tumbler', c: 'e04858', frutto: 1, ice: 1 },
+  'Sex on the Beach': { t: 'highball', c: 'f09030', c2: 'c02040', straw: 1 },
+  'Long Island': { t: 'highball', c: '4a2410', slice: 'f0d060', straw: 1 },
+  Alexander: { t: 'coupe', c: '2858c8' },
+  'Japanese Ice Tea': { t: 'highball', c: '58b848', lime: 1 },
+  Samu: { t: 'tumbler', c: 'f07020' },
+};
 const menuTitolo = `Menu · ${info.nome} Pub — Birre, hamburger e cocktail a Ciampino`;
 const menuDesc =
   'Il menu completo di Arkadia Pub: birre alla spina e in bottiglia (belghe, italiane, artigianali), hamburger da 200gr, fritti, dessert, cocktail e caffetteria.';
@@ -103,6 +187,7 @@ const menuDesc =
           {
             birre.spina.map((b) => (
               <article class="spina-riga" data-reveal>
+                <canvas class="micona micona--spina" width="128" height="160" data-icona={j(icSpina[b.nome] ?? { t: 'pinta', c: 'e8c04a' })} aria-hidden="true"></canvas>
                 <div class="spina-info">
                   <h3 class="spina-nome">
                     {b.nome}
@@ -135,6 +220,7 @@ const menuDesc =
           {
             birreBottiglia.map((b) => (
               <li class="bottiglia" data-reveal>
+                <canvas class="micona micona--bott" width="128" height="160" data-icona={j(icBottiglia(b))} aria-hidden="true"></canvas>
                 <div class="bottiglia-main">
                   <h3 class="bottiglia-nome">
                     {b.nome}
@@ -164,6 +250,7 @@ const menuDesc =
         <ul class="menu-list">
           {fritti.map((v) => (
             <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icFritti[v.nome] ?? { t: 'friescup' })} aria-hidden="true"></canvas>
               <div class="mi-main">
                 <h3 class="mi-nome">
                   {v.nome}
@@ -190,6 +277,7 @@ const menuDesc =
         <ul class="menu-list">
           {hamburger.map((v) => (
             <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icBurger[v.nome] ?? { t: 'burger', pane: 'classico', s: ['insalata', 'patty', 'cheddar'] })} aria-hidden="true"></canvas>
               <div class="mi-main">
                 <h3 class="mi-nome">
                   {v.nome}
@@ -217,6 +305,7 @@ const menuDesc =
         <ul class="menu-list">
           {dessert.map((v) => (
             <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icDessert[v.nome] ?? { t: 'torta' })} aria-hidden="true"></canvas>
               <div class="mi-main">
                 <h3 class="mi-nome">{v.nome}</h3>
                 {v.desc && <p class="mi-desc">{v.desc}</p>}
@@ -242,6 +331,7 @@ const menuDesc =
         <ul class="menu-list">
           {daBere.distillati.map((v) => (
             <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icDistillati[v.nome] ?? { t: 'tumbler', c: 'c87828' })} aria-hidden="true"></canvas>
               <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
               <span class="mi-prezzo mono">€ {v.prezzo} <em>/ {v.shot}</em></span>
             </li>
@@ -252,6 +342,7 @@ const menuDesc =
         <ul class="menu-list">
           {daBere.vini.map((v) => (
             <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icVini[v.nome] ?? { t: 'vino', c: '7a1626' })} aria-hidden="true"></canvas>
               <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
               <span class="mi-prezzo mono">€ {v.calice} <em>/ {v.bottiglia}</em></span>
             </li>
@@ -272,6 +363,7 @@ const menuDesc =
         <ul class="menu-list">
           {caffetteria.map((v) => (
             <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icCaffe[v.nome] ?? { t: 'tazzina' })} aria-hidden="true"></canvas>
               <div class="mi-main">
                 <h3 class="mi-nome">{v.nome}</h3>
                 {v.desc && <p class="mi-desc">{v.desc}</p>}
@@ -295,6 +387,7 @@ const menuDesc =
         <ul class="menu-list menu-list--cols">
           {cocktail.map((v) => (
             <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icCocktail[v.nome] ?? { t: 'tumbler', c: 'e06010' })} aria-hidden="true"></canvas>
               <div class="mi-main">
                 <h3 class="mi-nome">{v.nome}</h3>
                 <p class="mi-desc">{v.desc}</p>
@@ -667,5 +760,53 @@ const menuDesc =
   @media (max-width: 720px) {
     .bottiglie { grid-template-columns: 1fr; }
     .menu-list--cols { grid-template-columns: 1fr; }
+  }
+
+  /* ---- Icone 3D per voce (renderer condiviso, vedi icone3d.js) ---- */
+  .micona {
+    width: 60px;
+    height: 75px;
+    flex: 0 0 auto;
+    align-self: center;
+    filter: drop-shadow(0 6px 14px rgba(232, 176, 75, 0.14));
+  }
+  .menu-item {
+    align-items: center;
+  }
+  .bottiglia {
+    align-items: center;
+  }
+  .bottiglia .micona {
+    width: 46px;
+    height: 58px;
+  }
+  .spina-riga {
+    grid-template-columns: auto 1fr;
+    column-gap: clamp(1rem, 2.5vw, 1.6rem);
+  }
+  .spina-riga .micona {
+    grid-row: 1 / 3;
+    align-self: center;
+    width: 72px;
+    height: 90px;
+  }
+  @media (max-width: 720px) {
+    .micona {
+      width: 48px;
+      height: 60px;
+    }
+    .spina-riga .micona {
+      width: 56px;
+      height: 70px;
+    }
+    .bottiglia .micona {
+      width: 40px;
+      height: 50px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .micona {
+      display: none;
+    }
   }
 </style>

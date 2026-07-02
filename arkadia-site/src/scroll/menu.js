@@ -234,6 +234,16 @@ async function boot() {
   initTabs();
   initScroll();
 
+  // Icone 3D per ogni voce del menu: UN renderer condiviso (icone3d.js).
+  const icone = document.querySelectorAll('canvas.micona');
+  if (icone.length && tier !== 'none') {
+    import('../three/icone3d.js')
+      .then(({ initIcone }) => initIcone(icone))
+      .catch(() => icone.forEach((c) => c.style.setProperty('display', 'none')));
+  } else {
+    icone.forEach((c) => c.style.setProperty('display', 'none'));
+  }
+
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => setPreload(0.5));
   else setPreload(0.5);
 
