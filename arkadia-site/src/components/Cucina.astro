@@ -1,12 +1,13 @@
 ---
-// ZONA CUCINA — gli hamburger reali (tutti con patatine). Dietro: il burger
-// del tavolo che si scompone + burger satelliti che si smontano in loop.
+// ZONA CUCINA — i tre panini più in voga del mese. L'esperienza è nella
+// scena 3D: i tre hamburger sono ricostruiti SUL TAVOLO (pane diverso per
+// ognuno) e scrollando si aprono strato per strato mentre ci passi vicino.
 import { hamburger, categorieMenu } from '../data/contenuti';
 // I tre panini più in voga del mese (evidenza in home; lista completa su /menu)
 const IN_VOGA = [
-  { ...hamburger[0], ricetta: 'brexit', frase: 'Il più scelto in assoluto: chi lo prova, lo riordina.' },
-  { ...hamburger[1], ricetta: 'hellfire', frase: 'Per chi non ha paura della bomba calabra.' },
-  { ...hamburger[3], ricetta: 'cheeseburger', frase: 'Tre formaggi e bacon: il comfort assoluto.' },
+  { ...hamburger[0], frase: 'Il più scelto in assoluto: chi lo prova, lo riordina.' },
+  { ...hamburger[1], frase: 'Per chi non ha paura della bomba calabra.' },
+  { ...hamburger[3], frase: 'Tre formaggi e bacon: il comfort assoluto.' },
 ];
 const base = import.meta.env.BASE_URL.endsWith('/')
   ? import.meta.env.BASE_URL
@@ -17,19 +18,14 @@ const base = import.meta.env.BASE_URL.endsWith('/')
   <div class="wrap">
     <p class="occhiello" data-reveal>La Cucina</p>
     <h2 class="z-titolo" data-split>Hamburger</h2>
-    <p class="z-slogan" data-reveal>I tre panini più in voga del mese — tutti con hamburger da 200gr e patatine.</p>
+    <p class="z-slogan" data-reveal>
+      I tre panini più in voga del mese, tutti con hamburger da 200gr e patatine: li trovi sul tavolo là davanti — scrollando si aprono strato per strato.
+    </p>
 
     <ul class="mlista" data-stagger>
       {
         IN_VOGA.map((v) => (
-          <li class="mriga mriga--3d">
-            <canvas
-              class="p3d"
-              data-ricetta={v.ricetta}
-              width="320"
-              height="400"
-              aria-label={`${v.nome}: il panino si scompone mostrando gli ingredienti`}
-            />
+          <li class="mriga">
             <div>
               <h3 class="mnome">
                 {v.nome}
@@ -77,55 +73,4 @@ const base = import.meta.env.BASE_URL.endsWith('/')
     padding-bottom: 0.3rem;
   }
   .z-cta:hover { color: var(--oro); }
-  /* L'ologramma del prodotto: fluttua TRA gli ingredienti e il prezzo,
-     senza toccare la colonna prezzi (che resta allineata a destra). */
-  .mriga--3d {
-    position: relative;
-    min-height: 168px;
-  }
-  .mriga--3d > div:first-of-type {
-    max-width: calc(100% - 300px); /* il testo si ferma prima dell'ologramma */
-  }
-  .p3d {
-    position: absolute;
-    right: 130px; /* tra il testo e la colonna prezzi */
-    top: 50%;
-    transform: translateY(-50%);
-    width: 118px;
-    height: 158px;
-    pointer-events: none;
-    filter: drop-shadow(0 10px 24px rgba(232, 176, 75, 0.18));
-  }
-  @media (max-width: 640px) {
-    .mriga--3d {
-      padding-bottom: 155px;
-    }
-    .mriga--3d > div:first-of-type {
-      max-width: 100%;
-    }
-    .p3d {
-      right: 50%;
-      top: auto;
-      bottom: -6px;
-      transform: translateX(50%);
-    }
-  }
 </style>
-
-<script>
-  // Init lazy dell'ologramma prodotto (solo se WebGL disponibile e motion ok)
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const cvs = document.querySelectorAll('canvas.p3d');
-  if (cvs.length && !reduced) {
-    import('../three/prodotto3d.js')
-      .then(({ initProdotto, RICETTE }) => {
-        cvs.forEach((c) => {
-          const r = RICETTE[c.dataset.ricetta || ''];
-          if (r) initProdotto(c, r);
-        });
-      })
-      .catch(() => cvs.forEach((c) => (c.style.display = 'none')));
-  } else if (reduced) {
-    cvs.forEach((c) => (c.style.display = 'none'));
-  }
-</script>

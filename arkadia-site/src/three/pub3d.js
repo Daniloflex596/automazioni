@@ -128,10 +128,28 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   }
 
 
+  // ==================================================================
+  //  METODO "ESPERIENZA IMMERSIVA ARKADIA" (da ripetere per ogni zona):
+  //  1. 2-3 prodotti REALI della categoria come oggetti 3D fisici nella
+  //     scena, distinti tra loro (colori/forme/ingredienti veri).
+  //  2. In fila lungo il percorso camera della loro stazione: scrollando
+  //     ci si passa vicino a ognuno. MAI lock di scroll né hover/POV.
+  //  3. UNA animazione continua pilotata dalla proximity DOM della sezione
+  //     (mescita per le birre, apertura a strati per i burger, ...).
+  //  4. La sezione DOM elenca gli stessi 2-3 prodotti + CTA al /menu.
+  //  5. Luce calda dedicata sugli oggetti.
+  //  Prossime zone: friggitoria (fritti), caffetteria (tisane+caffè),
+  //  cocktail bar sul BANCONE lato DESTRO (z locale -1..-4, oggi vuoto).
+  // ==================================================================
+
   // ---- LE TRE DEL MOMENTO sotto le spine: si riempiono IN SINCRONIA con
-  //      lo scroll (la grafica della vecchia pinta, moltiplicata per tre).
-  //      Oro (Birra del Mese) · rosso ambrato (La Rossa) · rubino (Chouffe Red).
-  const TRIO_COL = [0xe8b04b, 0x8a2012, 0xa81424];
+  //      lo scroll. Tre colori DIVERSI e REALISTICI (mai bianchi):
+  //      bionda dorata (Birra del Mese) · ramata (La Rossa) · rubino ciliegia
+  //      (Chouffe Red), ognuna con la sua schiuma (crema / nocciola / rosata).
+  const TRIO_COL = [0xd9921e, 0x9a4210, 0x8e1032];
+  const TRIO_EMI = [0x7a4a08, 0x3f1808, 0x3c0618];
+  const TRIO_EI = [0.3, 0.35, 0.4];
+  const TRIO_FOAM = [0xf4e9d0, 0xe2cba4, 0xf0d6d2];
   const trio = [];
   [0.07, 0.49, 0.91].forEach((z, i) => {
     const g = new THREE.Group();
@@ -143,10 +161,10 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     glassM.position.y = 0.15;
     const liq = new THREE.Mesh(
       new THREE.CylinderGeometry(0.078, 0.064, 1, 14),
-      mat(TRIO_COL[i], { r: 0.32, e: TRIO_COL[i], ei: 0.25 })
+      mat(TRIO_COL[i], { r: 0.32, e: TRIO_EMI[i], ei: TRIO_EI[i] })
     );
     liq.scale.y = 0.001;
-    const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.026, 14), mat(0xf4e9d0, { r: 0.95 }));
+    const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.026, 14), mat(TRIO_FOAM[i], { r: 0.95 }));
     foam.visible = false;
     const jet = new THREE.Mesh(
       new THREE.CylinderGeometry(0.011, 0.015, 1, 8, 1, true),
@@ -276,32 +294,174 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const tLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 1, 12), mat(0x201510, { r: 0.8 }));
   tLeg.position.y = 0.5;
   table.add(tLeg);
-  // Piatto + burger a strati: si SCOMPONE a mezz'aria quando la camera
-  // arriva al tavolo (la stazione "La Tavola") e si ricompone andando via.
-  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.03, 22), mat(C.schiuma, { r: 0.6 }));
-  plate.position.set(0, 1.09, 0);
-  table.add(plate);
+  // ---- I TRE IN VOGA sul tavolo (stessa esperienza immersiva delle birre):
+  //      tre piatti in fila lungo il percorso camera; scrollando la sezione
+  //      Hamburger ognuno si apre a mezz'aria mostrando i SUOI ingredienti
+  //      reali. Pane diverso per ognuno: sesamo (Brexit) · rustico scuro
+  //      (Hellfire) · brioche lucida (Cheeseburger). Nessun lock di scroll.
+  let burgerAmt = 0; // 0..1 dal DOM (sezione Hamburger centrata)
+  const seg = isHigh ? 22 : 14;
 
-  const burger = new THREE.Group();
-  burger.position.set(0, 1.11, 0);
-  table.add(burger);
-  // Intensità dell'esplosione del burger (0..1), pilotata da setBurger().
-  let burgerAmt = 0;
-  const seg = isHigh ? 20 : 12;
-  // [geometria, colore, baseY, offsetEsploso]
-  const burgerLayers = [
-    { m: new THREE.Mesh(new THREE.SphereGeometry(0.17, seg, seg, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat(0x9a6a30, { r: 0.75 })), y: 0.045, off: 0 },   // pane sotto (mezza sfera capovolta)
-    { m: new THREE.Mesh(new THREE.CylinderGeometry(0.175, 0.175, 0.02, seg), mat(0x4a7a30, { r: 0.9 })), y: 0.062, off: 0.09 },   // insalata
-    { m: new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.05, seg), mat(0x4a2a16, { r: 0.85 })), y: 0.1, off: 0.18 },      // hamburger 200gr
-    { m: new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.014, 0.26), mat(0xe8a33c, { r: 0.5, e: 0x6a4310, ei: 0.25 })), y: 0.132, off: 0.27 }, // cheddar
-    { m: new THREE.Mesh(new THREE.CylinderGeometry(0.155, 0.155, 0.024, seg), mat(0xa03020, { r: 0.7 })), y: 0.152, off: 0.36 },  // pomodoro
-    { m: new THREE.Mesh(new THREE.SphereGeometry(0.175, seg, seg, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xa57136, { r: 0.7 })), y: 0.165, off: 0.48 }, // pane sopra
+  // Builder di strati (ogni ingrediente reale ha la sua mini-geometria)
+  const mkPatty = () => new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.153, 0.055, seg), mat(0x4a2a16, { r: 0.85 }));
+  const mkInsalata = () => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.168, 0.158, 0.02, seg), mat(0x4a7a30, { r: 0.9 }));
+    m.scale.z = 0.94; // foglia irregolare
+    return m;
+  };
+  const mkCheddar = () => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.014, 0.24), mat(0xe8a33c, { r: 0.5, e: 0x6a4310, ei: 0.25 }));
+    m.rotation.y = Math.PI / 5;
+    return m;
+  };
+  const mkBacon = () => {
+    // due strisce ondulate: segmenti alternati carne scura / grasso chiaro
+    const g = new THREE.Group();
+    for (let k = 0; k < 2; k++) {
+      const strip = new THREE.Group();
+      for (let s = 0; s < 3; s++) {
+        const piece = new THREE.Mesh(
+          new THREE.BoxGeometry(0.062, 0.012, 0.19),
+          mat(s === 1 ? 0xd9a888 : 0x8a3020, { r: 0.7 })
+        );
+        piece.position.set(-0.062 + s * 0.062, (s % 2 ? 1 : -1) * 0.004, 0);
+        strip.add(piece);
+      }
+      strip.position.x = -0.05 + k * 0.1;
+      strip.rotation.y = (k ? -1 : 1) * 0.35;
+      g.add(strip);
+    }
+    return g;
+  };
+  const mkAnelli = () => {
+    const g = new THREE.Group();
+    for (let k = 0; k < 2; k++) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.017, 8, 16), mat(0xd8912f, { r: 0.55, e: 0x6a3a10, ei: 0.2 }));
+      ring.rotation.x = Math.PI / 2;
+      ring.position.set(-0.055 + k * 0.11, 0, k ? 0.025 : -0.025);
+      g.add(ring);
+    }
+    return g;
+  };
+  const mkBbq = () => {
+    const m = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.014, 8, 20), mat(0x5a2210, { r: 0.35, e: 0x2a0d04, ei: 0.4 }));
+    m.rotation.x = Math.PI / 2;
+    return m;
+  };
+  const mkStracciatella = () => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.12, seg, 12), mat(0xf6f2e8, { r: 0.95 }));
+    m.scale.set(1.2, 0.28, 1.1);
+    return m;
+  };
+  const mkBomba = () => {
+    const g = new THREE.Group();
+    const disco = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.135, 0.026, seg), mat(0xb83010, { r: 0.75, e: 0x501004, ei: 0.4 }));
+    g.add(disco);
+    for (let k = 0; k < 4; k++) {
+      const chili = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), mat(0xe03414, { r: 0.4, e: 0xa01000, ei: 0.8 }));
+      const a = (k / 4) * Math.PI * 2 + 0.6;
+      chili.position.set(Math.cos(a) * 0.08, 0.018, Math.sin(a) * 0.08);
+      g.add(chili);
+    }
+    return g;
+  };
+  const mkTomino = () => new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.045, seg), mat(0xf0ead8, { r: 0.85 }));
+  const mkBunBottom = (color) =>
+    new THREE.Mesh(new THREE.SphereGeometry(0.17, seg, seg, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat(color, { r: 0.75 }));
+  function mkBunTop(style) {
+    const g = new THREE.Group();
+    if (style === 'sesamo') {
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(0.175, seg, seg, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xa57136, { r: 0.7 })));
+      for (let k = 0; k < 9; k++) {
+        const sem = new THREE.Mesh(new THREE.SphereGeometry(0.011, 6, 6), mat(0xf2e2c0, { r: 0.9 }));
+        const a = pseudo(k * 7) * Math.PI * 2;
+        const e = 0.35 + pseudo(k * 3) * 0.85;
+        sem.position.set(Math.cos(a) * Math.cos(e) * 0.172, Math.sin(e) * 0.172, Math.sin(a) * Math.cos(e) * 0.172);
+        sem.scale.y = 0.55;
+        g.add(sem);
+      }
+    } else if (style === 'rustico') {
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.178, seg, seg, 0, Math.PI * 2, 0, Math.PI / 2), mat(0x6a4520, { r: 0.95 }));
+      cap.scale.y = 0.78; // più basso e piatto, da forno a legna
+      g.add(cap);
+      for (let k = 0; k < 6; k++) {
+        const fl = new THREE.Mesh(new THREE.SphereGeometry(0.016, 6, 6), mat(0xd9c9a8, { r: 1 }));
+        const a = pseudo(k * 13) * Math.PI * 2;
+        const e = 0.5 + pseudo(k * 5) * 0.8;
+        fl.position.set(Math.cos(a) * Math.cos(e) * 0.174, Math.sin(e) * 0.136, Math.sin(a) * Math.cos(e) * 0.174);
+        fl.scale.y = 0.25;
+        g.add(fl);
+      }
+    } else {
+      // brioche lucida, senza semi
+      g.add(new THREE.Mesh(
+        new THREE.SphereGeometry(0.172, seg, seg, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshPhysicalMaterial({ color: 0xc07f3a, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.25 })
+      ));
+    }
+    return g;
+  }
+
+  // Le tre ricette REALI (stesso ordine della lista in home):
+  // [builder, quota base, offset di apertura]
+  const RICETTE3D = [
+    { // BREXIT — sesamo: insalata, 200gr, bacon, cheddar, anelli cipolla, bbq
+      x: -0.33, z: -0.26,
+      strati: [
+        { make: () => mkBunBottom(0x9a6a30), y: 0.045, off: 0 },
+        { make: mkInsalata, y: 0.062, off: 0.07 },
+        { make: mkPatty, y: 0.1, off: 0.14 },
+        { make: mkBacon, y: 0.135, off: 0.21 },
+        { make: mkCheddar, y: 0.152, off: 0.28 },
+        { make: mkAnelli, y: 0.178, off: 0.36 },
+        { make: mkBbq, y: 0.198, off: 0.43 },
+        { make: () => mkBunTop('sesamo'), y: 0.208, off: 0.52 },
+      ],
+    },
+    { // HELLFIRE — rustico: insalata, 200gr, stracciatella, bomba calabra
+      x: 0, z: 0,
+      strati: [
+        { make: () => mkBunBottom(0x8a5a28), y: 0.045, off: 0 },
+        { make: mkInsalata, y: 0.062, off: 0.08 },
+        { make: mkPatty, y: 0.1, off: 0.17 },
+        { make: mkStracciatella, y: 0.148, off: 0.27 },
+        { make: mkBomba, y: 0.178, off: 0.37 },
+        { make: () => mkBunTop('rustico'), y: 0.2, off: 0.48 },
+      ],
+    },
+    { // CHEESEBURGER — brioche: 200gr, cheddar, bacon, tomino
+      x: 0.33, z: 0.26,
+      strati: [
+        { make: () => mkBunBottom(0xb07a38), y: 0.045, off: 0 },
+        { make: mkPatty, y: 0.095, off: 0.09 },
+        { make: mkCheddar, y: 0.13, off: 0.18 },
+        { make: mkBacon, y: 0.148, off: 0.27 },
+        { make: mkTomino, y: 0.185, off: 0.36 },
+        { make: () => mkBunTop('brioche'), y: 0.222, off: 0.46 },
+      ],
+    },
   ];
-  burgerLayers[3].m.rotation.y = Math.PI / 5; // cheddar leggermente ruotato
-  burgerLayers.forEach((L) => {
-    L.m.position.y = L.y;
-    burger.add(L.m);
+  const burgers = [];
+  RICETTE3D.forEach((cfg, bIdx) => {
+    const piatto = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.025, 22), mat(C.schiuma, { r: 0.6 }));
+    piatto.position.set(cfg.x, 1.09, cfg.z);
+    table.add(piatto);
+    const grp = new THREE.Group();
+    grp.position.set(cfg.x, 1.11, cfg.z);
+    grp.rotation.y = bIdx * 2.1; // ognuno mostra un lato diverso
+    table.add(grp);
+    const layers = cfg.strati.map((s) => {
+      const m = s.make();
+      m.position.y = s.y;
+      grp.add(m);
+      return { m, y: s.y, off: s.off };
+    });
+    burgers.push({ grp, layers, seed: bIdx * 2.1 });
   });
+  // Luce calda dedicata sopra il tavolo: i tre panini ben definiti.
+  const tavoloLight = new THREE.PointLight(0xffc06a, isHigh ? 7 : 5, 4.5, 2);
+  tavoloLight.position.set(2.6, 2.35, -3);
+  scene.add(tavoloLight);
 
   // Bersaglio freccette sulla parete destra (la Sala Giochi esiste anche in 3D)
   const dart = new THREE.Mesh(
@@ -510,12 +670,12 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     new THREE.CylinderGeometry(0.075, 0.055, 0.12, 12, 1, true),
     mat(C.rame, { r: 0.7, side: THREE.DoubleSide })
   );
-  friesCup.position.set(0.34, 1.17, -0.22);
+  friesCup.position.set(0.25, 1.17, -0.5);
   table.add(friesCup);
   for (let i = 0; i < 7; i++) {
     const fry = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.16, 0.016), mat(0xe8b04b, { r: 0.6, e: 0x6a4310, ei: 0.15 }));
     const a = pseudo(i * 11) * Math.PI * 2;
-    fry.position.set(0.34 + Math.cos(a) * 0.035, 1.26, -0.22 + Math.sin(a) * 0.035);
+    fry.position.set(0.25 + Math.cos(a) * 0.035, 1.26, -0.5 + Math.sin(a) * 0.035);
     fry.rotation.z = (pseudo(i * 5) - 0.5) * 0.5;
     fry.rotation.x = (pseudo(i * 3) - 0.5) * 0.3;
     table.add(fry);
@@ -622,7 +782,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     { p: [0.0, 2.35, 8.6], l: [0, 1.1, -10] },      // 0 soglia: TUTTO il locale in vista
     { p: [0.6, 1.65, 5.5], l: [-1.5, 1.6, 1] },     // 1 storia (entrando, verso sinistra)
     { p: [-1.8, 1.55, 1.7], l: [-3.35, 1.33, 0.45] }, // 2 bancone: vicino alle tre sotto le spine
-    { p: [1.55, 1.45, -1.85], l: [2.6, 1.18, -3] }, // 3 cucina (tavolo: burger protagonista)
+    { p: [1.0, 1.8, -1.05], l: [2.6, 1.15, -3.0] }, // 3 cucina: i tre panini affiancati in quadro
     { p: [-1.2, 1.7, -6.4], l: [-4.3, 1.85, -8.7] }, // 4 angolo fritti (sinistra)
     { p: [1.3, 1.65, -10.5], l: [4.4, 1.75, -12.7] }, // 5 angolo dolci (destra)
     { p: [-1.3, 1.7, -14.4], l: [-4.4, 1.65, -16.7] }, // 6 il bar / cocktail (sinistra)
@@ -685,16 +845,20 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     });
     camera.position.y += Math.sin(time * 0.8) * 0.01;
 
-    // Burger esploso: pilotato dalla pagina (setBurger) quando la sezione
-    // "La Tavola" è al centro del viewport. Gli strati si separano e il
-    // panino LEVITA sopra il tavolo, così lo stacco si legge anche da lontano.
+    // I tre in voga si aprono a mezz'aria: pilotati dalla pagina (setBurger)
+    // quando la sezione Hamburger è al centro. Ogni stack levita e respira
+    // con una fase propria, ma tutti in sincronia con lo scroll.
     const explode = burgerAmt * burgerAmt; // ease-in per uno stacco netto
-    burgerLayers.forEach((L, i) => {
-      L.m.position.y += (L.y + L.off * explode - L.m.position.y) * 0.12;
-      L.m.rotation.y += 0.002 + i * 0.002 * explode;
+    burgers.forEach((B) => {
+      B.layers.forEach((L, i) => {
+        // apertura compatta (0.75): gli strati restano leggibili in quadro
+        L.m.position.y += (L.y + L.off * 0.75 * explode - L.m.position.y) * 0.12;
+        L.m.rotation.y += i * 0.0015 * explode;
+      });
+      const bob = Math.sin(time * 1.2 + B.seed) * 0.02;
+      B.grp.position.y += (1.11 + explode * (0.16 + bob) - B.grp.position.y) * 0.1;
+      B.grp.rotation.y += 0.003 + explode * 0.015;
     });
-    burger.position.y += (1.11 + explode * 0.34 - burger.position.y) * 0.1;
-    burger.rotation.y += 0.003 + explode * 0.02;
 
     // Le tre si riempiono in sincronia: livello = spinaAmt, getto per ognuna.
     const level3 = 0.02 + spinaAmt * 0.24;
