@@ -525,35 +525,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const fritCab = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.9, 0.9), mat(C.legno, { r: 0.75 }));
   fritCab.position.y = -1.4;
   fritGrp.add(fritCab);
-  const FRY_N = isHigh ? 22 : 12;
-  const fries3 = [];
-  const fryMat3 = mat(0xe8b04b, { r: 0.5, e: 0x7a4a10, ei: 0.35 });
-  for (let i = 0; i < FRY_N; i++) {
-    // ogni "patatina" è una coppia di metà: si separano (si spezzano) e si riuniscono
-    const pair = new THREE.Group();
-    const a = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.17, 0.055), fryMat3);
-    const b = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.17, 0.055), fryMat3);
-    a.position.y = 0.09;
-    b.position.y = -0.09;
-    pair.add(a, b);
-    // nuvola alzata: lascia libero il bancone dove stanno i tre in voga
-    pair.position.set((pseudo(i * 3) - 0.5) * 1.7, (pseudo(i * 5) - 0.5) * 1.1 + 0.25, (pseudo(i * 7) - 0.5) * 0.8);
-    pair.userData = { ph: pseudo(i * 11) * Math.PI * 2, a, b, baseY: pair.position.y };
-    fritGrp.add(pair);
-    fries3.push(pair);
-  }
-  const rings3 = [];
-  for (let i = 0; i < 3; i++) {
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(0.13, 0.045, 8, 18),
-      mat(0xd8912f, { r: 0.55, e: 0x6a3a10, ei: 0.3 })
-    );
-    ring.position.set(-0.7 + i * 0.7, 0.75 - i * 0.18, 0.25);
-    ring.userData.ph = pseudo(i * 13) * 6;
-    fritGrp.add(ring);
-    rings3.push(ring);
-  }
-
   // ---- I TRE IN VOGA della friggitoria SUL BANCONE (metodo immersivo):
   //      Patatine "Montparnasse" (formaggio fuso, cheddar e bacon) · Tagliere
   //      "Colesterolo" (gran trionfo di fritti) · Onion Rings impilati.
@@ -779,6 +750,97 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   die2.position.set(4.48, 0.9, -21.68);
   root.add(die2);
   let giochiAmt = 0;
+
+  // ---- SALA GIOCHI 3D: cabinato arcade retro + giochi da tavolo + carte ----
+  // Il cabinato è contro la parete destra, davanti al bersaglio: schermo a
+  // pixel che sfarfalla come un CRT. Accanto al barile: la pila di scatole
+  // dei giochi con la scacchiera e le pedine, e il ventaglio di carte che
+  // si apre quando la sezione Giochi è al centro.
+  const arcade = new THREE.Group();
+  arcade.position.set(4.85, 0, -19.75);
+  arcade.rotation.y = -Math.PI / 2 + 0.14; // fronte verso la sala, appena angolato
+  root.add(arcade);
+  const arcBody = new THREE.Mesh(new THREE.BoxGeometry(0.62, 1.75, 0.55), mat(0x1a1420, { r: 0.7 }));
+  arcBody.position.y = 0.875;
+  arcade.add(arcBody);
+  const arcBezel = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.44, 0.03), mat(0x0c0910, { r: 0.5 }));
+  arcBezel.position.set(0, 1.27, 0.27);
+  arcade.add(arcBezel);
+  const arcScreenMat = new THREE.MeshBasicMaterial({ map: makeArcadeScreen() });
+  const arcScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.34), arcScreenMat);
+  arcScreen.position.set(0, 1.27, 0.29);
+  arcade.add(arcScreen);
+  const arcPanel = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.05, 0.3), mat(0x241a30, { r: 0.6 }));
+  arcPanel.position.set(0, 0.97, 0.34);
+  arcPanel.rotation.x = -0.3;
+  arcade.add(arcPanel);
+  const joyBase = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.09, 8), mat(0x0c0910, { r: 0.4 }));
+  joyBase.position.set(-0.13, 1.03, 0.36);
+  const joyBall = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 10), mat(0xc22a1e, { r: 0.35, e: 0x500a06, ei: 0.4 }));
+  joyBall.position.set(-0.13, 1.08, 0.36);
+  arcade.add(joyBase, joyBall);
+  [[0.07, 0xc22a1e], [0.16, 0xe8b04b]].forEach(([bx, bc]) => {
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.016, 10), mat(bc, { r: 0.35, e: bc, ei: 0.25 }));
+    btn.position.set(bx, 1.0, 0.37);
+    btn.rotation.x = -0.3;
+    arcade.add(btn);
+  });
+  // insegna luminosa incassata sotto il cappello del cabinato
+  const arcCap = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.07, 0.58), mat(0x0c0910, { r: 0.6 }));
+  arcCap.position.y = 1.79;
+  arcade.add(arcCap);
+  const arcMarq = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.09), new THREE.MeshBasicMaterial({ color: 0xe8b04b }));
+  arcMarq.position.set(0, 1.68, 0.281);
+  arcade.add(arcMarq);
+  // bagliore freddo del CRT: stacca nel calore del pub
+  const crtLight = new THREE.PointLight(0x7ab8ff, isHigh ? 3.5 : 2.5, 2.4, 2);
+  crtLight.position.set(4.35, 1.35, -19.7);
+  scene.add(crtLight);
+
+  // Pila di scatole di giochi da tavolo + scacchiera con le pedine
+  const giochiTav = new THREE.Group();
+  giochiTav.position.set(4.55, 0, -22.35);
+  root.add(giochiTav);
+  [[0x3b5e4a, 0.05, 0.15], [0x7a2e1e, 0.14, -0.2], [0xb98a3e, 0.23, 0.35]].forEach(([bc, by, br]) => {
+    const box = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.09, 0.32), mat(bc, { r: 0.7 }));
+    box.position.y = by;
+    box.rotation.y = br;
+    giochiTav.add(box);
+  });
+  const chess = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.3), new THREE.MeshBasicMaterial({ map: makeChecker() }));
+  chess.rotation.x = -Math.PI / 2;
+  chess.rotation.z = 0.35;
+  chess.position.y = 0.277;
+  giochiTav.add(chess);
+  const meeples = [];
+  [[-0.06, 0.04, 0xf4e9d0], [0.05, -0.03, 0x7a2e1e], [0.0, 0.08, 0x3b5e4a]].forEach(([mx, mz, mc], i) => {
+    const mp = new THREE.Group();
+    const corpo = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.05, 10), mat(mc, { r: 0.5 }));
+    corpo.position.y = 0.025;
+    const testa = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), mat(mc, { r: 0.5 }));
+    testa.position.y = 0.058;
+    mp.add(corpo, testa);
+    mp.position.set(mx, 0.28, mz);
+    mp.userData = { baseY: 0.28, ph: i * 1.7 };
+    giochiTav.add(mp);
+    meeples.push(mp);
+  });
+
+  // Ventaglio di carte da gioco sul barile (si apre con lo scroll)
+  const cardFan = new THREE.Group();
+  cardFan.position.set(4.26, 0.86, -21.4);
+  cardFan.rotation.y = -Math.PI / 3.2; // rivolto verso la sala
+  cardFan.rotation.x = -0.15;
+  root.add(cardFan);
+  const cards = [];
+  const cardGeo = new THREE.PlaneGeometry(0.07, 0.11);
+  cardGeo.translate(0, 0.055, 0); // pivot sul bordo basso: il ventaglio ruota da lì
+  for (let i = 0; i < 5; i++) {
+    const card = new THREE.Mesh(cardGeo, mat(0xf4e9d0, { r: 0.6, side: THREE.DoubleSide }));
+    card.position.z = i * 0.0022; // leggerissimo sfalsamento anti z-fighting
+    cardFan.add(card);
+    cards.push(card);
+  }
 
   // ---- SET-PIECE TAVOLA: patatine + vapore sopra il burger ----
   const friesCup = new THREE.Mesh(
@@ -1019,6 +1081,17 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     die1.rotation.z += roll * 0.09;
     die2.rotation.x -= roll * 0.1;
     die2.rotation.y += roll * 0.11;
+    // Il CRT sfarfalla sempre un po', di più quando la sezione è centrata;
+    // il ventaglio di carte si apre e le pedine saltellano a turno.
+    const flick = 0.78 + Math.sin(time * 9.3) * 0.06 + Math.sin(time * 23.7) * 0.04 + g * 0.16;
+    arcScreenMat.color.setScalar(flick);
+    arcScreenMat.map.offset.y = (time * 1.7) % 1 > 0.94 ? 0.03 * g : 0;
+    cards.forEach((card, i) => {
+      card.rotation.z += ((i - 2) * 0.3 * g - card.rotation.z) * 0.1;
+    });
+    meeples.forEach((mp) => {
+      mp.position.y = mp.userData.baseY + Math.max(0, Math.sin(time * 2.2 + mp.userData.ph)) * 0.035 * g;
+    });
 
     // Vapore del burger: sale, si allarga e svanisce in loop.
     steam.forEach((s, i) => {
@@ -1059,25 +1132,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     });
 
     // ---- Fondali del menu: si accendono quando la loro sezione è centrata ----
-    // FRITTI: si dilatano (scale), si spezzano (le metà si separano) e ruotano.
     const fA = zoneAmt.fritti;
-    fries3.forEach((pair) => {
-      const u = pair.userData;
-      const w = Math.sin(time * 2.1 + u.ph);
-      const stretch = 1 + Math.max(0, w) * 0.7 * fA;        // dilatazione
-      const split = Math.max(0, -w) * 0.16 * fA;            // spezzata
-      u.a.scale.y = stretch;
-      u.b.scale.y = stretch;
-      u.a.position.y = 0.09 * stretch + split;
-      u.b.position.y = -0.09 * stretch - split;
-      pair.rotation.z = Math.sin(time * 0.9 + u.ph) * 0.5 * fA;
-      pair.rotation.x = Math.cos(time * 0.7 + u.ph) * 0.3 * fA;
-      pair.position.y = u.baseY + Math.sin(time * 1.1 + u.ph) * 0.12 * fA;
-    });
-    rings3.forEach((r) => {
-      r.rotation.x = time * (0.6 + r.userData.ph * 0.1) * Math.max(0.15, fA);
-      r.rotation.y = time * 0.4 * Math.max(0.15, fA);
-    });
     // I tre in voga sfrigolano appena usciti dal fritto: le patatine saltano
     // nella coppetta, i pezzi del tagliere ballonzolano a turno, l'anello in
     // cima alla pila si solleva e ondeggia.
@@ -1333,6 +1388,57 @@ function makeDartboard() {
   ctx.fillStyle = '#e8b04b';
   ctx.fill();
   return new THREE.CanvasTexture(c);
+}
+
+function makeArcadeScreen() {
+  // Schermo CRT retro: file di "invasori" a pixel, colpi e navicella in basso.
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#070a16';
+  ctx.fillRect(0, 0, 64, 64);
+  const cols = ['#7ee08a', '#e8b04b', '#f4e9d0'];
+  for (let row = 0; row < 3; row++) {
+    ctx.fillStyle = cols[row];
+    for (let k = 0; k < 5; k++) {
+      const x = 6 + k * 11 + (row % 2 ? 2 : 0);
+      const y = 8 + row * 9;
+      ctx.fillRect(x, y, 7, 5);
+      ctx.fillRect(x - 1, y + 1, 1, 2);
+      ctx.fillRect(x + 7, y + 1, 1, 2);
+    }
+  }
+  // colpi
+  ctx.fillStyle = '#f4e9d0';
+  ctx.fillRect(30, 38, 1, 5);
+  ctx.fillRect(45, 42, 1, 5);
+  // navicella del giocatore
+  ctx.fillStyle = '#7ee08a';
+  ctx.fillRect(27, 54, 9, 3);
+  ctx.fillRect(30, 52, 3, 2);
+  // scanline leggere
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  for (let y = 0; y < 64; y += 2) ctx.fillRect(0, y, 64, 1);
+  const tex = new THREE.CanvasTexture(c);
+  tex.magFilter = THREE.NearestFilter;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+function makeChecker() {
+  // Scacchiera in palette per il tavolo dei giochi.
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const ctx = c.getContext('2d');
+  const s = 8;
+  for (let y = 0; y < 8; y++)
+    for (let x = 0; x < 8; x++) {
+      ctx.fillStyle = (x + y) % 2 ? '#2a1d12' : '#d9cdb4';
+      ctx.fillRect(x * s, y * s, s, s);
+    }
+  const tex = new THREE.CanvasTexture(c);
+  tex.magFilter = THREE.NearestFilter;
+  return tex;
 }
 
 function makeNeon() {
