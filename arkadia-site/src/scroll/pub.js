@@ -111,6 +111,7 @@ async function boot() {
     tavola: document.getElementById('tavola'),
     spina: document.getElementById('spina'),
     brindisi: document.getElementById('brindisi'),
+    giochi: document.getElementById('giochi'),
   };
   function proximity(el) {
     if (!el) return 0;
@@ -133,9 +134,11 @@ async function boot() {
   // stazione sul percorso (0..5). Il progresso è interpolato tra i CENTRI
   // delle sezioni, così la camera è sempre nel punto giusto della scena
   // quando quella sezione è al centro dello schermo.
+  // 7 stazioni sul percorso (0..6): ogni sezione DOM ha la sua inquadratura.
+  const LAST_ST = 6;
   const ROUTE = [
     ['soglia', 0], ['rifugio', 1], ['spina', 2], ['tavola', 3],
-    ['luogo', 4], ['giochi', 4.55], ['brindisi', 5],
+    ['luogo', 4], ['giochi', 5], ['brindisi', 6],
   ].map(([id, st]) => ({ el: document.getElementById(id), st }));
 
   function narrativeT() {
@@ -145,11 +148,11 @@ async function boot() {
       st: r.st,
     }));
     if (!pts.length) return 0;
-    if (mid <= pts[0].y) return (pts[0].st / 5) * Math.max(0, mid / pts[0].y);
+    if (mid <= pts[0].y) return (pts[0].st / LAST_ST) * Math.max(0, mid / pts[0].y);
     for (let i = 0; i < pts.length - 1; i++) {
       if (mid <= pts[i + 1].y) {
         const f = (mid - pts[i].y) / (pts[i + 1].y - pts[i].y);
-        return (pts[i].st + (pts[i + 1].st - pts[i].st) * f) / 5;
+        return (pts[i].st + (pts[i + 1].st - pts[i].st) * f) / LAST_ST;
       }
     }
     return 1;
@@ -161,9 +164,14 @@ async function boot() {
     const t = max > 0 ? window.scrollY / max : 0;
     if (pub) {
       pub.setProgress(narrativeT());
+      // Hook diagnostico (solo con ?debug nell'URL, nessun costo altrimenti)
+      if (location.search.includes('debug')) {
+        window.__arkadia = { narrT: narrativeT(), ...pub.getT?.() };
+      }
       pub.setBurger?.(proximity(sects.tavola));
       pub.setSpina?.(proximity(sects.spina));
       pub.setBrindisi?.(proximity(sects.brindisi));
+      pub.setGiochi?.(proximity(sects.giochi));
     }
     // La pinta di progresso si riempie con lo scroll.
     const pct = Math.round(t * 100);

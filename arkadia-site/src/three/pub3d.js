@@ -43,8 +43,14 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const root = new THREE.Group();
   scene.add(root);
 
-  // ---- Pavimento ----
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(16, 40), mat(C.legno, { r: 0.6, m: 0.1 }));
+  // ---- Pavimento: legno a doghe (texture procedurale) ----
+  const woodTex = makeWood();
+  woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping;
+  woodTex.repeat.set(4, 10);
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(16, 40),
+    new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.55, metalness: 0.08 })
+  );
   floor.rotation.x = -Math.PI / 2;
   floor.position.z = -8;
   root.add(floor);
@@ -212,8 +218,14 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     shelf.position.set(shelfX, 1.5 + s * 0.7, -0.5);
     root.add(shelf);
   }
-  // retro illuminato
-  const backLight = new THREE.Mesh(new THREE.PlaneGeometry(8, 2.4), new THREE.MeshBasicMaterial({ color: 0x2a1a0c }));
+  // retro-bancone in mattoni a vista, scaldato dal neon
+  const brickTex = makeBrick();
+  brickTex.wrapS = brickTex.wrapT = THREE.RepeatWrapping;
+  brickTex.repeat.set(4, 1.6);
+  const backLight = new THREE.Mesh(
+    new THREE.PlaneGeometry(8, 2.4),
+    new THREE.MeshStandardMaterial({ map: brickTex, roughness: 0.95, emissive: 0x33200e, emissiveIntensity: 0.4 })
+  );
   backLight.rotation.y = Math.PI / 2;
   backLight.position.set(-4.95, 2.2, -0.5);
   root.add(backLight);
@@ -288,6 +300,122 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   dart.position.set(5.14, 2.1, -6.5);
   root.add(dart);
 
+  // ---- SET-PIECE SALA GIOCHI: freccetta che vola nel bersaglio + dadi ----
+  // La freccetta parte a mezz'aria e si conficca nel centro quando la sezione
+  // Giochi è al centro dello schermo (setGiochi 0→1). I dadi rotolano su un
+  // barile accanto e si fermano.
+  const dartArrow = new THREE.Group();
+  const dartShaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.012, 0.22, 8),
+    mat(0xd9cdb4, { r: 0.4 })
+  );
+  dartShaft.rotation.z = Math.PI / 2;
+  dartArrow.add(dartShaft);
+  const dartTip = new THREE.Mesh(new THREE.ConeGeometry(0.014, 0.06, 8), mat(C.ottone, { r: 0.2, m: 0.9 }));
+  dartTip.rotation.z = -Math.PI / 2;
+  dartTip.position.x = 0.13;
+  dartArrow.add(dartTip);
+  const dartFl = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.09, 4), mat(C.rame, { r: 0.6, e: C.rame, ei: 0.25 }));
+  dartFl.rotation.z = Math.PI / 2;
+  dartFl.position.x = -0.13;
+  dartArrow.add(dartFl);
+  const dartFrom = new THREE.Vector3(3.4, 1.75, -5.6);
+  const dartTo = new THREE.Vector3(4.9, 2.1, -6.5);
+  dartArrow.position.copy(dartFrom);
+  root.add(dartArrow);
+
+  // Lampada da pub sopra il bersaglio: la Sala Giochi ha la sua luce di scena.
+  const dartBulb = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffd68a }));
+  dartBulb.position.set(4.55, 3.0, -6.5);
+  root.add(dartBulb);
+  const dartWire = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 1.2, 6), mat(0x100b07));
+  dartWire.position.set(4.55, 3.6, -6.5);
+  root.add(dartWire);
+  const dartLight = new THREE.PointLight(0xffb851, isHigh ? 10 : 7, 6, 2);
+  dartLight.position.set(4.5, 2.9, -6.6);
+  scene.add(dartLight);
+
+  // Barile con due dadi
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.32, 0.85, 14), mat(C.legno, { r: 0.75 }));
+  barrel.position.set(4.4, 0.42, -7.6);
+  root.add(barrel);
+  const diceMat = mat(C.schiuma, { r: 0.5 });
+  const die1 = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 0.09), diceMat);
+  die1.position.set(4.34, 0.9, -7.55);
+  root.add(die1);
+  const die2 = die1.clone();
+  die2.position.set(4.48, 0.9, -7.68);
+  root.add(die2);
+  let giochiAmt = 0;
+
+  // ---- SET-PIECE TAVOLA: patatine + vapore sopra il burger ----
+  const friesCup = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.075, 0.055, 0.12, 12, 1, true),
+    mat(C.rame, { r: 0.7, side: THREE.DoubleSide })
+  );
+  friesCup.position.set(0.34, 1.17, -0.22);
+  table.add(friesCup);
+  for (let i = 0; i < 7; i++) {
+    const fry = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.16, 0.016), mat(0xe8b04b, { r: 0.6, e: 0x6a4310, ei: 0.15 }));
+    const a = pseudo(i * 11) * Math.PI * 2;
+    fry.position.set(0.34 + Math.cos(a) * 0.035, 1.26, -0.22 + Math.sin(a) * 0.035);
+    fry.rotation.z = (pseudo(i * 5) - 0.5) * 0.5;
+    fry.rotation.x = (pseudo(i * 3) - 0.5) * 0.3;
+    table.add(fry);
+  }
+  // Vapore: 3 sprite morbidi che salgono sopra il burger
+  const steamMat = new THREE.SpriteMaterial({
+    map: makeSoftDot(), color: 0xf4e9d0, transparent: true, opacity: 0.0,
+    depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const steam = [];
+  for (let i = 0; i < 3; i++) {
+    const s = new THREE.Sprite(steamMat.clone());
+    s.scale.setScalar(0.14);
+    s.position.set(0, 1.4, 0);
+    s.userData.seed = pseudo(i * 17);
+    table.add(s);
+    steam.push(s);
+  }
+
+  // ---- SET-PIECE BRINDISI: esplosione di schiuma al tocco dei boccali ----
+  const BURST_N = 26;
+  const burstPos = new Float32Array(BURST_N * 3);
+  const burstDir = [];
+  for (let i = 0; i < BURST_N; i++) {
+    const a = pseudo(i * 3) * Math.PI * 2;
+    const e = pseudo(i * 7) * Math.PI * 0.6;
+    burstDir.push(new THREE.Vector3(Math.cos(a) * Math.cos(e), Math.sin(e) + 0.4, Math.sin(a) * Math.cos(e) * 0.4));
+  }
+  const burstGeo = new THREE.BufferGeometry();
+  burstGeo.setAttribute('position', new THREE.BufferAttribute(burstPos, 3));
+  const burst = new THREE.Points(
+    burstGeo,
+    new THREE.PointsMaterial({
+      map: makeSoftDot(), color: 0xf4e9d0, size: 0.06, transparent: true,
+      opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending,
+    })
+  );
+  burst.position.set(0, 1.62, -13.35);
+  root.add(burst);
+  let burstT = -1; // -1 = inattivo; 0..1 = animazione in corso
+  let burstArmed = true;
+
+  // ---- SET-PIECE STORIA: insegne d'epoca appese sopra il bancone ----
+  // (aderenti alla parete sinistra: la stazione "storia" le inquadra entrando)
+  const anniPanels = [];
+  [['2018', 3.4], ['LA RADICE', 2.2], ['OGGI', 1.0]].forEach(([txt, z], i) => {
+    const p = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.85, 0.36),
+      new THREE.MeshBasicMaterial({ map: makeYearCard(txt), transparent: true, opacity: 0.95 })
+    );
+    p.position.set(-5.05, 3.05, z);
+    p.rotation.y = Math.PI / 2;
+    p.userData.seed = pseudo(i * 23);
+    root.add(p);
+    anniPanels.push(p);
+  });
+
   // Séparé in fondo (booth)
   const booth = new THREE.Mesh(new THREE.BoxGeometry(3, 1.3, 0.5), mat(C.rame, { r: 0.85 }));
   booth.position.set(0, 0.65, -13.5);
@@ -338,7 +466,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     { p: [-1.4, 1.55, 1.2], l: [-3.2, 1.3, -0.4] }, // 2 bancone / birre
     { p: [1.55, 1.45, -1.85], l: [2.6, 1.18, -3] }, // 3 tavolo / cibo (vicino: burger protagonista)
     { p: [0.4, 1.9, -5.5], l: [-2, 1.4, -6] },    // 4 sala (wide)
-    { p: [0.0, 1.5, -10.5], l: [0, 1.0, -13.5] }, // 5 séparé / brindisi
+    { p: [2.0, 1.75, -4.6], l: [5.2, 2.0, -6.9] }, // 5 sala giochi (bersaglio + barile)
+    { p: [0.0, 1.5, -10.5], l: [0, 1.0, -13.5] }, // 6 séparé / brindisi
   ];
   const posCurve = new THREE.CatmullRomCurve3(stations.map((s) => new THREE.Vector3(...s.p)), false, 'catmullrom', 0.4);
   const lookCurve = new THREE.CatmullRomCurve3(stations.map((s) => new THREE.Vector3(...s.l)), false, 'catmullrom', 0.4);
@@ -368,18 +497,22 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   function frame() {
     if (!running) return;
     raf = requestAnimationFrame(frame);
-    const dt = Math.min(clock.getDelta(), 0.05);
+    const dtRaw = clock.getDelta();
+    const dt = Math.min(dtRaw, 0.05); // cap per le animazioni fisiche
     const time = clock.elapsedTime;
 
     if (introActive) {
-      introElapsed += dt;
-      const k = Math.min(1, introElapsed / INTRO_DUR);
+      // Timeline su TEMPO REALE (non su dt cappato): a bassi framerate
+      // l'intro deve comunque durare INTRO_DUR secondi, non dilatarsi.
+      const k = Math.min(1, time / INTRO_DUR);
       const eased = 1 - Math.pow(1 - k, 3); // easeOutCubic
       // l'intro percorre la prima porzione del path (fuori → dentro, prime 2 stazioni)
       renderT = eased * (1 / (stations.length - 1)) * 1.15;
       if (k >= 1) introActive = false;
     } else {
-      renderT += (targetT - renderT) * 0.06;
+      // Smoothing indipendente dal framerate: stessa "morbidezza" a 20 o 120fps.
+      const s = 1 - Math.pow(0.94, Math.min(dtRaw, 0.25) * 60);
+      renderT += (targetT - renderT) * s;
     }
     applyCamera(renderT);
 
@@ -433,6 +566,57 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       dust.position.y = Math.sin(time * 0.25) * 0.12;
     }
 
+    // Sala Giochi: la freccetta vola verso il bersaglio (con leggera parabola)
+    // e i dadi rotolano finché la sezione non è centrata.
+    const g = giochiAmt * giochiAmt * (3 - 2 * giochiAmt); // smoothstep
+    dartArrow.position.lerpVectors(dartFrom, dartTo, g);
+    dartArrow.position.y += Math.sin(g * Math.PI) * 0.22; // arco di volo
+    dartArrow.rotation.z = (1 - g) * -0.35;
+    dartArrow.rotation.y = (1 - g) * 0.4;
+    const roll = 1 - g;
+    die1.rotation.x += roll * 0.12;
+    die1.rotation.z += roll * 0.09;
+    die2.rotation.x -= roll * 0.1;
+    die2.rotation.y += roll * 0.11;
+
+    // Vapore del burger: sale, si allarga e svanisce in loop.
+    steam.forEach((s, i) => {
+      const k = (time * 0.35 + s.userData.seed + i * 0.33) % 1;
+      s.position.y = 1.32 + k * 0.5;
+      s.position.x = Math.sin((time + i) * 1.3) * 0.04;
+      s.scale.setScalar(0.1 + k * 0.22);
+      s.material.opacity = Math.sin(k * Math.PI) * 0.16;
+    });
+
+    // Brindisi: al culmine del tocco parte l'esplosione di schiuma (one-shot,
+    // si riarma quando i boccali si allontanano).
+    if (cheer > 0.88 && burstArmed) {
+      burstT = 0;
+      burstArmed = false;
+    }
+    if (cheer < 0.3) burstArmed = true;
+    if (burstT >= 0) {
+      burstT += dt * 1.6;
+      const life = Math.min(1, burstT);
+      const pos = burst.geometry.attributes.position;
+      for (let i = 0; i < BURST_N; i++) {
+        const d = burstDir[i];
+        const r = life * (0.25 + pseudo(i * 5) * 0.3);
+        pos.setXYZ(i, d.x * r, d.y * r - life * life * 0.18, d.z * r);
+      }
+      pos.needsUpdate = true;
+      burst.material.opacity = Math.sin(Math.min(1, life) * Math.PI) * 0.9;
+      if (life >= 1) burstT = -1;
+    } else {
+      burst.material.opacity = 0;
+    }
+
+    // Gli anni della Storia fluttuano piano, come appesi nell'aria.
+    anniPanels.forEach((p, i) => {
+      p.position.y = 2.35 + Math.sin(time * 0.7 + p.userData.seed * 6) * 0.05;
+      p.rotation.y = 0.5 + Math.sin(time * 0.4 + i) * 0.05;
+    });
+
     renderer.render(scene, camera);
   }
   frame();
@@ -449,6 +633,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     setBurger: (p) => { burgerAmt = Math.max(0, Math.min(1, p)); },
     setSpina: (p) => { spinaAmt = Math.max(0, Math.min(1, p)); },
     setBrindisi: (p) => { brindisiAmt = Math.max(0, Math.min(1, p)); },
+    setGiochi: (p) => { giochiAmt = Math.max(0, Math.min(1, p)); },
+    getT: () => ({ targetT, renderT, intro: introActive }),
     introRunning: () => introActive,
     dispose() {
       running = false;
@@ -502,6 +688,79 @@ function makeEnv(renderer) {
   const rt = pmrem.fromEquirectangular(tex);
   tex.dispose(); pmrem.dispose();
   return rt.texture;
+}
+
+function makeYearCard(txt) {
+  // Cartellino d'epoca fluttuante: testo dorato su velo scuro, bordo sottile.
+  const c = document.createElement('canvas');
+  c.width = 512;
+  c.height = 216;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = 'rgba(14, 10, 7, 0.72)';
+  ctx.fillRect(0, 0, 512, 216);
+  ctx.strokeStyle = 'rgba(232, 176, 75, 0.85)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, 492, 196);
+  ctx.font = '700 92px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#e8b04b';
+  ctx.shadowBlur = 22;
+  ctx.fillStyle = '#f4e9d0';
+  ctx.fillText(txt, 256, 112);
+  return new THREE.CanvasTexture(c);
+}
+
+function makeWood() {
+  // Doghe di legno caldo con venature — disegnate a mano su canvas.
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const ctx = c.getContext('2d');
+  const plank = 32;
+  for (let y = 0; y < 256; y += plank) {
+    // tonalità leggermente diversa per doga
+    const t = 0.85 + pseudo(y) * 0.35;
+    ctx.fillStyle = `rgb(${Math.round(58 * t)}, ${Math.round(36 * t)}, ${Math.round(22 * t)})`;
+    ctx.fillRect(0, y, 256, plank);
+    // venature
+    ctx.strokeStyle = 'rgba(20, 12, 7, 0.35)';
+    ctx.lineWidth = 1;
+    for (let v = 0; v < 5; v++) {
+      const vy = y + 4 + pseudo(y * 7 + v) * (plank - 8);
+      ctx.beginPath();
+      ctx.moveTo(0, vy);
+      for (let x = 0; x <= 256; x += 32) {
+        ctx.lineTo(x, vy + Math.sin(x * 0.05 + v) * 1.5);
+      }
+      ctx.stroke();
+    }
+    // fuga tra le doghe
+    ctx.fillStyle = 'rgba(10, 6, 4, 0.8)';
+    ctx.fillRect(0, y + plank - 1.5, 256, 1.5);
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+function makeBrick() {
+  // Mattoni a vista in palette, con fughe scure e variazioni di tono.
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#17100b'; // fuga
+  ctx.fillRect(0, 0, 256, 128);
+  const bw = 42, bh = 18, gap = 3;
+  let row = 0;
+  for (let y = 0; y < 128; y += bh + gap) {
+    const off = row % 2 ? -(bw + gap) / 2 : 0;
+    for (let x = off; x < 256; x += bw + gap) {
+      const t = 0.8 + pseudo(x * 13 + y * 7) * 0.5;
+      ctx.fillStyle = `rgb(${Math.round(74 * t)}, ${Math.round(40 * t)}, ${Math.round(24 * t)})`;
+      ctx.fillRect(x, y, bw, bh);
+    }
+    row++;
+  }
+  return new THREE.CanvasTexture(c);
 }
 
 function makeSoftDot() {

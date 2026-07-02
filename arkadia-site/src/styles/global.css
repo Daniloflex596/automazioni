@@ -111,6 +111,8 @@ canvas {
   position: absolute;
   inset: 0;
   background:
+    /* vignettatura cinematografica */
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(8, 5, 3, 0.55) 100%),
     linear-gradient(
       90deg,
       rgba(14, 10, 7, 0.9) 0%,
@@ -120,6 +122,32 @@ canvas {
     ),
     radial-gradient(ellipse at 72% 50%, transparent 40%, rgba(14, 10, 7, 0.5) 100%);
   pointer-events: none;
+}
+
+/* Grana pellicola: velo di rumore animato sopra tutto, quasi impercettibile
+   ma dà la pasta "girato in notturna". SVG turbolenza inline, zero asset. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -60px;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(4) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-24px, 16px); }
+  50% { transform: translate(18px, -22px); }
+  75% { transform: translate(-14px, -12px); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+    opacity: 0.03;
+  }
 }
 
 main {
