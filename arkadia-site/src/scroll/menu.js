@@ -66,11 +66,25 @@ function proximity(el) {
 }
 function menuT() {
   const mid = scrollY + innerHeight / 2;
-  const pts = MROUTE.map(([id, st]) => {
+  // DUE ancore per sezione (inizio e fine): la camera si FISSA sulla
+  // stazione per TUTTA la sezione — anche le più lunghe, come Birre con
+  // spina + 18 bottiglie, o Hamburger coi tre panini 3D da godersi — e
+  // viaggia solo nel passaggio tra una categoria e l'altra.
+  const pts = [];
+  MROUTE.forEach(([id, st]) => {
     const el = document.getElementById(id);
-    return el ? { y: el.offsetTop + el.offsetHeight / 2, st } : null;
-  }).filter(Boolean);
+    if (!el) return;
+    const top = el.offsetTop;
+    const h = el.offsetHeight;
+    const margine = Math.min(h * 0.5, innerHeight * 0.28);
+    pts.push({ y: top + margine, st });
+    pts.push({ y: top + h - margine, st });
+  });
   if (!pts.length) return 0;
+  // ancore strettamente crescenti (sezioni corte o adiacenti)
+  for (let i = 1; i < pts.length; i++) {
+    if (pts[i].y <= pts[i - 1].y) pts[i].y = pts[i - 1].y + 1;
+  }
   if (mid <= pts[0].y) return (pts[0].st / 9) * Math.max(0, mid / pts[0].y);
   for (let i = 0; i < pts.length - 1; i++) {
     if (mid <= pts[i + 1].y) {
