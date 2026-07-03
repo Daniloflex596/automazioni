@@ -448,13 +448,231 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
   fondoLight.position.set(0, 2.4, -32.2);
   scene.add(fondoLight);
 
-  return { fiammelle };
+  // -- FLIPPER "ARKADIA PINBALL" (parete sinistra, oltre il salotto):
+  //    il fratello nerd del cabinato arcade, dall'altra parte della sala.
+  const flipper = new THREE.Group();
+  flipper.position.set(-4.5, 0, -20.8);
+  flipper.rotation.y = Math.PI / 2; // testa verso la parete
+  root.add(flipper);
+  const flCorpo = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.2, 1.15), mat(0x241630, { r: 0.6 }));
+  flCorpo.position.set(0, 0.82, 0);
+  flCorpo.rotation.x = -0.1;
+  flipper.add(flCorpo);
+  const flPiano = new THREE.Mesh(new THREE.PlaneGeometry(0.58, 1.05), new THREE.MeshBasicMaterial({ map: makePinTex() }));
+  flPiano.rotation.x = -Math.PI / 2 - 0.1;
+  flPiano.position.set(0, 0.925, 0);
+  flipper.add(flPiano);
+  const flTesta = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.52, 0.14), mat(0x241630, { r: 0.6 }));
+  flTesta.position.set(0, 1.24, -0.62);
+  flipper.add(flTesta);
+  const flArte = new THREE.Mesh(new THREE.PlaneGeometry(0.58, 0.44), new THREE.MeshBasicMaterial({ map: makePinBackTex() }));
+  flArte.position.set(0, 1.24, -0.548);
+  flipper.add(flArte);
+  [[-0.28, 0.5], [0.28, 0.5], [-0.28, -0.5], [0.28, -0.5]].forEach(([lx, lz]) => {
+    const gamba = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.03, 0.75, 8), mat(0x2a2a2e, { r: 0.4, m: 0.6 }));
+    gamba.position.set(lx, 0.37, lz);
+    flipper.add(gamba);
+  });
+  const flBottone = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), mat(0xc22a1e, { r: 0.35, e: 0xc22a1e, ei: 0.3 }));
+  flBottone.position.set(0.34, 0.86, 0.28);
+  flipper.add(flBottone);
+
+  // -- JUKEBOX (parete destra, tra i cimeli e il banco dolci): archi dorati,
+  //    finestrella accesa e griglia del parlante.
+  const jukebox = new THREE.Group();
+  jukebox.position.set(4.75, 0, -10.6);
+  jukebox.rotation.y = -Math.PI / 2;
+  root.add(jukebox);
+  const jbCorpo = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.15, 0.5), mat(0x4a1c12, { r: 0.55 }));
+  jbCorpo.position.y = 0.575;
+  const jbTesta = new THREE.Mesh(new THREE.CylinderGeometry(0.425, 0.425, 0.5, 18, 1, false, 0, Math.PI), mat(0x4a1c12, { r: 0.55 }));
+  jbTesta.rotation.x = Math.PI / 2;
+  jbTesta.rotation.z = Math.PI / 2;
+  jbTesta.position.y = 1.15;
+  jukebox.add(jbCorpo, jbTesta);
+  [[0.34, 0xe8b04b], [0.27, 0x7a2e1e]].forEach(([r, col], i) => {
+    const arco = new THREE.Mesh(new THREE.TorusGeometry(r, 0.022, 8, 20, Math.PI), mat(col, { r: 0.4, e: col, ei: i ? 0.25 : 0.5 }));
+    arco.position.y = 1.15;
+    arco.position.z = 0.23 + i * 0.005;
+    jukebox.add(arco);
+  });
+  const jbFinestra = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.16), new THREE.MeshBasicMaterial({ color: 0xffd68a }));
+  jbFinestra.position.set(0, 1.12, 0.252);
+  jukebox.add(jbFinestra);
+  const jbGriglia = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.42), mat(0x1a0f08, { r: 0.95 }));
+  jbGriglia.position.set(0, 0.55, 0.252);
+  jukebox.add(jbGriglia);
+  for (let k = 0; k < 3; k++) {
+    const stecca = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.02, 0.01), mat(C.ottone, { r: 0.3, m: 0.8 }));
+    stecca.position.set(0, 0.44 + k * 0.11, 0.258);
+    jukebox.add(stecca);
+  }
+
+  // -- TARGHE SMALTATE delle birre (parete destra, sopra il tavolo dei
+  //    panini): la Bionda, la Rossa e l'IPA come insegne d'epoca.
+  [['BIONDA', '#c9931e', -2.4], ['ROSSA', '#96420f', -3.6], ['IPA', '#d07818', -4.8]].forEach(([nome, col, z]) => {
+    const targa = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.4), new THREE.MeshBasicMaterial({ map: makeTargaTex(nome, col) }));
+    targa.position.set(5.14, 2.4, z);
+    targa.rotation.y = -Math.PI / 2;
+    root.add(targa);
+  });
+
+  // -- VENTILATORI A SOFFITTO: girano piano, come nelle sere d'estate.
+  const ventole = [];
+  [-3, -15].forEach((z) => {
+    const vg = new THREE.Group();
+    vg.position.set(0, 3.88, z);
+    const asta = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8), mat(0x1a0f08, { r: 0.7 }));
+    asta.position.y = 0.17;
+    const mozzo = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.06, 12), mat(C.ottone, { r: 0.3, m: 0.8 }));
+    vg.add(asta, mozzo);
+    for (let k = 0; k < 4; k++) {
+      const pala = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.015, 0.12), mat(0x3a2416, { r: 0.8 }));
+      pala.position.set(Math.cos((k / 4) * Math.PI * 2) * 0.32, 0, Math.sin((k / 4) * Math.PI * 2) * 0.32);
+      pala.rotation.y = -(k / 4) * Math.PI * 2;
+      pala.rotation.x = 0.12;
+      vg.add(pala);
+    }
+    root.add(vg);
+    ventole.push(vg);
+  });
+
+  // -- PORTAOMBRELLI all'ingresso, con due ombrelli dimenticati.
+  const portaOmbrelli = new THREE.Group();
+  portaOmbrelli.position.set(-4.72, 0, 6.4);
+  root.add(portaOmbrelli);
+  const poCorpo = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.11, 0.5, 12, 1, true), mat(C.rame, { r: 0.6, side: THREE.DoubleSide }));
+  poCorpo.position.y = 0.25;
+  const poFondo = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.03, 12), mat(C.rame, { r: 0.6 }));
+  poFondo.position.y = 0.015;
+  portaOmbrelli.add(poCorpo, poFondo);
+  [[0x2a3b5e, -0.18], [0x3b5e4a, 0.22]].forEach(([col, tilt]) => {
+    const om = new THREE.Group();
+    const asta = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.75, 6), mat(0x1a0f08, { r: 0.7 }));
+    asta.position.y = 0.375;
+    const telo = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.3, 8), mat(col, { r: 0.8 }));
+    telo.position.y = 0.62;
+    const pomo = new THREE.Mesh(new THREE.SphereGeometry(0.018, 8, 8), mat(C.ottone, { r: 0.3, m: 0.8 }));
+    pomo.position.y = 0.78;
+    om.add(asta, telo, pomo);
+    om.rotation.z = tilt;
+    om.position.y = 0.1;
+    portaOmbrelli.add(om);
+  });
+
+  // -- SACCHI DI IUTA delle patate, accanto alla friggitoria.
+  [[-4.55, -7.35, 1], [-4.35, -7.75, 0.8]].forEach(([x, z, s]) => {
+    const sacco = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 10), mat(0x8a6a42, { r: 0.98 }));
+    sacco.scale.set(s, s * 1.15, s);
+    sacco.position.set(x, 0.26 * s, z);
+    root.add(sacco);
+    const nodo = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.1, 8), mat(0x7a5a36, { r: 0.98 }));
+    nodo.position.set(x, 0.55 * s, z);
+    root.add(nodo);
+  });
+
+  return { fiammelle, ventole };
 }
 
 /* ---------- helper ---------- */
 function pseudo(i) {
   const x = Math.sin(i * 12.9898) * 43758.5453;
   return x - Math.floor(x);
+}
+
+function makePinTex() {
+  // Piano di gioco del flipper: corsie, bersagli tondi e i due flipper.
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 224;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1c1030';
+  ctx.fillRect(0, 0, 128, 224);
+  ctx.strokeStyle = '#b98a3e';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(6, 6, 116, 212);
+  [[38, 60, '#c22a1e'], [90, 48, '#e8b04b'], [64, 96, '#3b5e4a'], [30, 130, '#e8b04b'], [98, 124, '#c22a1e']].forEach(([x, y, col]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 11, 0, Math.PI * 2);
+    ctx.fillStyle = col;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#f4e9d0';
+    ctx.fill();
+  });
+  // corsie laterali e flipper in basso
+  ctx.strokeStyle = '#7a2e1e';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(20, 150);
+  ctx.lineTo(48, 190);
+  ctx.moveTo(108, 150);
+  ctx.lineTo(80, 190);
+  ctx.stroke();
+  ctx.strokeStyle = '#e8b04b';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(48, 196);
+  ctx.lineTo(60, 204);
+  ctx.moveTo(80, 196);
+  ctx.lineTo(68, 204);
+  ctx.stroke();
+  return new THREE.CanvasTexture(c);
+}
+
+function makePinBackTex() {
+  // Backglass del flipper: titolo e punteggio da record.
+  const c = document.createElement('canvas');
+  c.width = 160;
+  c.height = 120;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#2a1440';
+  ctx.fillRect(0, 0, 160, 120);
+  ctx.textAlign = 'center';
+  ctx.shadowColor = '#e8b04b';
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = '#ffe6b0';
+  ctx.font = '900 22px Georgia, serif';
+  ctx.fillText('ARKADIA', 80, 40);
+  ctx.font = '700 16px Georgia, serif';
+  ctx.fillStyle = '#e8b04b';
+  ctx.fillText('PINBALL', 80, 62);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#c22a1e';
+  ctx.font = '700 13px Georgia, serif';
+  ctx.fillText('RECORD 2.018.000', 80, 92);
+  // stelline
+  ctx.fillStyle = '#f4e9d0';
+  [[20, 20], [140, 24], [24, 98], [138, 96]].forEach(([x, y]) => ctx.fillText('✶', x, y));
+  return new THREE.CanvasTexture(c);
+}
+
+function makeTargaTex(nome, colore) {
+  // Targa smaltata d'epoca: ovale col bordo crema e il nome della birra.
+  const c = document.createElement('canvas');
+  c.width = 192;
+  c.height = 124;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 192, 124);
+  ctx.fillStyle = colore;
+  ctx.beginPath();
+  ctx.ellipse(96, 62, 92, 58, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#f4e9d0';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.ellipse(96, 62, 84, 50, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#f4e9d0';
+  ctx.font = '900 30px Georgia, serif';
+  ctx.fillText(nome, 96, 66, 150);
+  ctx.font = 'italic 700 12px Georgia, serif';
+  ctx.fillText('alla spina', 96, 90);
+  ctx.font = '700 11px Georgia, serif';
+  ctx.fillText('— ARKADIA —', 96, 40);
+  return new THREE.CanvasTexture(c);
 }
 
 function makePosterTex(seed) {

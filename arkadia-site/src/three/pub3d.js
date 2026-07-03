@@ -1165,7 +1165,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   //  queste quattro righe) e il resto del sito non se ne accorge.
   const ARREDO = true;
   let fiammelle = [];
-  if (ARREDO) ({ fiammelle } = addArredo({ root, scene, mat, C, isHigh }));
+  let ventole = [];
+  if (ARREDO) ({ fiammelle, ventole } = addArredo({ root, scene, mat, C, isHigh }));
 
   // ---- Luci ----
   scene.add(new THREE.AmbientLight(0x5a4228, 2.0));
@@ -1315,6 +1316,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     mugR.position.x += (0.38 - 0.19 * cheer - mugR.position.x) * 0.1;
     brindisi.position.y = 1.42 + Math.sin(time * 1.6) * 0.015 * cheer;
 
+    // I ventilatori a soffitto girano piano.
+    ventole.forEach((v) => (v.rotation.y += dt * 1.4));
     // Le fiammelle di lanterna e candela tremolano come vere.
     fiammelle.forEach((f, i) => {
       f.scale.y = 1.5 + Math.sin(time * 9 + i * 2.3) * 0.28;
