@@ -31,7 +31,10 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const env = makeEnv(renderer);
   scene.environment = env;
 
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  // In verticale (telefono) il campo visivo si allarga: si vede più scena
+  // ai lati, dove in portrait l'inquadratura stringerebbe troppo.
+  const fovPer = () => (window.innerWidth / window.innerHeight < 0.8 ? 64 : 55);
+  const camera = new THREE.PerspectiveCamera(fovPer(), window.innerWidth / window.innerHeight, 0.1, 100);
 
   // ---- Palette ----
   const C = {
@@ -1456,6 +1459,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
   function onResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
+    camera.fov = fovPer();
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   }

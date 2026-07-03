@@ -69,10 +69,12 @@ import { info } from '../data/contenuti';
   }
   .hero-claim {
     color: var(--schiuma-soft);
-    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    font-size: clamp(1.05rem, 2.6vw, 1.5rem);
     font-style: italic;
     font-family: var(--font-display);
     max-width: 32ch;
+    white-space: pre-line; /* il claim va a capo tra le due frasi */
+    line-height: 1.35;
   }
   .hero-scroll {
     margin-top: 2rem;

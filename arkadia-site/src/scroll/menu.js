@@ -58,7 +58,10 @@ let pub = null; // scena pub condivisa con la home
 // il giro del bancone: arrivo dall'ingresso → spine da vicino → sala).
 const MROUTE = [
   ['cat-birre', 1.7, 2.2], ['cat-fritti', 4], ['cat-hamburger', 3],
-  ['cat-dessert', 5], ['cat-da-bere', 6], ['cat-caffetteria', 6], ['cat-cocktail', 6],
+  ['cat-dessert', 5], ['cat-da-bere', 6], ['cat-caffetteria', 6],
+  // Cocktail: mini-travelling lungo la fila dei drink sul bancone — lo
+  // sguardo scivola da Spritz a Negroni allo Sbagliato, uno per uno.
+  ['cat-cocktail', 6, 6.09],
   ['cat-giochi', 7],
 ];
 function proximity(el) {

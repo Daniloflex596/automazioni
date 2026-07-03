@@ -17,7 +17,7 @@
 export const info = {
   nome: 'Arkadia',
   sottotitolo: 'Pub · Birreria · Ciampino',
-  claim: 'Un rifugio dorato dal 2018',
+  claim: 'Entri per una birra.\nResti tutta la serata.',
   annoFondazione: 2018,
   // ⚠️ DA CONFERMARE: il delivery riporta anche "Via Palermo 4a".
   indirizzo: 'Via Madrid 10',
@@ -313,7 +313,7 @@ export const luogo = {
   occhiello: 'Dentro Arkadia',
   titolo: 'Il posto giusto per restare',
   descrizione:
-    'Luci calde, tavoli veri, la spina che scorre. Arkadia è il tipo di posto dove entri per una birra e resti per la serata.',
+    'Luci calde, tavoli veri, la spina che scorre. Arkadia è il posto che ti trattiene: un\'altra partita, un\'altra chiacchiera, un\'altra birra.',
   mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Arkadia+Pub+Ciampino',
 };
 
