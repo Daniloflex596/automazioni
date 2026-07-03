@@ -201,6 +201,28 @@ section {
   transform: none;
   filter: blur(0);
 }
+/* Sottotitoli di sezione "illuminati": quando entrano in scena si accendono
+   come sotto la lampada del pub — più leggibili sopra la scena 3D. */
+.sottoluce.is-visible {
+  animation: sottoluce-on 1.4s var(--ease-out) 0.25s both;
+}
+@keyframes sottoluce-on {
+  from {
+    color: var(--schiuma-soft);
+    text-shadow: 0 1px 10px rgba(14, 10, 7, 0.9), 0 0 0 rgba(232, 176, 75, 0);
+  }
+  to {
+    color: #eee1c6;
+    text-shadow: 0 1px 10px rgba(14, 10, 7, 0.9), 0 0 22px rgba(232, 176, 75, 0.34);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sottoluce.is-visible {
+    animation: none;
+    color: #eee1c6;
+    text-shadow: 0 1px 10px rgba(14, 10, 7, 0.9);
+  }
+}
 /* Stagger: i figli diretti di un contenitore [data-stagger] entrano a cascata. */
 [data-stagger] > * {
   opacity: 0;

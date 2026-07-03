@@ -116,10 +116,14 @@ async function boot() {
     dessert: document.getElementById('dessert'),
     bar: document.getElementById('bar'),
   };
+  // FLUIDITÀ: la geometria delle sezioni è misurata UNA volta (al load e al
+  // resize), MAI dentro il raf — niente getBoundingClientRect per frame,
+  // niente reflow forzato: lo scroll resta liscio anche su mobile.
+  const geoMid = new Map();
   function proximity(el) {
-    if (!el) return 0;
-    const r = el.getBoundingClientRect();
-    const center = r.top + r.height / 2;
+    const mid = el && geoMid.get(el);
+    if (mid === undefined) return 0;
+    const center = mid - window.scrollY;
     const d = Math.abs(center - window.innerHeight / 2) / (window.innerHeight * 0.85);
     return Math.max(0, 1 - d);
   }
@@ -145,12 +149,23 @@ async function boot() {
     ['luogo', 8], ['brindisi', 9],
   ].map(([id, st]) => ({ el: document.getElementById(id), st }));
 
-  function narrativeT() {
-    const mid = window.scrollY + window.innerHeight / 2;
-    const pts = ROUTE.filter((r) => r.el).map((r) => ({
+  // Misura (e ri-misura al resize/load) i punti-ancora una volta sola.
+  let pts = [];
+  function misura() {
+    Object.values(sects).forEach((el) => {
+      if (el) geoMid.set(el, el.offsetTop + el.offsetHeight / 2);
+    });
+    pts = ROUTE.filter((r) => r.el).map((r) => ({
       y: r.el.offsetTop + r.el.offsetHeight / 2,
       st: r.st,
     }));
+  }
+  misura();
+  window.addEventListener('resize', misura, { passive: true });
+  window.addEventListener('load', misura);
+
+  function narrativeT() {
+    const mid = window.scrollY + window.innerHeight / 2;
     if (!pts.length) return 0;
     if (mid <= pts[0].y) return (pts[0].st / LAST_ST) * Math.max(0, mid / pts[0].y);
     for (let i = 0; i < pts.length - 1; i++) {

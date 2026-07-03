@@ -19,7 +19,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   const isHigh = quality === 'high';
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: isHigh, alpha: false, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isHigh ? 2 : 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isHigh ? 2 : 1.35));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.45;

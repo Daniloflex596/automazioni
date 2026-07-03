@@ -64,57 +64,71 @@ const MROUTE = [
   ['cat-cocktail', 6, 6.09],
   ['cat-giochi', 7],
 ];
-function proximity(el) {
-  if (!el) return 0;
-  const r = el.getBoundingClientRect();
-  const c = r.top + r.height / 2;
-  return Math.max(0, 1 - Math.abs(c - innerHeight / 2) / (innerHeight * 0.85));
-}
-function menuT() {
-  const mid = scrollY + innerHeight / 2;
-  // DUE ancore per sezione (inizio e fine): la camera si FISSA sulla
-  // stazione per TUTTA la sezione — anche le più lunghe, come Birre con
-  // spina + 18 bottiglie, o Hamburger coi tre panini 3D da godersi — e
-  // viaggia solo nel passaggio tra una categoria e l'altra.
-  const pts = [];
+// FLUIDITÀ: geometria misurata una volta (al load e al resize), MAI nel raf —
+// niente getBoundingClientRect o offsetTop per frame, niente reflow forzato.
+const geoMid = new Map();
+let mpts = [];
+function misura() {
+  ['cat-birre', 'cat-fritti', 'cat-hamburger', 'cat-dessert', 'cat-da-bere', 'cat-caffetteria', 'cat-cocktail', 'cat-giochi'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) geoMid.set(id, el.offsetTop + el.offsetHeight / 2);
+  });
+  // DUE ancore per sezione (inizio e fine): la camera si FISSA (o viaggia
+  // lungo il suo tratto) per TUTTA la sezione, e si sposta solo tra
+  // una categoria e l'altra.
+  mpts = [];
   MROUTE.forEach(([id, stA, stB]) => {
     const el = document.getElementById(id);
     if (!el) return;
     const top = el.offsetTop;
     const h = el.offsetHeight;
     const margine = Math.min(h * 0.5, innerHeight * 0.28);
-    pts.push({ y: top + margine, st: stA });
-    pts.push({ y: top + h - margine, st: stB ?? stA });
+    mpts.push({ y: top + margine, st: stA });
+    mpts.push({ y: top + h - margine, st: stB ?? stA });
   });
-  if (!pts.length) return 0;
   // ancore strettamente crescenti (sezioni corte o adiacenti)
-  for (let i = 1; i < pts.length; i++) {
-    if (pts[i].y <= pts[i - 1].y) pts[i].y = pts[i - 1].y + 1;
+  for (let i = 1; i < mpts.length; i++) {
+    if (mpts[i].y <= mpts[i - 1].y) mpts[i].y = mpts[i - 1].y + 1;
   }
-  if (mid <= pts[0].y) return (pts[0].st / 9) * Math.max(0, mid / pts[0].y);
-  for (let i = 0; i < pts.length - 1; i++) {
-    if (mid <= pts[i + 1].y) {
-      const f = (mid - pts[i].y) / (pts[i + 1].y - pts[i].y);
-      return (pts[i].st + (pts[i + 1].st - pts[i].st) * f) / 9;
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', misura);
+else misura();
+window.addEventListener('resize', misura, { passive: true });
+window.addEventListener('load', misura);
+
+function proximity(id) {
+  const mid = geoMid.get(id);
+  if (mid === undefined) return 0;
+  const c = mid - scrollY;
+  return Math.max(0, 1 - Math.abs(c - innerHeight / 2) / (innerHeight * 0.85));
+}
+function menuT() {
+  const mid = scrollY + innerHeight / 2;
+  if (!mpts.length) return 0;
+  if (mid <= mpts[0].y) return (mpts[0].st / 9) * Math.max(0, mid / mpts[0].y);
+  for (let i = 0; i < mpts.length - 1; i++) {
+    if (mid <= mpts[i + 1].y) {
+      const f = (mid - mpts[i].y) / (mpts[i + 1].y - mpts[i].y);
+      return (mpts[i].st + (mpts[i + 1].st - mpts[i].st) * f) / 9;
     }
   }
-  return pts[pts.length - 1].st / 9;
+  return mpts[mpts.length - 1].st / 9;
 }
 function drivePub() {
   if (!pub) return;
   pub.setProgress(menuT());
-  pub.setSpina?.(proximity(document.getElementById('cat-birre')));
-  pub.setBurger?.(proximity(document.getElementById('cat-hamburger')));
-  pub.setZone?.('cucina', proximity(document.getElementById('cat-hamburger')));
-  pub.setZone?.('fritti', proximity(document.getElementById('cat-fritti')));
-  pub.setZone?.('dessert', proximity(document.getElementById('cat-dessert')));
+  pub.setSpina?.(proximity('cat-birre'));
+  pub.setBurger?.(proximity('cat-hamburger'));
+  pub.setZone?.('cucina', proximity('cat-hamburger'));
+  pub.setZone?.('fritti', proximity('cat-fritti'));
+  pub.setZone?.('dessert', proximity('cat-dessert'));
   const barP = Math.max(
-    proximity(document.getElementById('cat-da-bere')),
-    proximity(document.getElementById('cat-caffetteria')),
-    proximity(document.getElementById('cat-cocktail'))
+    proximity('cat-da-bere'),
+    proximity('cat-caffetteria'),
+    proximity('cat-cocktail')
   );
   pub.setZone?.('bar', barP);
-  pub.setGiochi?.(proximity(document.getElementById('cat-giochi')));
+  pub.setGiochi?.(proximity('cat-giochi'));
 }
 
 function driveFill(p) {
