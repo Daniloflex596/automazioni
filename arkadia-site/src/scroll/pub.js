@@ -120,12 +120,20 @@ async function boot() {
   // resize), MAI dentro il raf — niente getBoundingClientRect per frame,
   // niente reflow forzato: lo scroll resta liscio anche su mobile.
   const geoMid = new Map();
+  const geoTop = new Map();
   function proximity(el) {
     const mid = el && geoMid.get(el);
     if (mid === undefined) return 0;
     const center = mid - window.scrollY;
     const d = Math.abs(center - window.innerHeight / 2) / (window.innerHeight * 0.85);
     return Math.max(0, 1 - d);
+  }
+  // Riempimento PERSISTENTE (spina, drink): 0→1 all'ingresso della sezione,
+  // poi resta pieno; si svuota solo risalendo sopra la sezione.
+  function fillOnce(el) {
+    const top = el && geoTop.get(el);
+    if (top === undefined) return 0;
+    return clamp01((window.scrollY + window.innerHeight * 0.6 - top) / (window.innerHeight * 0.75));
   }
 
   // Progress "pinta" (indicatore scroll a bordo destro), iniettato via JS.
@@ -153,7 +161,10 @@ async function boot() {
   let pts = [];
   function misura() {
     Object.values(sects).forEach((el) => {
-      if (el) geoMid.set(el, el.offsetTop + el.offsetHeight / 2);
+      if (el) {
+        geoMid.set(el, el.offsetTop + el.offsetHeight / 2);
+        geoTop.set(el, el.offsetTop);
+      }
     });
     pts = ROUTE.filter((r) => r.el).map((r) => ({
       y: r.el.offsetTop + r.el.offsetHeight / 2,
@@ -189,13 +200,13 @@ async function boot() {
         window.__arkadia = { narrT: narrativeT(), ...pub.getT?.() };
       }
       pub.setBurger?.(proximity(sects.cucina));
-      pub.setSpina?.(proximity(sects.spina));
+      pub.setSpina?.(fillOnce(sects.spina));
       pub.setBrindisi?.(proximity(sects.brindisi));
       pub.setGiochi?.(proximity(sects.giochi));
       pub.setZone?.('cucina', proximity(sects.cucina));
       pub.setZone?.('fritti', proximity(sects.fritti));
       pub.setZone?.('dessert', proximity(sects.dessert));
-      pub.setZone?.('bar', proximity(sects.bar));
+      pub.setZone?.('bar', fillOnce(sects.bar));
     }
     // La pinta di progresso si riempie con lo scroll.
     const pct = Math.round(t * 100);

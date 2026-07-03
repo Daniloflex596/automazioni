@@ -67,11 +67,15 @@ const MROUTE = [
 // FLUIDITÀ: geometria misurata una volta (al load e al resize), MAI nel raf —
 // niente getBoundingClientRect o offsetTop per frame, niente reflow forzato.
 const geoMid = new Map();
+const geoTop = new Map();
 let mpts = [];
 function misura() {
   ['cat-birre', 'cat-fritti', 'cat-hamburger', 'cat-dessert', 'cat-da-bere', 'cat-caffetteria', 'cat-cocktail', 'cat-giochi'].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) geoMid.set(id, el.offsetTop + el.offsetHeight / 2);
+    if (el) {
+      geoMid.set(id, el.offsetTop + el.offsetHeight / 2);
+      geoTop.set(id, el.offsetTop);
+    }
   });
   // DUE ancore per sezione (inizio e fine): la camera si FISSA (o viaggia
   // lungo il suo tratto) per TUTTA la sezione, e si sposta solo tra
@@ -102,6 +106,14 @@ function proximity(id) {
   const c = mid - scrollY;
   return Math.max(0, 1 - Math.abs(c - innerHeight / 2) / (innerHeight * 0.85));
 }
+// Riempimento PERSISTENTE: 0→1 mentre la sezione entra in scena, poi resta
+// pieno per tutta la sezione e oltre; si svuota solo risalendo sopra.
+// (Le spine non si svuotano mai a metà lista: una volta versata, è versata.)
+function fillOnce(id) {
+  const top = geoTop.get(id);
+  if (top === undefined) return 0;
+  return clamp01((scrollY + innerHeight * 0.6 - top) / (innerHeight * 0.75));
+}
 function menuT() {
   const mid = scrollY + innerHeight / 2;
   if (!mpts.length) return 0;
@@ -117,17 +129,12 @@ function menuT() {
 function drivePub() {
   if (!pub) return;
   pub.setProgress(menuT());
-  pub.setSpina?.(proximity('cat-birre'));
+  pub.setSpina?.(fillOnce('cat-birre'));
   pub.setBurger?.(proximity('cat-hamburger'));
   pub.setZone?.('cucina', proximity('cat-hamburger'));
   pub.setZone?.('fritti', proximity('cat-fritti'));
   pub.setZone?.('dessert', proximity('cat-dessert'));
-  const barP = Math.max(
-    proximity('cat-da-bere'),
-    proximity('cat-caffetteria'),
-    proximity('cat-cocktail')
-  );
-  pub.setZone?.('bar', barP);
+  pub.setZone?.('bar', fillOnce('cat-da-bere'));
   pub.setGiochi?.(proximity('cat-giochi'));
 }
 
