@@ -1066,20 +1066,21 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     cards.push(card);
   }
 
-  // ---- SET-PIECE TAVOLA: patatine + vapore sopra il burger ----
+  // ---- Coppetta di patatine: vive sul banco della FRIGGITORIA (non sul
+  //      tavolo dei panini — lì restano solo i tre burger e il vapore).
   const friesCup = new THREE.Mesh(
     new THREE.CylinderGeometry(0.075, 0.055, 0.12, 12, 1, true),
     mat(C.rame, { r: 0.7, side: THREE.DoubleSide })
   );
-  friesCup.position.set(0.25, 1.17, -0.5);
-  table.add(friesCup);
+  friesCup.position.set(0.58, CTOP + 0.06, 0.25);
+  fritGrp.add(friesCup);
   for (let i = 0; i < 7; i++) {
     const fry = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.16, 0.016), mat(0xe8b04b, { r: 0.6, e: 0x6a4310, ei: 0.15 }));
     const a = pseudo(i * 11) * Math.PI * 2;
-    fry.position.set(0.25 + Math.cos(a) * 0.035, 1.26, -0.5 + Math.sin(a) * 0.035);
+    fry.position.set(0.58 + Math.cos(a) * 0.035, CTOP + 0.15, 0.25 + Math.sin(a) * 0.035);
     fry.rotation.z = (pseudo(i * 5) - 0.5) * 0.5;
     fry.rotation.x = (pseudo(i * 3) - 0.5) * 0.3;
-    table.add(fry);
+    fritGrp.add(fry);
   }
   // Vapore: 3 sprite morbidi che salgono sopra il burger
   const steamMat = new THREE.SpriteMaterial({

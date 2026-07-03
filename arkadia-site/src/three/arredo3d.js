@@ -589,7 +589,7 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
     root.add(seduta, gamba, poggia);
   });
   const ketchup = new THREE.Group();
-  ketchup.position.set(2.05, 1.07, -2.55); // sul bordo del tavolo dei panini
+  ketchup.position.set(-3.97, 0.96, -8.3); // sul banco della friggitoria
   root.add(ketchup);
   const kBody = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, 0.13, 10), mat(0xc22a1e, { r: 0.5, e: 0x500a06, ei: 0.3 }));
   kBody.position.y = 0.065;
