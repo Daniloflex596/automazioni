@@ -575,8 +575,8 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
   //  TERZO GIRO — la vita attorno alle tre zone food.
   // ====================================================================
 
-  // -- CUCINA: sgabelli attorno al tavolo dei panini, cassetta delle
-  //    verdure fresche e il ketchup a portata di mano.
+  // -- CUCINA: sgabelli attorno al tavolo dei panini e il ketchup a
+  //    portata di mano.
   [[3.55, -3.85], [2.1, -4.15], [3.85, -2.35]].forEach(([x, z], i) => {
     const seduta = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.05, 12), mat(0x63301e, { r: 0.6 }));
     seduta.position.set(x, 0.62, z);
@@ -588,24 +588,6 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
     poggia.userData.i = i;
     root.add(seduta, gamba, poggia);
   });
-  const cassettaV = new THREE.Group();
-  cassettaV.position.set(3.9, 0, -1.9);
-  cassettaV.rotation.y = 0.4;
-  root.add(cassettaV);
-  [[0, 0.09, 0.24, 0.5, 0.18, 0.02], [0, 0.09, -0.24, 0.5, 0.18, 0.02], [0.24, 0.09, 0, 0.02, 0.18, 0.46], [-0.24, 0.09, 0, 0.02, 0.18, 0.46], [0, 0.015, 0, 0.46, 0.03, 0.44]].forEach(([px, py, pz, sx, sy, sz]) => {
-    const lato = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat(0x6a4a26, { r: 0.85 }));
-    lato.position.set(px, py, pz);
-    cassettaV.add(lato);
-  });
-  for (let k = 0; k < 6; k++) {
-    const verdura = new THREE.Mesh(
-      new THREE.SphereGeometry(0.07, 10, 8),
-      mat(k % 2 ? 0xa03020 : 0x4a7a30, { r: 0.7 })
-    );
-    verdura.position.set((pseudo(k * 7) - 0.5) * 0.32, 0.2, (pseudo(k * 11) - 0.5) * 0.3);
-    verdura.scale.y = 0.85;
-    cassettaV.add(verdura);
-  }
   const ketchup = new THREE.Group();
   ketchup.position.set(2.05, 1.07, -2.55); // sul bordo del tavolo dei panini
   root.add(ketchup);
