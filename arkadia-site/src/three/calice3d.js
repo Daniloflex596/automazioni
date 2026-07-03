@@ -22,14 +22,22 @@ export function initCalice(canvas, { quality = 'high' } = {}) {
     alpha: true,
     powerPreference: 'high-performance',
   });
+  // Viewport stabile: 100vh (barra indirizzi ritirata) misurata da un probe,
+  // così il collasso della barra di Chrome non ridimensiona il canvas.
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100vh;pointer-events:none;visibility:hidden';
+  document.body.appendChild(probe);
+  const vpW = () => window.innerWidth;
+  const vpH = () => probe.offsetHeight || window.innerHeight;
+
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, isHigh ? 2 : 1.5));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(vpW(), vpH());
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(38, vpW() / vpH(), 0.1, 100);
   camera.position.set(0, 0.4, 6.2);
 
   // --- Ambiente per i riflessi del vetro (gradiente caldo, leggero) ---
@@ -302,11 +310,18 @@ export function initCalice(canvas, { quality = 'high' } = {}) {
   frame();
 
   // --- Resize ---
+  let lastW = vpW();
+  let lastH = vpH();
   function onResize() {
+    const w = vpW();
+    const h = vpH();
+    if (w === lastW && h === lastH) return;
+    lastW = w;
+    lastH = h;
     frameForViewport();
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h);
   }
   window.addEventListener('resize', onResize);
 

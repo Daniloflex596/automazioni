@@ -19,9 +19,20 @@ import { addArredo } from './arredo3d.js';
 export function initPub(canvas, { quality = 'high' } = {}) {
   const isHigh = quality === 'high';
 
+  // VIEWPORT STABILE: su Chrome mobile innerHeight cambia di ~60px quando
+  // la barra degli indirizzi collassa al primo scroll — se il canvas la
+  // segue, l'inquadratura "salta" proprio entrando nel locale. Il probe
+  // misura 100vh (= viewport grande, barra ritirata), che NON cambia mai
+  // durante lo scroll: il canvas nasce già a quella misura e resta fermo.
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100vh;pointer-events:none;visibility:hidden';
+  document.body.appendChild(probe);
+  const vpW = () => window.innerWidth;
+  const vpH = () => probe.offsetHeight || window.innerHeight;
+
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: isHigh, alpha: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, isHigh ? 2 : 1.35));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(vpW(), vpH());
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.45;
 
@@ -34,8 +45,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
   // In verticale (telefono) il campo visivo si allarga: si vede più scena
   // ai lati, dove in portrait l'inquadratura stringerebbe troppo.
-  const fovPer = () => (window.innerWidth / window.innerHeight < 0.8 ? 64 : 55);
-  const camera = new THREE.PerspectiveCamera(fovPer(), window.innerWidth / window.innerHeight, 0.1, 100);
+  const fovPer = () => (vpW() / vpH() < 0.8 ? 64 : 55);
+  const camera = new THREE.PerspectiveCamera(fovPer(), vpW() / vpH(), 0.1, 100);
 
   // ---- Palette ----
   const C = {
@@ -1450,11 +1461,21 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   }
   frame();
 
+  // Ridimensiona SOLO se la misura stabile è cambiata davvero (rotazione,
+  // finestra): il collasso della barra di Chrome rientra qui con gli stessi
+  // valori e non tocca nulla — niente reframe, niente salto.
+  let lastW = vpW();
+  let lastH = vpH();
   function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    const w = vpW();
+    const h = vpH();
+    if (w === lastW && h === lastH) return;
+    lastW = w;
+    lastH = h;
+    camera.aspect = w / h;
     camera.fov = fovPer();
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h);
   }
   window.addEventListener('resize', onResize);
 
@@ -1473,6 +1494,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       running = false;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
+      probe.remove();
       renderer.dispose();
       env.dispose();
     },

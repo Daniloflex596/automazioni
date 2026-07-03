@@ -21,7 +21,13 @@ import { info } from '../data/contenuti';
 
 <style>
   .hero {
-    min-height: 100svh;
+    /* Viewport GRANDE (barra indirizzi ritirata): su Chrome/Safari mobile
+       la barra collassa al primo scroll e il viewport cresce di ~60px — se
+       l'hero fosse alto 100svh (schermo CON barra), in quel momento
+       spunterebbe di colpo la sezione sotto: lo "scalino" all'ingresso.
+       Con 100lvh l'hero copre già lo schermo pieno e non si muove nulla. */
+    min-height: 100vh;
+    min-height: 100lvh;
     display: flex;
     align-items: center;
     padding-block: 0;
