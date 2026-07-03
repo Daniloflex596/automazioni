@@ -1164,6 +1164,8 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   //  botti e piante · insegna sul fondo.
   // ======================================================================
 
+  const fiammelle = []; // lanterna + candele: tremolano nel frame loop
+
   // -- Travi di legno a soffitto: scaldano ogni sguardo verso l'alto.
   for (let i = 0; i < 7; i++) {
     const trave = new THREE.Mesh(new THREE.BoxGeometry(10.4, 0.16, 0.32), mat(0x241609, { r: 0.95 }));
@@ -1445,6 +1447,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   lnFiamma.scale.y = 1.5;
   lnFiamma.position.y = 0.1;
   lanterna.add(lnBase, lnVetro, lnCappello, lnManico, lnFiamma);
+  fiammelle.push(lnFiamma);
   // orologio da stazione sopra la mensola
   const orologio = new THREE.Group();
   orologio.position.set(5.14, 2.85, -7.5);
@@ -1494,6 +1497,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       fiam.scale.y = 1.6;
       fiam.position.set(x, 0.95, z);
       root.add(cand, fiam);
+      fiammelle.push(fiam);
     }
   });
   function makePianta(x, z, scala = 1) {
@@ -1517,6 +1521,50 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   makePianta(-4.75, 7.9, 1.15);
   makePianta(-4.6, -25.6, 1.0);
   makePianta(3.2, -13.6, 0.8);
+
+  // -- LA MAPPA DEL BELGIO incorniciata sopra il bancone: la prova di
+  //    "Abbiamo portato il Belgio a Ciampino".
+  const mappa = new THREE.Group();
+  mappa.position.set(-5.09, 3.3, 2.4); // sopra le mensole, accanto al neon
+  mappa.rotation.y = Math.PI / 2;
+  root.add(mappa);
+  const mpCornice = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.72, 0.04), mat(0x1a0f08, { r: 0.6 }));
+  const mpTela = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.64), new THREE.MeshBasicMaterial({ map: makeMappaTex() }));
+  mpTela.position.z = 0.022;
+  mappa.add(mpCornice, mpTela);
+
+  // -- LAVAGNA A CAVALLETTO all'ingresso: "OGGI IN SPINA".
+  const lavagna = new THREE.Group();
+  lavagna.position.set(3.5, 0, 6.6); // entra in scena col primo scroll
+  lavagna.rotation.y = -0.6;
+  root.add(lavagna);
+  const lvBoard = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.86, 0.04), mat(0x141a16, { r: 0.9 }));
+  lvBoard.position.set(0, 0.75, 0);
+  lvBoard.rotation.x = -0.12;
+  const lvTesto = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.76), new THREE.MeshBasicMaterial({ map: makeChalkTex() }));
+  lvTesto.position.set(0, 0.75, 0.025);
+  lvTesto.rotation.x = -0.12;
+  const lvCorniceL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.15, 0.05), mat(C.legno, { r: 0.85 }));
+  lvCorniceL.position.set(-0.3, 0.56, 0.06);
+  lvCorniceL.rotation.x = -0.12;
+  const lvCorniceR = lvCorniceL.clone();
+  lvCorniceR.position.x = 0.3;
+  const lvGambaL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.12, 0.05), mat(C.legno, { r: 0.85 }));
+  lvGambaL.position.set(-0.3, 0.55, -0.22);
+  lvGambaL.rotation.x = 0.28;
+  const lvGambaR = lvGambaL.clone();
+  lvGambaR.position.x = 0.3;
+  lavagna.add(lvBoard, lvTesto, lvCorniceL, lvCorniceR, lvGambaL, lvGambaR);
+
+  // -- LAVAGNETTA DEI PUNTEGGI accanto al bersaglio delle freccette.
+  const punteggi = new THREE.Group();
+  punteggi.position.set(5.13, 1.95, -19.1);
+  punteggi.rotation.y = -Math.PI / 2;
+  root.add(punteggi);
+  const pgCornice = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.64, 0.035), mat(C.legno, { r: 0.8 }));
+  const pgTela = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.56), new THREE.MeshBasicMaterial({ map: makeScoreTex() }));
+  pgTela.position.z = 0.02;
+  punteggi.add(pgCornice, pgTela);
 
   // -- IL FONDO: insegna "EST. 2018" e applique calde dietro il séparé,
   //    così l'ultimo sguardo del viaggio non finisce nel buio.
@@ -1685,6 +1733,14 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     mugL.position.x += (-0.38 + 0.19 * cheer - mugL.position.x) * 0.1;
     mugR.position.x += (0.38 - 0.19 * cheer - mugR.position.x) * 0.1;
     brindisi.position.y = 1.42 + Math.sin(time * 1.6) * 0.015 * cheer;
+
+    // Le fiammelle di lanterna e candela tremolano come vere.
+    fiammelle.forEach((f, i) => {
+      f.scale.y = 1.5 + Math.sin(time * 9 + i * 2.3) * 0.28;
+      const w = 1 + Math.sin(time * 7 + i * 1.7) * 0.12;
+      f.scale.x = w;
+      f.scale.z = w;
+    });
 
     // Polvere dorata: deriva lenta nell'aria calda.
     if (dust) {
@@ -2174,6 +2230,116 @@ function makeClockFace() {
   ctx.beginPath();
   ctx.arc(64, 64, 4.5, 0, Math.PI * 2);
   ctx.fill();
+  return new THREE.CanvasTexture(c);
+}
+
+function makeMappaTex() {
+  // Mappa d'epoca del Belgio: carta invecchiata, sagoma dorata, stella su
+  // Bruxelles e rotta tratteggiata che scende verso Ciampino.
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 192;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#d9c9a4';
+  ctx.fillRect(0, 0, 256, 192);
+  ctx.strokeStyle = 'rgba(90, 60, 30, 0.35)';
+  for (let k = 0; k < 6; k++) {
+    ctx.strokeRect(6 + k * 2, 6 + k * 2, 244 - k * 4, 180 - k * 4);
+    if (k > 0) break;
+  }
+  // sagoma del Belgio (stilizzata)
+  ctx.fillStyle = '#b98a3e';
+  ctx.beginPath();
+  ctx.moveTo(70, 60);
+  ctx.lineTo(110, 44);
+  ctx.lineTo(150, 52);
+  ctx.lineTo(178, 74);
+  ctx.lineTo(170, 100);
+  ctx.lineTo(140, 116);
+  ctx.lineTo(104, 110);
+  ctx.lineTo(78, 88);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#5a3c1e';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  // stella su Bruxelles
+  ctx.fillStyle = '#7a2e1e';
+  ctx.font = '900 22px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('★', 124, 88);
+  // rotta tratteggiata verso sud (Ciampino)
+  ctx.strokeStyle = '#7a2e1e';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 5]);
+  ctx.beginPath();
+  ctx.moveTo(124, 92);
+  ctx.quadraticCurveTo(150, 140, 208, 162);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = '700 13px Georgia, serif';
+  ctx.fillText('BELGIQUE · BELGIË', 124, 34);
+  ctx.font = 'italic 700 12px Georgia, serif';
+  ctx.fillText('→ Ciampino', 205, 178);
+  return new THREE.CanvasTexture(c);
+}
+
+function makeChalkTex() {
+  // Lavagna col gesso: cosa gira in spina stasera.
+  const c = document.createElement('canvas');
+  c.width = 160;
+  c.height = 224;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#161d18';
+  ctx.fillRect(0, 0, 160, 224);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#e8dcc0';
+  ctx.font = '700 20px Georgia, serif';
+  ctx.fillText('OGGI', 80, 38);
+  ctx.fillText('IN SPINA', 80, 62);
+  ctx.strokeStyle = 'rgba(232, 220, 192, 0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(28, 76);
+  ctx.lineTo(132, 76);
+  ctx.stroke();
+  ctx.font = 'italic 17px Georgia, serif';
+  ctx.fillText('Bionda', 80, 106);
+  ctx.fillText('Rossa', 80, 134);
+  ctx.fillText('IPA', 80, 162);
+  ctx.fillStyle = '#e8b04b';
+  ctx.font = 'italic 700 15px Georgia, serif';
+  ctx.fillText('+ la sorpresa', 80, 196);
+  ctx.fillText('del mese ✶', 80, 214);
+  return new THREE.CanvasTexture(c);
+}
+
+function makeScoreTex() {
+  // Lavagnetta dei punteggi delle freccette: NOI contro VOI.
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 168;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#161d18';
+  ctx.fillRect(0, 0, 128, 168);
+  ctx.strokeStyle = 'rgba(232, 220, 192, 0.85)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(64, 14);
+  ctx.lineTo(64, 154);
+  ctx.moveTo(14, 44);
+  ctx.lineTo(114, 44);
+  ctx.stroke();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#e8dcc0';
+  ctx.font = '700 15px Georgia, serif';
+  ctx.fillText('NOI', 38, 32);
+  ctx.fillText('VOI', 92, 32);
+  ctx.font = 'italic 16px Georgia, serif';
+  ['301', '260', '180'].forEach((n, i) => ctx.fillText(n, 38, 72 + i * 28));
+  ['301', '281', '245'].forEach((n, i) => ctx.fillText(n, 92, 72 + i * 28));
+  ctx.fillStyle = '#e8b04b';
+  ctx.font = '700 12px Georgia, serif';
   return new THREE.CanvasTexture(c);
 }
 
