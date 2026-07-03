@@ -52,9 +52,12 @@ const fallbackFoam = fallback?.querySelector('.fb-foam');
 let scene3d = null;
 let pub = null; // scena pub condivisa con la home
 
-// Route menu→stazioni del pub: le sezioni bevande vivono tutte al Bar.
+// Route menu→stazioni del pub. Ogni sezione può avere una stazione fissa
+// [id, st] oppure un TRATTO di percorso [id, stInizio, stFine]: la camera
+// viaggia lentamente lungo quel tratto per tutta la sezione (le Birre fanno
+// il giro del bancone: arrivo dall'ingresso → spine da vicino → sala).
 const MROUTE = [
-  ['cat-birre', 2], ['cat-fritti', 4], ['cat-hamburger', 3],
+  ['cat-birre', 1.7, 2.2], ['cat-fritti', 4], ['cat-hamburger', 3],
   ['cat-dessert', 5], ['cat-da-bere', 6], ['cat-caffetteria', 6], ['cat-cocktail', 6],
   ['cat-giochi', 7],
 ];
@@ -71,14 +74,14 @@ function menuT() {
   // spina + 18 bottiglie, o Hamburger coi tre panini 3D da godersi — e
   // viaggia solo nel passaggio tra una categoria e l'altra.
   const pts = [];
-  MROUTE.forEach(([id, st]) => {
+  MROUTE.forEach(([id, stA, stB]) => {
     const el = document.getElementById(id);
     if (!el) return;
     const top = el.offsetTop;
     const h = el.offsetHeight;
     const margine = Math.min(h * 0.5, innerHeight * 0.28);
-    pts.push({ y: top + margine, st });
-    pts.push({ y: top + h - margine, st });
+    pts.push({ y: top + margine, st: stA });
+    pts.push({ y: top + h - margine, st: stB ?? stA });
   });
   if (!pts.length) return 0;
   // ancore strettamente crescenti (sezioni corte o adiacenti)
