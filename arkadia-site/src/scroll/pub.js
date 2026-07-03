@@ -137,11 +137,15 @@ async function boot() {
   }
 
   // Progress "pinta" (indicatore scroll a bordo destro), iniettato via JS.
-  const pp = document.createElement('div');
+  // È anche un bottone: un click riporta all'ingresso del pub.
+  const pp = document.createElement('button');
   pp.id = 'pinta-progress';
-  pp.setAttribute('aria-hidden', 'true');
+  pp.type = 'button';
+  pp.setAttribute('aria-label', "Torna all'ingresso");
+  pp.title = "Torna all'ingresso";
   pp.innerHTML = '<div class="pp-glass"><div class="pp-fill"></div><div class="pp-foam"></div></div>';
   document.body.appendChild(pp);
+  pp.addEventListener('click', () => lenis.scrollTo(0, { duration: 1.7 }));
   const ppFill = pp.querySelector('.pp-fill');
   const ppFoam = pp.querySelector('.pp-foam');
 

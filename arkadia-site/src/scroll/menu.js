@@ -216,13 +216,37 @@ function initReveals() {
 function initTabs() {
   const tabs = [...document.querySelectorAll('.tab')];
   const byId = new Map(tabs.map((t) => [t.dataset.tab, t]));
+  const bar = document.getElementById('tabs');
+  const row = document.querySelector('.tabs-row');
+
+  // Sfumature ai bordi della riga: visibili solo dal lato dove ci sono
+  // altre categorie nascoste, così su mobile le pillole non si troncano
+  // di netto contro il bordo dello schermo.
+  function edges() {
+    if (!bar || !row) return;
+    bar.classList.toggle('at-start', row.scrollLeft < 8);
+    bar.classList.toggle('at-end', row.scrollLeft > row.scrollWidth - row.clientWidth - 8);
+  }
+  row?.addEventListener('scroll', edges, { passive: true });
+  window.addEventListener('resize', edges);
+  edges();
+
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
           const id = e.target.id.replace('cat-', '');
           tabs.forEach((t) => t.classList.remove('is-active'));
-          byId.get(id)?.classList.add('is-active');
+          const t = byId.get(id);
+          if (t) {
+            t.classList.add('is-active');
+            // Porta la pillola attiva al centro della riga (solo scroll
+            // orizzontale della riga, mai della pagina).
+            row?.scrollTo({
+              left: t.offsetLeft - (row.clientWidth - t.offsetWidth) / 2,
+              behavior: 'smooth',
+            });
+          }
         }
       });
     },
@@ -237,11 +261,15 @@ function initScroll() {
   const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
 
   // Progress "pinta": stessa firma della home, si riempie con lo scroll.
-  const pp = document.createElement('div');
+  // È anche un bottone: un click riporta in cima alla carta.
+  const pp = document.createElement('button');
   pp.id = 'pinta-progress';
-  pp.setAttribute('aria-hidden', 'true');
+  pp.type = 'button';
+  pp.setAttribute('aria-label', "Torna all'inizio");
+  pp.title = "Torna all'inizio";
   pp.innerHTML = '<div class="pp-glass"><div class="pp-fill"></div><div class="pp-foam"></div></div>';
   document.body.appendChild(pp);
+  pp.addEventListener('click', () => lenis.scrollTo(0, { duration: 1.7 }));
   const ppFill = pp.querySelector('.pp-fill');
   const ppFoam = pp.querySelector('.pp-foam');
 
