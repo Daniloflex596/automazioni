@@ -571,6 +571,149 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
     root.add(nodo);
   });
 
+  // ====================================================================
+  //  TERZO GIRO — la vita attorno alle tre zone food.
+  // ====================================================================
+
+  // -- CUCINA: sgabelli attorno al tavolo dei panini, cassetta delle
+  //    verdure fresche e il ketchup a portata di mano.
+  [[3.55, -3.85], [2.1, -4.15], [3.85, -2.35]].forEach(([x, z], i) => {
+    const seduta = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.05, 12), mat(0x63301e, { r: 0.6 }));
+    seduta.position.set(x, 0.62, z);
+    const gamba = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.6, 8), mat(0x1a0f08, { r: 0.8 }));
+    gamba.position.set(x, 0.3, z);
+    const poggia = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.012, 6, 12), mat(C.ottone, { r: 0.35, m: 0.7 }));
+    poggia.rotation.x = Math.PI / 2;
+    poggia.position.set(x, 0.22, z);
+    poggia.userData.i = i;
+    root.add(seduta, gamba, poggia);
+  });
+  const cassettaV = new THREE.Group();
+  cassettaV.position.set(3.9, 0, -1.9);
+  cassettaV.rotation.y = 0.4;
+  root.add(cassettaV);
+  [[0, 0.09, 0.24, 0.5, 0.18, 0.02], [0, 0.09, -0.24, 0.5, 0.18, 0.02], [0.24, 0.09, 0, 0.02, 0.18, 0.46], [-0.24, 0.09, 0, 0.02, 0.18, 0.46], [0, 0.015, 0, 0.46, 0.03, 0.44]].forEach(([px, py, pz, sx, sy, sz]) => {
+    const lato = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat(0x6a4a26, { r: 0.85 }));
+    lato.position.set(px, py, pz);
+    cassettaV.add(lato);
+  });
+  for (let k = 0; k < 6; k++) {
+    const verdura = new THREE.Mesh(
+      new THREE.SphereGeometry(0.07, 10, 8),
+      mat(k % 2 ? 0xa03020 : 0x4a7a30, { r: 0.7 })
+    );
+    verdura.position.set((pseudo(k * 7) - 0.5) * 0.32, 0.2, (pseudo(k * 11) - 0.5) * 0.3);
+    verdura.scale.y = 0.85;
+    cassettaV.add(verdura);
+  }
+  const ketchup = new THREE.Group();
+  ketchup.position.set(2.05, 1.07, -2.55); // sul bordo del tavolo dei panini
+  root.add(ketchup);
+  const kBody = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, 0.13, 10), mat(0xc22a1e, { r: 0.5, e: 0x500a06, ei: 0.3 }));
+  kBody.position.y = 0.065;
+  const kCap = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.03, 0.05, 8), mat(0xc22a1e, { r: 0.5 }));
+  kCap.position.y = 0.15;
+  ketchup.add(kBody, kCap);
+
+  // -- FRIGGITORIA: la friggitrice col cestello, la bottiglia d'olio, la
+  //    cassa di patate e la targhetta di reparto.
+  const friggitrice = new THREE.Group();
+  friggitrice.position.set(-4.72, 0.96, -9.05);
+  root.add(friggitrice);
+  const frPentola = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.15, 0.2, 14, 1, true), mat(0x9aa0a8, { r: 0.3, m: 0.85, side: THREE.DoubleSide }));
+  frPentola.position.y = 0.1;
+  const frFondo = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.02, 14), mat(0x9aa0a8, { r: 0.3, m: 0.85 }));
+  frFondo.position.y = 0.01;
+  const frOlio = new THREE.Mesh(new THREE.CylinderGeometry(0.155, 0.155, 0.02, 14), mat(0xd9a018, { r: 0.25, e: 0x6a4a08, ei: 0.5 }));
+  frOlio.position.y = 0.16;
+  friggitrice.add(frPentola, frFondo, frOlio);
+  const frCestello = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.1, 10, 1, true), mat(0x6a7078, { r: 0.4, m: 0.7, side: THREE.DoubleSide }));
+  frCestello.position.set(0.05, 0.2, 0);
+  frCestello.rotation.z = -0.15;
+  const frManico = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.3, 6), mat(0x1a0f08, { r: 0.7 }));
+  frManico.rotation.z = Math.PI / 2 - 0.5;
+  frManico.position.set(0.24, 0.32, 0);
+  friggitrice.add(frCestello, frManico);
+  const olioBott = new THREE.Group();
+  olioBott.position.set(-4.45, 0.96, -9.15);
+  root.add(olioBott);
+  const obCorpo = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.22, 10), mat(0xd9a018, { r: 0.3, e: 0x5a4008, ei: 0.4 }));
+  obCorpo.position.y = 0.11;
+  const obCollo = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.03, 0.1, 8), mat(0xd9a018, { r: 0.3 }));
+  obCollo.position.y = 0.26;
+  olioBott.add(obCorpo, obCollo);
+  const cassaPatate = new THREE.Group();
+  cassaPatate.position.set(-4.6, 0, -10.05);
+  cassaPatate.rotation.y = -0.3;
+  root.add(cassaPatate);
+  [[0, 0.1, 0.21, 0.46, 0.2, 0.02], [0, 0.1, -0.21, 0.46, 0.2, 0.02], [0.22, 0.1, 0, 0.02, 0.2, 0.4], [-0.22, 0.1, 0, 0.02, 0.2, 0.4], [0, 0.015, 0, 0.42, 0.03, 0.38]].forEach(([px, py, pz, sx, sy, sz]) => {
+    const lato = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat(0x6a4a26, { r: 0.85 }));
+    lato.position.set(px, py, pz);
+    cassaPatate.add(lato);
+  });
+  for (let k = 0; k < 7; k++) {
+    const patata = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 7), mat(0xb08a4a, { r: 0.95 }));
+    patata.position.set((pseudo(k * 5) - 0.5) * 0.3, 0.21, (pseudo(k * 9) - 0.5) * 0.26);
+    patata.scale.set(1.2, 0.8, 0.9);
+    patata.rotation.y = k;
+    cassaPatate.add(patata);
+  }
+  const targaFritti = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.72, 0.3),
+    new THREE.MeshBasicMaterial({ map: makeMiniLavagnaTex(['FRITTI', 'sempre caldi ↓']) })
+  );
+  targaFritti.position.set(-5.13, 2.45, -8.7);
+  targaFritti.rotation.y = Math.PI / 2;
+  root.add(targaFritti);
+
+  // -- DOLCERIA: la torta intera sotto la campana di vetro, i barattoli
+  //    dei topping ("chiedi il tuo") e la lavagnetta del dolce di oggi.
+  const campana = new THREE.Group();
+  campana.position.set(3.68, 0.96, -12.5); // sul banco delle dolcezze
+  root.add(campana);
+  const cpPiatto = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.19, 0.04, 16), mat(0xf4e9d0, { r: 0.5 }));
+  cpPiatto.position.y = 0.02;
+  campana.add(cpPiatto);
+  const cpTorta1 = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.115, 0.07, 16), mat(0x38200e, { r: 0.75 }));
+  cpTorta1.position.y = 0.075;
+  const cpTorta2 = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.055, 16), mat(0xf2e6cc, { r: 0.7 }));
+  cpTorta2.position.y = 0.14;
+  const cpCiliegia = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), mat(0xa01020, { r: 0.3, e: 0x500810, ei: 0.5 }));
+  cpCiliegia.position.y = 0.18;
+  campana.add(cpTorta1, cpTorta2, cpCiliegia);
+  const cpVetro = new THREE.Mesh(
+    new THREE.SphereGeometry(0.16, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.06, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false })
+  );
+  cpVetro.scale.y = 1.4;
+  cpVetro.position.y = 0.04;
+  const cpPomello = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), mat(C.ottone, { r: 0.3, m: 0.8 }));
+  cpPomello.position.y = 0.27;
+  campana.add(cpVetro, cpPomello);
+  // barattoli dei topping: caramello, cioccolato, frutti rossi
+  [[0xc07018, -0.25], [0x4a2410, 0], [0xa01020, 0.25]].forEach(([col, dz]) => {
+    const jar = new THREE.Group();
+    jar.position.set(4.88, 0.96, -12.45 + dz);
+    const vetro = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 0.14, 10, 1, true),
+      new THREE.MeshPhysicalMaterial({ color: 0xf3ead6, roughness: 0.08, transparent: true, opacity: 0.25, side: THREE.DoubleSide, depthWrite: false })
+    );
+    vetro.position.y = 0.07;
+    const contenuto = new THREE.Mesh(new THREE.CylinderGeometry(0.044, 0.044, 0.1, 10), mat(col, { r: 0.35, e: col, ei: 0.15 }));
+    contenuto.position.y = 0.055;
+    const tappo = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.025, 10), mat(C.ottone, { r: 0.3, m: 0.8 }));
+    tappo.position.y = 0.15;
+    jar.add(vetro, contenuto, tappo);
+    root.add(jar);
+  });
+  const targaDolce = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.72, 0.3),
+    new THREE.MeshBasicMaterial({ map: makeMiniLavagnaTex(['IL DOLCE DI OGGI:', '? · chiedi a noi']) })
+  );
+  targaDolce.position.set(5.13, 2.5, -12.7);
+  targaDolce.rotation.y = -Math.PI / 2;
+  root.add(targaDolce);
+
   return { fiammelle, ventole };
 }
 
@@ -578,6 +721,27 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
 function pseudo(i) {
   const x = Math.sin(i * 12.9898) * 43758.5453;
   return x - Math.floor(x);
+}
+
+function makeMiniLavagnaTex(righe) {
+  // Targhetta-lavagna di reparto: due righe di gesso su fondo scuro.
+  const c = document.createElement('canvas');
+  c.width = 224;
+  c.height = 96;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#161d18';
+  ctx.fillRect(0, 0, 224, 96);
+  ctx.strokeStyle = '#6a4a26';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, 218, 90);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#e8dcc0';
+  ctx.font = '700 22px Georgia, serif';
+  ctx.fillText(righe[0], 112, 40, 200);
+  ctx.fillStyle = '#e8b04b';
+  ctx.font = 'italic 700 17px Georgia, serif';
+  ctx.fillText(righe[1] || '', 112, 70, 200);
+  return new THREE.CanvasTexture(c);
 }
 
 function makePinTex() {
