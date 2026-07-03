@@ -178,35 +178,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     bar.add(g);
     trio.push({ liq, foam, jet });
   });
-  // Cassa di legno con le bottiglie, a terra a fine bancone (lato ingresso):
-  // il benvenuto della sezione "In bottiglia" quando la camera fa il giro.
-  const cassa = new THREE.Group();
-  cassa.position.set(0.55, 0, 3.6); // bar-locale: davanti al bancone, lato porta
-  cassa.rotation.y = -0.4;
-  const cassaLati = [
-    [0, 0.14, 0.21, 0.56, 0.28, 0.02], [0, 0.14, -0.21, 0.56, 0.28, 0.02],
-    [0.27, 0.14, 0, 0.02, 0.28, 0.4], [-0.27, 0.14, 0, 0.02, 0.28, 0.4],
-    [0, 0.02, 0, 0.52, 0.03, 0.38],
-  ];
-  cassaLati.forEach(([px, py, pz, sx, sy, sz]) => {
-    const lato = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat(0x6a4a26, { r: 0.85 }));
-    lato.position.set(px, py, pz);
-    cassa.add(lato);
-  });
-  const cassaCols = [0x5a3212, 0x3a5e2a, 0x4a1016, 0x5a3212, 0x38160e, 0x3a5e2a];
-  for (let i = 0; i < 6; i++) {
-    const bx = -0.16 + (i % 3) * 0.16;
-    const bz = i < 3 ? -0.09 : 0.09;
-    const corpo = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, 0.24, 10), mat(cassaCols[i], { r: 0.35, e: 0x120a04, ei: 0.4 }));
-    corpo.position.set(bx, 0.16, bz);
-    const collo = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.035, 0.12, 8), mat(cassaCols[i], { r: 0.35 }));
-    collo.position.set(bx, 0.34, bz);
-    const tappo = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.018, 8), mat(C.ottone, { r: 0.3, m: 0.8 }));
-    tappo.position.set(bx, 0.41, bz);
-    cassa.add(corpo, collo, tappo);
-  }
-  bar.add(cassa);
-
   // Secchiello del ghiaccio sul bancone con due bottiglie in fresco.
   const secchiello = new THREE.Group();
   secchiello.position.set(0.12, 1.22, 2.5);
