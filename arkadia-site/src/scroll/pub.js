@@ -202,7 +202,12 @@ async function boot() {
     if (mid <= pts[0].y) return (pts[0].st / LAST_ST) * Math.max(0, mid / pts[0].y);
     for (let i = 0; i < pts.length - 1; i++) {
       if (mid <= pts[i + 1].y) {
-        const f = (mid - pts[i].y) / (pts[i + 1].y - pts[i].y);
+        let f = (mid - pts[i].y) / (pts[i + 1].y - pts[i].y);
+        // INGRESSO IN PUNTA DI PIEDI: la prima tratta (porta → dentro) è
+        // quella con meno corsa di scroll e più distanza 3D — senza easing
+        // il primo swipe "spara" la camera nel locale. Lo smoothstep fa
+        // partire il varco piano e lo raccorda alla tratta successiva.
+        if (i === 0) f = f * f * (3 - 2 * f);
         return (pts[i].st + (pts[i + 1].st - pts[i].st) * f) / LAST_ST;
       }
     }
