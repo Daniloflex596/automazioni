@@ -1,0 +1,50 @@
+---
+// CTA fissa "Prenota": compare dopo l'ingresso nel pub e resta a portata di
+// pollice per tutto lo scroll; sparisce quando arrivi al form del Brindisi.
+---
+
+<a id="prenota-sticky" href="#brindisi" aria-label="Prenota un tavolo">Prenota</a>
+
+<script>
+  const btn = document.getElementById('prenota-sticky');
+  const brindisi = document.getElementById('brindisi');
+  const onScroll = () => {
+    if (!btn) return;
+    const dopoHero = scrollY > innerHeight * 0.7;
+    const primaDelForm = !brindisi || scrollY < brindisi.offsetTop - innerHeight * 0.55;
+    btn.classList.toggle('is-on', dopoHero && primaDelForm);
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll, { passive: true });
+  onScroll();
+</script>
+
+<style>
+  #prenota-sticky {
+    position: fixed;
+    top: 1.1rem;
+    right: var(--gutter);
+    z-index: 6;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--notte);
+    background: var(--oro);
+    padding: 0.55rem 1.2rem;
+    border-radius: 999px;
+    box-shadow: 0 6px 22px rgba(232, 176, 75, 0.28);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.35s, transform 0.35s var(--ease-out), background 0.3s;
+  }
+  #prenota-sticky.is-on {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  #prenota-sticky:hover {
+    background: var(--schiuma);
+  }
+</style>
