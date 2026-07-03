@@ -57,7 +57,7 @@ export const orariSchema = [
  */
 export const storia = {
   occhiello: 'Il Rifugio',
-  titolo: 'Dal 2018,\nun angolo di Arcadia a Ciampino',
+  titolo: 'Abbiamo portato\nil Belgio a Ciampino',
   blocchi: [
     {
       anno: '2018',
