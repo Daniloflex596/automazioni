@@ -121,11 +121,25 @@ async function boot() {
   // niente reflow forzato: lo scroll resta liscio anche su mobile.
   const geoMid = new Map();
   const geoTop = new Map();
+  // VIEWPORT STABILE: su Chrome mobile la barra degli indirizzi collassa al
+  // primo scroll e cambia innerHeight di ~60px → senza cache la narrativa
+  // salta proprio all'ingresso. L'altezza viene aggiornata solo su resize
+  // veri (cambio larghezza o Δaltezza > 150px, cioè rotazione/finestra).
+  let vw = window.innerWidth;
+  let vh = window.innerHeight;
+  function aggiornaViewport() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    if (w !== vw || Math.abs(h - vh) > 150) {
+      vw = w;
+      vh = h;
+    }
+  }
   function proximity(el) {
     const mid = el && geoMid.get(el);
     if (mid === undefined) return 0;
     const center = mid - window.scrollY;
-    const d = Math.abs(center - window.innerHeight / 2) / (window.innerHeight * 0.85);
+    const d = Math.abs(center - vh / 2) / (vh * 0.85);
     return Math.max(0, 1 - d);
   }
   // Riempimento PERSISTENTE (spina, drink): 0→1 all'ingresso della sezione,
@@ -133,7 +147,7 @@ async function boot() {
   function fillOnce(el) {
     const top = el && geoTop.get(el);
     if (top === undefined) return 0;
-    return clamp01((window.scrollY + window.innerHeight * 0.6 - top) / (window.innerHeight * 0.75));
+    return clamp01((window.scrollY + vh * 0.6 - top) / (vh * 0.75));
   }
 
   // Progress "pinta" (indicatore scroll a bordo destro), iniettato via JS.
@@ -176,11 +190,14 @@ async function boot() {
     }));
   }
   misura();
-  window.addEventListener('resize', misura, { passive: true });
+  window.addEventListener('resize', () => {
+    aggiornaViewport();
+    misura();
+  }, { passive: true });
   window.addEventListener('load', misura);
 
   function narrativeT() {
-    const mid = window.scrollY + window.innerHeight / 2;
+    const mid = window.scrollY + vh / 2;
     if (!pts.length) return 0;
     if (mid <= pts[0].y) return (pts[0].st / LAST_ST) * Math.max(0, mid / pts[0].y);
     for (let i = 0; i < pts.length - 1; i++) {
@@ -195,8 +212,8 @@ async function boot() {
 
   function raf(time) {
     lenis.raf(time);
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const t = max > 0 ? window.scrollY / max : 0;
+    const max = document.documentElement.scrollHeight - vh;
+    const t = max > 0 ? clamp01(window.scrollY / max) : 0;
     if (pub) {
       pub.setProgress(narrativeT());
       // Hook diagnostico (solo con ?debug nell'URL, nessun costo altrimenti)

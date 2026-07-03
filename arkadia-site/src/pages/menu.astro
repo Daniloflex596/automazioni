@@ -586,6 +586,9 @@ const menuDesc =
     overflow-x: auto;
     padding-block: 0.85rem;
     scrollbar-width: none;
+    /* Lo swipe oltre il fine-corsa resta nella riga: mai trascinare la pagina */
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
   }
   .tabs-row::-webkit-scrollbar { display: none; }
   .tab {

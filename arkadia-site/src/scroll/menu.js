@@ -69,6 +69,19 @@ const MROUTE = [
 const geoMid = new Map();
 const geoTop = new Map();
 let mpts = [];
+// VIEWPORT STABILE: la barra degli indirizzi di Chrome mobile collassa al
+// primo scroll cambiando innerHeight → cache aggiornata solo su resize veri
+// (cambio larghezza o Δaltezza > 150px), così la camera non salta.
+let vw = window.innerWidth;
+let vh = window.innerHeight;
+function aggiornaViewport() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (w !== vw || Math.abs(h - vh) > 150) {
+    vw = w;
+    vh = h;
+  }
+}
 function misura() {
   ['cat-birre', 'cat-fritti', 'cat-hamburger', 'cat-dessert', 'cat-da-bere', 'cat-caffetteria', 'cat-cocktail', 'cat-giochi'].forEach((id) => {
     const el = document.getElementById(id);
@@ -86,7 +99,7 @@ function misura() {
     if (!el) return;
     const top = el.offsetTop;
     const h = el.offsetHeight;
-    const margine = Math.min(h * 0.5, innerHeight * 0.28);
+    const margine = Math.min(h * 0.5, vh * 0.28);
     mpts.push({ y: top + margine, st: stA });
     mpts.push({ y: top + h - margine, st: stB ?? stA });
   });
@@ -97,14 +110,17 @@ function misura() {
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', misura);
 else misura();
-window.addEventListener('resize', misura, { passive: true });
+window.addEventListener('resize', () => {
+  aggiornaViewport();
+  misura();
+}, { passive: true });
 window.addEventListener('load', misura);
 
 function proximity(id) {
   const mid = geoMid.get(id);
   if (mid === undefined) return 0;
   const c = mid - scrollY;
-  return Math.max(0, 1 - Math.abs(c - innerHeight / 2) / (innerHeight * 0.85));
+  return Math.max(0, 1 - Math.abs(c - vh / 2) / (vh * 0.85));
 }
 // Riempimento PERSISTENTE: 0→1 mentre la sezione entra in scena, poi resta
 // pieno per tutta la sezione e oltre; si svuota solo risalendo sopra.
@@ -112,10 +128,10 @@ function proximity(id) {
 function fillOnce(id) {
   const top = geoTop.get(id);
   if (top === undefined) return 0;
-  return clamp01((scrollY + innerHeight * 0.6 - top) / (innerHeight * 0.75));
+  return clamp01((scrollY + vh * 0.6 - top) / (vh * 0.75));
 }
 function menuT() {
-  const mid = scrollY + innerHeight / 2;
+  const mid = scrollY + vh / 2;
   if (!mpts.length) return 0;
   if (mid <= mpts[0].y) return (mpts[0].st / 9) * Math.max(0, mid / mpts[0].y);
   for (let i = 0; i < mpts.length - 1; i++) {
@@ -276,7 +292,7 @@ function initScroll() {
   function raf(time) {
     lenis.raf(time);
     drivePub();
-    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const max = document.documentElement.scrollHeight - vh;
     const pct = Math.round((max > 0 ? window.scrollY / max : 0) * 100);
     ppFill.style.height = pct + '%';
     ppFoam.style.bottom = pct + '%';

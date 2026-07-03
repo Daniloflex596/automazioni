@@ -16,6 +16,15 @@ html {
   scroll-behavior: auto; /* lo smooth scrolling è gestito da Lenis */
 }
 
+/* Niente movimento orizzontale della pagina su mobile: il viewport è
+   inchiodato all'asse verticale (clip non crea scroller, a differenza di
+   hidden) e l'overscroll laterale non si propaga mai alla pagina. */
+html {
+  overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
 body {
   background: var(--notte);
   color: var(--schiuma);
@@ -26,6 +35,8 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
 }
 
 /* Lenis: durante lo smooth scroll disattiva lo snap nativo */
