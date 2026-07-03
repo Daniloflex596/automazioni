@@ -136,7 +136,7 @@ const menuDesc =
     </svg>
   </div>
 
-  <main id="contenuto">
+  <main id="contenuto" data-whatsapp={info.whatsapp}>
     <!-- Barra di navigazione minimale -->
     <nav class="topbar">
       <a class="topbar-back" href={base}>
@@ -207,6 +207,11 @@ const menuDesc =
                     ) : null
                   )}
                 </dl>
+                <button
+                  class="ord-btn mono"
+                  data-ord={j({ n: `${b.nome} (spina)`, f: birre.formati.map((f, i) => (b.prezzi[i] !== '—' ? { f, p: b.prezzi[i] } : null)).filter(Boolean) })}
+                  aria-label={`Aggiungi ${b.nome} all'ordine`}
+                >+</button>
               </article>
             ))
           }
@@ -232,6 +237,7 @@ const menuDesc =
                   </p>
                 </div>
                 <span class="bottiglia-prezzo mono">€ {b.prezzo}</span>
+                <button class="ord-btn mono" data-ord={j({ n: b.nome, p: b.prezzo })} aria-label={`Aggiungi ${b.nome} all'ordine`}>+</button>
               </li>
             ))
           }
@@ -260,6 +266,7 @@ const menuDesc =
                 {v.desc && <p class="mi-desc">{v.desc}</p>}
               </div>
               <span class="mi-prezzo mono">€ {v.prezzo}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
             </li>
           ))}
         </ul>
@@ -288,6 +295,7 @@ const menuDesc =
                 {v.desc && <p class="mi-desc">{v.desc}</p>}
               </div>
               <span class="mi-prezzo mono">€ {v.prezzo}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
             </li>
           ))}
         </ul>
@@ -312,6 +320,9 @@ const menuDesc =
                 {v.desc && <p class="mi-desc">{v.desc}</p>}
               </div>
               {v.prezzo && <span class="mi-prezzo mono">€ {v.prezzo}</span>}
+              {v.prezzo && (
+                <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+              )}
             </li>
           ))}
         </ul>
@@ -335,6 +346,7 @@ const menuDesc =
               <canvas class="micona" width="128" height="160" data-icona={j(icDistillati[v.nome] ?? { t: 'tumbler', c: 'c87828' })} aria-hidden="true"></canvas>
               <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
               <span class="mi-prezzo mono">€ {v.prezzo} <em>/ {v.shot}</em></span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, f: [{ f: 'Bicchiere', p: v.prezzo }, { f: 'Shot', p: v.shot }] })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
             </li>
           ))}
         </ul>
@@ -346,6 +358,7 @@ const menuDesc =
               <canvas class="micona" width="128" height="160" data-icona={j(icVini[v.nome] ?? { t: 'vino', c: '7a1626' })} aria-hidden="true"></canvas>
               <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
               <span class="mi-prezzo mono">€ {v.calice} <em>/ {v.bottiglia}</em></span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, f: [{ f: 'Calice', p: v.calice }, { f: 'Bottiglia', p: v.bottiglia }] })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
             </li>
           ))}
         </ul>
@@ -370,6 +383,7 @@ const menuDesc =
                 {v.desc && <p class="mi-desc">{v.desc}</p>}
               </div>
               <span class="mi-prezzo mono">€ {v.prezzo}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
             </li>
           ))}
         </ul>
@@ -394,6 +408,7 @@ const menuDesc =
                 <p class="mi-desc">{v.desc}</p>
               </div>
               <span class="mi-prezzo mono">€ {prezzoCocktail}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: prezzoCocktail })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
             </li>
           ))}
         </ul>
@@ -445,6 +460,7 @@ const menuDesc =
 
   <script>
     import '../scroll/menu.js';
+    import '../scroll/carrello.js';
   </script>
 </Base>
 
@@ -814,6 +830,43 @@ const menuDesc =
   @media (max-width: 720px) {
     .bottiglie { grid-template-columns: 1fr; }
     .menu-list--cols { grid-template-columns: 1fr; }
+  }
+
+  /* ---- Ordina: il "+" accanto a ogni voce (carrello in carrello.js) ---- */
+  .ord-btn {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    align-self: center;
+    border-radius: 999px;
+    border: 1px solid var(--oro);
+    background: transparent;
+    color: var(--oro);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s, transform 0.2s var(--ease-out);
+  }
+  .ord-btn:hover {
+    background: var(--oro);
+    color: var(--notte);
+  }
+  .ord-btn:active {
+    transform: scale(0.88);
+  }
+  .spina-riga {
+    position: relative;
+  }
+  .spina-riga .ord-btn {
+    position: absolute;
+    top: 1.75rem;
+    right: 0;
+  }
+  @media (max-width: 720px) {
+    .ord-btn {
+      width: 38px;
+      height: 38px;
+    }
   }
 
   /* ---- Icone 3D per voce (renderer condiviso, vedi icone3d.js) ---- */
