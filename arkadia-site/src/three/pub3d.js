@@ -682,7 +682,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     addItem(ciotola, -0.17, 0.048, -0.08);
     fritGrp.add(g);
   }
-  // 3) Onion Rings: pila dorata sul piattino + uno appoggiato di sbieco.
+  // 3) Onion Rings: pila dorata sul piattino.
   {
     const g = new THREE.Group();
     g.position.set(0.36, CTOP, -0.42);
@@ -697,10 +697,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       g.add(ring);
       friggStack.push(ring);
     }
-    const lean = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.026, 10, 20), mat(0xd8912f, { r: 0.5, e: 0x6a3a10, ei: 0.25 }));
-    lean.position.set(0.12, 0.055, 0.06);
-    lean.rotation.set(1.15, 0, 0.45);
-    g.add(lean);
     fritGrp.add(g);
   }
   // Luce calda bassa sul bancone: i tre prodotti ben definiti.
@@ -954,6 +950,11 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   die2.position.set(4.48, 0.9, -21.68);
   root.add(die2);
   let giochiAmt = 0;
+  // Progresso PIANTATO della freccetta: latch del massimo giochiAmt visto —
+  // la freccetta arriva al centro seguendo lo scroll e poi RESTA conficcata
+  // (non si ritrae più mentre continui a scorrere). I dadi/arcade continuano
+  // invece a seguire giochiAmt normale.
+  let dartProg = 0;
 
   // ---- SALA GIOCHI 3D: cabinato arcade retro + giochi da tavolo + carte ----
   // Il cabinato è contro la parete destra, davanti al bersaglio: schermo a
@@ -1054,21 +1055,31 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   for (let i = 0; i < 6; i++) {
     const asta = new THREE.Group();
     asta.position.set(-0.45 + i * 0.18, 0.97, 0);
-    const tubo = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.95, 8), mat(0xd9cdb4, { r: 0.25, m: 0.7 }));
+    const squadra = i % 2 ? 0x2858c8 : 0xc22a1e; // blu contro rosso
+    const side = i % 2 ? -1 : 1; // manici alternati: rossi da un lato, blu dall'altro
+    // stecca cromata che attraversa il campo e sporge dai due lati
+    const tubo = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.94, 10), mat(0xcfc6b2, { r: 0.25, m: 0.75 }));
     tubo.rotation.x = Math.PI / 2;
     asta.add(tubo);
-    const manopola = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.09, 10), mat(0x100b07, { r: 0.6 }));
-    manopola.rotation.x = Math.PI / 2;
-    manopola.position.z = 0.46;
-    asta.add(manopola);
-    const squadra = i % 2 ? 0x2858c8 : 0xc22a1e; // blu contro rosso
+    // impugnatura sul lato del proprio giocatore: grip nero + pomello colorato
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.12, 12), mat(0x141212, { r: 0.55 }));
+    grip.rotation.x = Math.PI / 2;
+    grip.position.z = side * 0.4;
+    asta.add(grip);
+    const pomello = new THREE.Mesh(new THREE.SphereGeometry(0.03, 14, 12), mat(squadra, { r: 0.4, e: squadra, ei: 0.12 }));
+    pomello.position.z = side * 0.49;
+    asta.add(pomello);
+    // ometti appesi alla stecca, piedini appena sopra il campo
     const nOmini = i === 0 || i === 5 ? 1 : i === 1 || i === 4 ? 2 : 3;
     for (let k = 0; k < nOmini; k++) {
-      const omino = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.11, 0.035), mat(squadra, { r: 0.5, e: squadra, ei: 0.12 }));
-      omino.position.set(0, -0.075, (k - (nOmini - 1) / 2) * 0.17);
+      const oz = (k - (nOmini - 1) / 2) * 0.17;
+      const omino = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.032), mat(squadra, { r: 0.5, e: squadra, ei: 0.12 }));
+      omino.position.set(0, -0.03, oz);
       asta.add(omino);
+      const piede = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.02, 0.05), mat(squadra, { r: 0.5, e: squadra, ei: 0.1 }));
+      piede.position.set(0, -0.062, oz);
+      asta.add(piede);
     }
-    asta.userData = { ph: pseudo(i * 29) * Math.PI * 2, baseZ: 0 };
     biliardino.add(asta);
     bilAste.push(asta);
   }
@@ -1350,19 +1361,23 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     // Sala Giochi: la freccetta vola in parabola e si CONFICCA dritta nel
     // centro del bersaglio quando la sezione è centrata (g→1); i dadi
     // rotolano finché non è centrata.
-    const g = giochiAmt * giochiAmt * (3 - 2 * giochiAmt); // smoothstep
-    dartArrow.position.lerpVectors(dartFrom, dartTo, g);
+    // La freccetta arriva al centro seguendo lo scroll e poi RESTA conficcata:
+    // dartProg è il massimo raggiunto (latch), così non si ritrae mai.
+    dartProg = Math.max(dartProg, giochiAmt);
+    const gd = dartProg * dartProg * (3 - 2 * dartProg); // smoothstep freccetta
+    dartArrow.position.lerpVectors(dartFrom, dartTo, gd);
     // arco che culmina un filo prima e scende deciso sul bersaglio
-    const arcT = Math.pow(g, 0.85) * Math.PI;
+    const arcT = Math.pow(gd, 0.85) * Math.PI;
     dartArrow.position.y += Math.sin(arcT) * 0.24;
-    // il naso segue la traiettoria (su in salita, giù in discesa); il fattore
-    // (1-g) lo riporta perfettamente dritto una volta piantato (g=1)
-    const arcVel = Math.PI * Math.cos(arcT); // derivata dell'arco
-    dartArrow.rotation.z = (1 - g) * (-0.24 + arcVel * 0.05);
-    dartArrow.rotation.y = (1 - g) * 0.4;
+    // il naso segue la traiettoria; il fattore (1-gd) la riporta dritta a gd=1
+    const arcVel = Math.PI * Math.cos(arcT);
+    dartArrow.rotation.z = (1 - gd) * (-0.24 + arcVel * 0.05);
+    dartArrow.rotation.y = (1 - gd) * 0.4;
     // "thunk" all'impatto: micro-vibrazione smorzata solo nell'ultimo tratto,
-    // nulla a g=1 (la freccetta resta ferma e piantata)
-    if (g > 0.9 && g < 1) dartArrow.rotation.z += Math.sin(time * 52) * 0.045 * ((1 - g) / 0.1);
+    // nulla a gd=1 (poi resta ferma e piantata al centro)
+    if (gd > 0.9 && gd < 1) dartArrow.rotation.z += Math.sin(time * 52) * 0.045 * ((1 - gd) / 0.1);
+    // Dadi e arcade seguono la prossimità normale (rotolano e si fermano).
+    const g = giochiAmt * giochiAmt * (3 - 2 * giochiAmt); // smoothstep
     const roll = 1 - g;
     die1.rotation.x += roll * 0.12;
     die1.rotation.z += roll * 0.09;
@@ -1379,14 +1394,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     meeples.forEach((mp) => {
       mp.position.y = mp.userData.baseY + Math.max(0, Math.sin(time * 2.2 + mp.userData.ph)) * 0.035 * g;
     });
-    // Biliardino: le stecche ruotano a scatti e scorrono, la pallina rimbalza.
-    bilAste.forEach((asta, i) => {
-      asta.rotation.x = Math.sin(time * 2.6 + asta.userData.ph) * 0.8 * g;
-      asta.position.z = Math.sin(time * 1.9 + asta.userData.ph * 2) * 0.05 * g;
-      if (i === 2) asta.rotation.x += Math.max(0, Math.sin(time * 5)) * 1.2 * g; // il tiro
-    });
-    bilPalla.position.x = Math.sin(time * 2.2) * 0.42 * Math.max(0.05, g) + 0.05;
-    bilPalla.position.z = Math.cos(time * 1.7) * 0.16 * g;
+    // Biliardino: fermo e ben definito (stecche dritte, pallina a centrocampo).
 
     // Vapore del burger: sale, si allarga e svanisce in loop.
     steam.forEach((s, i) => {
