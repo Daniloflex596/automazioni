@@ -173,6 +173,11 @@
         "fx_intensity": { "type": "string", "enum": ["low", "medium", "high"] }
       }
     },
+    "art_direction": {
+      "type": "object",
+      "description": "Direzione visiva unica del sito (nicchia, motivo animazione, camera, brief cinematografico AI).",
+      "additionalProperties": true
+    },
     "sections_order": {
       "type": "array",
       "items": { "type": "string", "enum": ["hero", "atmosphere", "loved", "reviews", "gallery", "hours", "contact", "cta"] }

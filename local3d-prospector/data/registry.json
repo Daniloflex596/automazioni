@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-07-05T14:23:45.256Z",
+  "updated_at": "2026-07-05T14:54:30.792Z",
   "businesses": {
     "mock_arcadia_pub": {
       "place_id": "mock_arcadia_pub",
@@ -8,14 +8,14 @@
       "history": [
         {
           "state": "qualificato",
-          "at": "2026-07-05T14:22:12.575Z"
+          "at": "2026-07-05T14:54:07.783Z"
         },
         {
           "state": "demo-pronta",
-          "at": "2026-07-05T14:22:25.548Z"
+          "at": "2026-07-05T14:54:21.158Z"
         }
       ],
-      "created_at": "2026-07-05T14:22:12.575Z",
+      "created_at": "2026-07-05T14:54:07.783Z",
       "name": "Arcadia Pub",
       "zone": "Ciampino",
       "matched_query": "pub",
@@ -23,22 +23,22 @@
       "score": 56,
       "rating": 4.7,
       "reviews_count": 384,
-      "updated_at": "2026-07-05T14:23:33.630Z",
+      "updated_at": "2026-07-05T14:54:30.791Z",
       "contact_checked": true,
       "contact_email": "info@arcadiapub.example",
       "contact_email_kind": "generic",
       "slug": "arcadia-pub",
       "site_dir": "sites/arcadia-pub",
-      "demo_token": "b63umu8sr49q16ya33e3na",
-      "demo_url": "https://api.local3d.example/d/b63umu8sr49q16ya33e3na",
-      "site_generated_at": "2026-07-05T14:22:12.640Z",
-      "wa_link": "https://wa.me/390612345670?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Arcadia%20Pub%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fb63umu8sr49q16ya33e3na%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+      "demo_token": "nzbx9mw2wtnm8nj4k2gn2q",
+      "demo_url": "https://api.local3d.example/d/nzbx9mw2wtnm8nj4k2gn2q",
+      "site_generated_at": "2026-07-05T14:54:08.050Z",
+      "wa_link": "https://wa.me/390612345670?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Arcadia%20Pub%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fnzbx9mw2wtnm8nj4k2gn2q%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
       "qa": {
         "ok": true,
         "warnings": [],
-        "loadMs": 571,
+        "loadMs": 606,
         "jsKB": 1139,
-        "at": "2026-07-05T14:23:33.630Z"
+        "at": "2026-07-05T14:54:21.158Z"
       },
       "last_error": null,
       "outreach_drafted": true
@@ -47,7 +47,7 @@
       "place_id": "mock_sakura_ramen",
       "state": "trovato",
       "history": [],
-      "created_at": "2026-07-05T14:22:12.576Z",
+      "created_at": "2026-07-05T14:54:07.783Z",
       "name": "Sakura Ramen House",
       "zone": "Morena",
       "matched_query": "ramen",
@@ -55,7 +55,7 @@
       "score": 39,
       "rating": 4.5,
       "reviews_count": 268,
-      "updated_at": "2026-07-05T14:22:12.576Z"
+      "updated_at": "2026-07-05T14:54:07.783Z"
     },
     "mock_porchetta_re": {
       "place_id": "mock_porchetta_re",
@@ -63,14 +63,14 @@
       "history": [
         {
           "state": "qualificato",
-          "at": "2026-07-05T14:22:12.576Z"
+          "at": "2026-07-05T14:54:07.783Z"
         },
         {
           "state": "demo-pronta",
-          "at": "2026-07-05T14:22:37.289Z"
+          "at": "2026-07-05T14:54:30.720Z"
         }
       ],
-      "created_at": "2026-07-05T14:22:12.576Z",
+      "created_at": "2026-07-05T14:54:07.783Z",
       "name": "Il Re della Porchetta",
       "zone": "Frascati",
       "matched_query": "porchetteria",
@@ -78,22 +78,22 @@
       "score": 46,
       "rating": 4.6,
       "reviews_count": 512,
-      "updated_at": "2026-07-05T14:23:45.157Z",
+      "updated_at": "2026-07-05T14:54:30.791Z",
       "contact_checked": true,
       "contact_email": "prenotazioni@reporchetta.example",
       "contact_email_kind": "generic",
       "slug": "il-re-della-porchetta",
       "site_dir": "sites/il-re-della-porchetta",
-      "demo_token": "fk19bsgyna730prcctxb3e",
-      "demo_url": "https://api.local3d.example/d/fk19bsgyna730prcctxb3e",
-      "site_generated_at": "2026-07-05T14:22:12.642Z",
-      "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Ffk19bsgyna730prcctxb3e%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+      "demo_token": "p17ctbfgwyd4l647lvt3cd",
+      "demo_url": "https://api.local3d.example/d/p17ctbfgwyd4l647lvt3cd",
+      "site_generated_at": "2026-07-05T14:54:08.057Z",
+      "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fp17ctbfgwyd4l647lvt3cd%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
       "qa": {
         "ok": true,
         "warnings": [],
-        "loadMs": 571,
+        "loadMs": 548,
         "jsKB": 1139,
-        "at": "2026-07-05T14:23:45.157Z"
+        "at": "2026-07-05T14:54:30.720Z"
       },
       "last_error": null,
       "outreach_drafted": true

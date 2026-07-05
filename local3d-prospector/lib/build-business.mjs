@@ -3,8 +3,8 @@
 import { config } from './config.mjs';
 import { slugify } from './util.mjs';
 import { templateFor } from './score.mjs';
-import { deriveTheme, defaultToneFor } from './theme.mjs';
 import { mineReviews, deriveClaim } from './reviews.mjs';
+import { deriveArtDirection, themeFromArtDirection } from './art-director.mjs';
 
 function toneForTemplate(template) {
   return { pub: 'cozy', streetfood: 'street', ethnic: 'neon', barber: 'elegant' }[template] || 'cozy';
@@ -36,6 +36,9 @@ export function buildBusiness(details, ctx) {
   const gallery = buildMode === 'live'
     ? (onboarding.photos || []).map((url, i) => ({ url, alt: `${name} ${i + 1}`, source: 'client_onboarding', rights: 'client_provided' }))
     : [];
+
+  // Direzione artistica unica per questo locale (palette/tipografia/motivo diversi da locale a locale).
+  const ad = deriveArtDirection({ identity: { name }, meta: { template, category } });
 
   const biz = {
     meta: {
@@ -72,7 +75,8 @@ export function buildBusiness(details, ctx) {
     },
     gallery,
     loved: mined.loved,
-    theme: deriveTheme(tone),
+    theme: themeFromArtDirection(ad),
+    art_direction: { niche: ad.niche, motif: ad.motif, camera: ad.camera, cinematic: ad.cinematic },
     sections_order: gallery.length
       ? ['hero', 'atmosphere', 'loved', 'reviews', 'gallery', 'hours', 'contact', 'cta']
       : ['hero', 'atmosphere', 'loved', 'reviews', 'hours', 'contact', 'cta'],
