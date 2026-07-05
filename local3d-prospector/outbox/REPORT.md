@@ -11,14 +11,14 @@
 
 ### Arcadia Pub  ·  score 56  ·  4.7★ (384)
 - Zona: Ciampino · Template: pub
-- Demo: https://api.local3d.example/d/9p20z10hzaulhnyg1kl7ca
+- Demo: https://api.local3d.example/d/b63umu8sr49q16ya33e3na
 - Screenshot: `sites/arcadia-pub/shots/desktop-hero.png`, `mobile-hero.png`, `desktop-cta.png`
 - Approva:  `npm run registry -- approve mock_arcadia_pub`
 - Scarta:   `npm run registry -- reject mock_arcadia_pub`
 
 ### Il Re della Porchetta  ·  score 46  ·  4.6★ (512)
 - Zona: Frascati · Template: streetfood
-- Demo: https://api.local3d.example/d/60lyim0dtuf4xu8u44fnl6
+- Demo: https://api.local3d.example/d/fk19bsgyna730prcctxb3e
 - Screenshot: `sites/il-re-della-porchetta/shots/desktop-hero.png`, `mobile-hero.png`, `desktop-cta.png`
 - Approva:  `npm run registry -- approve mock_porchetta_re`
 - Scarta:   `npm run registry -- reject mock_porchetta_re`

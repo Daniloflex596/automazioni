@@ -4,14 +4,14 @@
       "place_id": "mock_arcadia_pub",
       "to": "info@arcadiapub.example",
       "subject": "Un'anteprima del sito di Arcadia Pub",
-      "body": "Buongiorno,\n\nmi chiamo Danilo, creo siti web per locali della zona. Ho visto le vostre ottime recensioni (specie per birra artigianale), e ho notato che Arcadia Pub non ha ancora un sito proprio — così ne ho preparata un'anteprima, gratis e senza impegno, per farvi vedere come potrebbe essere.\n\nLa trovate qui: https://api.local3d.example/d/9p20z10hzaulhnyg1kl7ca\n\nÈ un sito moderno, con animazioni, pensato per farsi trovare e prendere prenotazioni. Se vi piace possiamo attivarlo con un dominio vostro (890€ una tantum + 59€/mese tutto incluso, soddisfatti o rimborsati entro 7 giorni). Se non vi interessa, nessun problema.\n\nUn saluto,\nDanilo\n\n— Se non volete più ricevere messaggi, rispondete \"STOP\" e sarete rimossi subito.",
+      "body": "Buongiorno,\n\nmi chiamo Danilo, creo siti web per locali della zona. Ho visto le vostre ottime recensioni (specie per birra artigianale), e ho notato che Arcadia Pub non ha ancora un sito proprio — così ne ho preparata un'anteprima, gratis e senza impegno, per farvi vedere come potrebbe essere.\n\nLa trovate qui: https://api.local3d.example/d/b63umu8sr49q16ya33e3na\n\nÈ un sito moderno, con animazioni, pensato per farsi trovare e prendere prenotazioni. Se vi piace possiamo attivarlo con un dominio vostro (890€ una tantum + 59€/mese tutto incluso, soddisfatti o rimborsati entro 7 giorni). Se non vi interessa, nessun problema.\n\nUn saluto,\nDanilo\n\n— Se non volete più ricevere messaggi, rispondete \"STOP\" e sarete rimossi subito.",
       "status": "DRAFT_PENDING_APPROVAL"
     },
     {
       "place_id": "mock_porchetta_re",
       "to": "prenotazioni@reporchetta.example",
       "subject": "Un'anteprima del sito di Il Re della Porchetta",
-      "body": "Buongiorno,\n\nmi chiamo Danilo, creo siti web per locali della zona. Ho visto le vostre ottime recensioni (specie per porchetta), e ho notato che Il Re della Porchetta non ha ancora un sito proprio — così ne ho preparata un'anteprima, gratis e senza impegno, per farvi vedere come potrebbe essere.\n\nLa trovate qui: https://api.local3d.example/d/60lyim0dtuf4xu8u44fnl6\n\nÈ un sito moderno, con animazioni, pensato per farsi trovare e prendere prenotazioni. Se vi piace possiamo attivarlo con un dominio vostro (890€ una tantum + 59€/mese tutto incluso, soddisfatti o rimborsati entro 7 giorni). Se non vi interessa, nessun problema.\n\nUn saluto,\nDanilo\n\n— Se non volete più ricevere messaggi, rispondete \"STOP\" e sarete rimossi subito.",
+      "body": "Buongiorno,\n\nmi chiamo Danilo, creo siti web per locali della zona. Ho visto le vostre ottime recensioni (specie per porchetta), e ho notato che Il Re della Porchetta non ha ancora un sito proprio — così ne ho preparata un'anteprima, gratis e senza impegno, per farvi vedere come potrebbe essere.\n\nLa trovate qui: https://api.local3d.example/d/fk19bsgyna730prcctxb3e\n\nÈ un sito moderno, con animazioni, pensato per farsi trovare e prendere prenotazioni. Se vi piace possiamo attivarlo con un dominio vostro (890€ una tantum + 59€/mese tutto incluso, soddisfatti o rimborsati entro 7 giorni). Se non vi interessa, nessun problema.\n\nUn saluto,\nDanilo\n\n— Se non volete più ricevere messaggi, rispondete \"STOP\" e sarete rimossi subito.",
       "status": "DRAFT_PENDING_APPROVAL"
     }
   ],
@@ -20,16 +20,16 @@
       "place_id": "mock_arcadia_pub",
       "name": "Arcadia Pub",
       "phone": "06 1234 5670",
-      "wa_link": "https://wa.me/390612345670?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Arcadia%20Pub%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2F9p20z10hzaulhnyg1kl7ca%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
-      "text": "Buongiorno! Sono Danilo, creo siti per locali della zona. Ho preparato un'anteprima gratuita del sito di Arcadia Pub, guardatela quando volete: https://api.local3d.example/d/9p20z10hzaulhnyg1kl7ca — se vi piace ne parliamo, altrimenti nessun problema 🙂",
+      "wa_link": "https://wa.me/390612345670?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Arcadia%20Pub%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fb63umu8sr49q16ya33e3na%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+      "text": "Buongiorno! Sono Danilo, creo siti per locali della zona. Ho preparato un'anteprima gratuita del sito di Arcadia Pub, guardatela quando volete: https://api.local3d.example/d/b63umu8sr49q16ya33e3na — se vi piace ne parliamo, altrimenti nessun problema 🙂",
       "status": "READY_MANUAL_SEND"
     },
     {
       "place_id": "mock_porchetta_re",
       "name": "Il Re della Porchetta",
       "phone": "06 9876 5432",
-      "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2F60lyim0dtuf4xu8u44fnl6%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
-      "text": "Buongiorno! Sono Danilo, creo siti per locali della zona. Ho preparato un'anteprima gratuita del sito di Il Re della Porchetta, guardatela quando volete: https://api.local3d.example/d/60lyim0dtuf4xu8u44fnl6 — se vi piace ne parliamo, altrimenti nessun problema 🙂",
+      "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Ffk19bsgyna730prcctxb3e%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+      "text": "Buongiorno! Sono Danilo, creo siti per locali della zona. Ho preparato un'anteprima gratuita del sito di Il Re della Porchetta, guardatela quando volete: https://api.local3d.example/d/fk19bsgyna730prcctxb3e — se vi piace ne parliamo, altrimenti nessun problema 🙂",
       "status": "READY_MANUAL_SEND"
     }
   ]

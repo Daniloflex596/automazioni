@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Scene3D from './Scene3D.jsx';
+import Intro from './Intro.jsx';
 import DemoBanner from './DemoBanner.jsx';
 import { Hero, Atmosphere, Loved, Reviews, Gallery, Hours, Contact } from './Sections.jsx';
 import { perfBudget } from '../lib/device.js';
@@ -19,6 +20,9 @@ export default function App({ business }) {
 
   return (
     <div className={`app fx-${business.theme?.fx_intensity || 'medium'} level-${budget.level}`}>
+      <Intro name={business.identity.name} />
+      <div className="grain" aria-hidden="true" />
+      <div className="vignette" aria-hidden="true" />
       <Scene3D template={business.meta.template} theme={business.theme} level={budget.level} />
       <main className="content">
         {order.map((key) => {

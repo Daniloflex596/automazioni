@@ -7,12 +7,12 @@
     "template": "streetfood",
     "build_mode": "demo",
     "score": 46,
-    "generated_at": "2026-07-05T11:46:16.521Z"
+    "generated_at": "2026-07-05T14:22:12.641Z"
   },
   "identity": {
     "name": "Il Re della Porchetta",
     "claim": "Porchetta, come si deve",
-    "tone": "elegant"
+    "tone": "street"
   },
   "contacts": {
     "phone": {
@@ -84,22 +84,22 @@
   ],
   "theme": {
     "palette": {
-      "bg": "#0c0c0e",
-      "surface": "#17171b",
-      "primary": "#c9a24b",
-      "accent": "#e9d9a8",
-      "text": "#f4f2ee",
-      "muted": "#9c988e"
+      "bg": "#0a0a0f",
+      "surface": "#15151f",
+      "primary": "#ff3d5a",
+      "accent": "#ffd23f",
+      "text": "#f5f5f7",
+      "muted": "#9a9aa8"
     },
-    "font_display": "'Cormorant Garamond', serif",
+    "font_display": "'Anton', sans-serif",
     "font_body": "'Inter', sans-serif",
-    "fx_intensity": "medium"
+    "fx_intensity": "high"
   },
   "sections_order": [
     "hero",
-    "reviews",
     "atmosphere",
     "loved",
+    "reviews",
     "hours",
     "contact",
     "cta"
@@ -110,8 +110,8 @@
     "price_setup_eur": 890,
     "price_monthly_eur": 59,
     "guarantee_days": 7,
-    "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2F60lyim0dtuf4xu8u44fnl6%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
-    "checkout_url": "https://api.local3d.example/buy/60lyim0dtuf4xu8u44fnl6",
+    "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Ffk19bsgyna730prcctxb3e%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+    "checkout_url": "https://api.local3d.example/buy/fk19bsgyna730prcctxb3e",
     "track_url": "https://api.local3d.example/track"
   }
 }

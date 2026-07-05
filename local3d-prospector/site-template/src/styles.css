@@ -30,6 +30,42 @@ a:hover { text-decoration: underline; }
 
 .content { position: relative; z-index: 1; }
 
+/* Intro registica */
+.intro {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.4rem;
+}
+.intro-name {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 8vw, 5rem);
+  font-weight: 800;
+  text-align: center;
+  padding: 0 1.5rem;
+  color: var(--text);
+}
+.intro-line {
+  width: min(280px, 60vw); height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform-origin: center;
+}
+
+/* Vignettatura cinematografica (tutti i dispositivi) */
+.vignette {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,0.55) 100%);
+  mix-blend-mode: multiply;
+}
+/* Grana pellicola leggera via SVG inline (nessun asset esterno) */
+.grain {
+  position: fixed; inset: -50%; z-index: 3; pointer-events: none; opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.5s steps(3) infinite;
+}
+@keyframes grain { 0%{transform:translate(0,0)} 33%{transform:translate(-3%,2%)} 66%{transform:translate(2%,-2%)} 100%{transform:translate(0,0)} }
+@media (prefers-reduced-motion: reduce) { .grain { animation: none; } }
+
 /* Fallback 2D di prima classe: quando la scena è off, il gradiente tiene l'atmosfera. */
 .level-off body, .app.level-off {
   background:
