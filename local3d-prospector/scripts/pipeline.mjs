@@ -8,6 +8,7 @@ import { runGenerate } from './generate-site.mjs';
 import { runVerify } from './verify.mjs';
 import { runOutreach } from './outreach.mjs';
 import { runReport } from './report.mjs';
+import { runCockpit } from './cockpit.mjs';
 import { logger, isMock } from '../lib/util.mjs';
 
 async function main() {
@@ -20,6 +21,7 @@ async function main() {
   summary.verify = await runVerify();
   summary.outreach = await runOutreach();
   runReport();
+  runCockpit();
 
   logger.step('\n── RIEPILOGO RUN ──');
   logger.info(`Scoperti: ${summary.scan.discovered} · Qualificati: ${summary.scan.qualified}`);

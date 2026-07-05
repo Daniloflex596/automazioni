@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-07-05T06:26:32.574Z",
+  "updated_at": "2026-07-05T06:32:09.564Z",
   "businesses": {
     "mock_arcadia_pub": {
       "place_id": "mock_arcadia_pub",
@@ -72,6 +72,10 @@
         {
           "state": "demo-pronta",
           "at": "2026-07-05T06:26:14.375Z"
+        },
+        {
+          "state": "demo-pronta",
+          "at": "2026-07-05T06:32:09.471Z"
         }
       ],
       "created_at": "2026-07-05T06:26:00.274Z",
@@ -82,25 +86,25 @@
       "score": 46,
       "rating": 4.6,
       "reviews_count": 512,
-      "updated_at": "2026-07-05T06:26:14.465Z",
+      "updated_at": "2026-07-05T06:32:09.471Z",
       "contact_checked": true,
       "contact_email": "prenotazioni@reporchetta.example",
       "contact_email_kind": "generic",
       "slug": "il-re-della-porchetta",
-      "site_dir": "sites/il-re-della-porchetta",
-      "demo_token": "vc6fsvy5pykgn6y34jgj3z",
-      "demo_url": "https://api.local3d.example/d/vc6fsvy5pykgn6y34jgj3z",
-      "site_generated_at": "2026-07-05T06:26:00.322Z",
-      "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fvc6fsvy5pykgn6y34jgj3z%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+      "demo_token": "iuo8uijz49fm1ur3nxemyt",
+      "demo_url": "https://api.local3d.example/d/iuo8uijz49fm1ur3nxemyt",
+      "site_generated_at": "2026-07-05T06:32:02.866Z",
+      "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fiuo8uijz49fm1ur3nxemyt%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
       "qa": {
         "ok": true,
         "warnings": [],
-        "loadMs": 559,
-        "jsKB": 1057,
-        "at": "2026-07-05T06:26:14.375Z"
+        "loadMs": 558,
+        "jsKB": 1060,
+        "at": "2026-07-05T06:32:09.471Z"
       },
       "last_error": null,
-      "outreach_drafted": true
+      "outreach_drafted": true,
+      "site_dir": "sites/il-re-della-porchetta"
     }
   }
 }

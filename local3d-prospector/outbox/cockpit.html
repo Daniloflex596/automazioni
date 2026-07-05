@@ -1,0 +1,68 @@
+<!doctype html><html lang="it"><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Local3D · Cockpit</title><style>
+*{box-sizing:border-box;margin:0}body{font-family:system-ui,sans-serif;background:#0a0a0f;color:#f5f5f7;padding:2rem;max-width:1200px;margin:auto}
+h1{font-size:1.6rem;margin-bottom:.3rem}.sub{color:#9a9aa8;margin-bottom:1.5rem}
+.kpis{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.kpi{background:#15151f;border:1px solid #ffffff14;border-radius:14px;padding:1rem 1.4rem;min-width:140px}
+.kpi b{font-size:1.8rem;display:block;color:#ffd23f}.kpi span{color:#9a9aa8;font-size:.85rem}
+h2{font-size:1.1rem;margin:2rem 0 1rem;border-bottom:1px solid #ffffff14;padding-bottom:.5rem}
+.frow{display:flex;align-items:center;gap:.6rem;margin:.35rem 0}.fname{width:110px;color:#9a9aa8;font-size:.85rem}
+.fbar{height:12px;background:linear-gradient(90deg,#ff3d5a,#ffd23f);border-radius:6px;min-width:4px}.fnum{font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem}
+.card{background:#15151f;border:1px solid #ffffff14;border-radius:16px;padding:1.1rem}
+.chead{display:flex;justify-content:space-between;align-items:center}.chead h3{font-size:1.15rem}
+.score{background:#ff3d5a22;border:1px solid #ff3d5a55;color:#ffd23f;border-radius:100px;padding:.1rem .7rem;font-weight:700}
+.meta{color:#9a9aa8;font-size:.85rem;margin:.5rem 0}.small{font-size:.78rem}
+.shots{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:auto auto;gap:.4rem;margin:.6rem 0}
+.shots a:first-child{grid-row:span 2}.shots img{width:100%;border-radius:8px;display:block;border:1px solid #ffffff14}
+.actions{display:flex;flex-direction:column;gap:.3rem;margin-top:.6rem}
+code{background:#000;padding:.25rem .5rem;border-radius:6px;font-size:.75rem;color:#ffd23f;display:block;overflow:auto}
+.state{padding:.05rem .5rem;border-radius:100px;font-size:.72rem}.s-approvata{background:#3fae6a33;color:#7fe0a3}
+.s-demo-pronta{background:#ffd23f22;color:#ffd23f}.s-pagato,.s-live,.s-attivo{background:#00e5ff22;color:#7ff0ff}
+.empty{color:#6a6a78;font-style:italic}
+</style></head><body>
+<h1>Local3D · Cockpit</h1>
+<div class="sub">Governa i due cancelli. Aggiornato: 2026-07-05T06:32:09.564Z</div>
+<div class="kpis">
+  <div class="kpi"><b>3</b><span>prospect totali</span></div>
+  <div class="kpi"><b>1</b><span>demo da approvare</span></div>
+  <div class="kpi"><b>2</b><span>contatti da inviare</span></div>
+  <div class="kpi"><b>0</b><span>clienti</span></div>
+  <div class="kpi"><b>€0</b><span>MRR stimato</span></div>
+</div>
+
+<h2>🟢 Cancello 1 — Demo da approvare (1)</h2>
+<div class="grid"><div class="card">
+    <div class="chead"><h3>Il Re della Porchetta</h3><span class="score">46</span></div>
+    <div class="meta">4.6★ (512) · Frascati · streetfood · <span class="state s-demo-pronta">demo-pronta</span></div>
+    <div class="shots"><a href="../sites/il-re-della-porchetta/shots/desktop-hero.png" target="_blank"><img src="../sites/il-re-della-porchetta/shots/desktop-hero.png" loading="lazy"></a><a href="../sites/il-re-della-porchetta/shots/mobile-hero.png" target="_blank"><img src="../sites/il-re-della-porchetta/shots/mobile-hero.png" loading="lazy"></a><a href="../sites/il-re-della-porchetta/shots/desktop-cta.png" target="_blank"><img src="../sites/il-re-della-porchetta/shots/desktop-cta.png" loading="lazy"></a></div>
+    <div class="meta small">QA ✓ 1060KB · 558ms</div>
+    <div class="meta small">Demo: <code>https://api.local3d.example/d/iuo8uijz49fm1ur3nxemyt</code></div>
+    <div class="actions">
+      <code>npm run registry -- approve mock_porchetta_re</code>
+      <code>npm run registry -- reject mock_porchetta_re</code>
+    </div>
+  </div></div>
+
+<h2>✅ Approvate — pronte a pubblicare/inviare (1)</h2>
+<div class="grid"><div class="card">
+    <div class="chead"><h3>Arcadia Pub</h3><span class="score">56</span></div>
+    <div class="meta">4.7★ (384) · Ciampino · pub · <span class="state s-approvata">approvata</span></div>
+    <div class="shots"><a href="../sites/arcadia-pub/shots/desktop-hero.png" target="_blank"><img src="../sites/arcadia-pub/shots/desktop-hero.png" loading="lazy"></a><a href="../sites/arcadia-pub/shots/mobile-hero.png" target="_blank"><img src="../sites/arcadia-pub/shots/mobile-hero.png" loading="lazy"></a><a href="../sites/arcadia-pub/shots/desktop-cta.png" target="_blank"><img src="../sites/arcadia-pub/shots/desktop-cta.png" loading="lazy"></a></div>
+    <div class="meta small">QA ✓ 1057KB · 565ms</div>
+    <div class="meta small">Demo: <code>https://api.local3d.example/d/b17kza8jecjol730fgw4u9</code></div>
+    <div class="actions">
+      <code>npm run registry -- approve mock_arcadia_pub</code>
+      <code>npm run registry -- reject mock_arcadia_pub</code>
+    </div>
+  </div></div>
+
+<h2>📊 Funnel</h2>
+<div class="frow"><span class="fname">trovato</span><span class="fbar" style="width:100%"></span><span class="fnum">1</span></div><div class="frow"><span class="fname">demo-pronta</span><span class="fbar" style="width:100%"></span><span class="fnum">1</span></div><div class="frow"><span class="fname">approvata</span><span class="fbar" style="width:100%"></span><span class="fnum">1</span></div>
+
+<h2>📨 Cancello 2 — Contatti pronti (2)</h2>
+<div class="meta">• <b>Arcadia Pub</b> — info@arcadiapub.example · <code>npm run registry -- sent mock_arcadia_pub</code></div><div class="meta">• <b>Il Re della Porchetta</b> — prenotazioni@reporchetta.example · <code>npm run registry -- sent mock_porchetta_re</code></div>
+
+<h2>🔥 Lead caldi</h2>
+<p class="meta small">In produzione arrivano dal backend: <code>curl -H "Authorization: Bearer $ADMIN_TOKEN" $WORKER_BASE/admin/leads</code> — chi ha aperto/cliccato la demo è il momento di chiamare.</p>
+</body></html>

@@ -7,6 +7,7 @@ import { join, extname } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import { paths, ensureDir, readJSON, logger } from '../lib/util.mjs';
 import { load, save, all, upsert } from '../lib/registry.mjs';
+import { launchChromium } from '../lib/browser.mjs';
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon' };
 const MAX_JS_BYTES = 1_600_000; // budget raw (non gzip) del JS totale servito
@@ -25,17 +26,6 @@ function serveDir(dir) {
     });
     server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));
   });
-}
-
-async function launchBrowser(playwright) {
-  const { chromium } = playwright;
-  try { return await chromium.launch({ args: ['--no-sandbox', '--use-gl=swiftshader'] }); }
-  catch (e) {
-    for (const p of ['/opt/pw-browsers/chromium/chrome-linux/chrome', '/opt/pw-browsers/chromium']) {
-      if (existsSync(p)) { try { return await chromium.launch({ executablePath: p, args: ['--no-sandbox', '--use-gl=swiftshader'] }); } catch {} }
-    }
-    throw e;
-  }
 }
 
 function norm(s) { return String(s || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
@@ -109,13 +99,12 @@ async function verifyOne(browser, siteDir, biz) {
 }
 
 export async function runVerify() {
-  const playwright = await import('playwright');
   const reg = load();
   const todo = all(reg).filter((b) => b.site_dir && ['qualificato', 'demo-pronta'].includes(b.state));
   if (!todo.length) { logger.info('VERIFY: niente da verificare'); return { verified: 0, passed: 0 }; }
 
   logger.step(`VERIFY: ${todo.length} siti`);
-  const browser = await launchBrowser(playwright);
+  const browser = await launchChromium();
   let passed = 0;
   try {
     for (const b of todo) {
