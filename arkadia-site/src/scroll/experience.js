@@ -190,9 +190,18 @@ async function boot() {
   setPreload(0.15);
   const tier = detectTier();
 
-  initReveals();
-  initScroll();
-  window.addEventListener('resize', updateProgress);
+  // Se l'orchestratore principale (pub.js) ha già creato Lenis e fatto lo
+  // split-text e ci importa come fallback dopo un errore 3D, NON duplichiamo:
+  // niente secondo Lenis, niente doppio split. Aggiorniamo solo il calice.
+  if (window.__ARK_BOOTED__) {
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+    updateProgress();
+  } else {
+    initReveals();
+    initScroll();
+    window.addEventListener('resize', updateProgress);
+  }
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => setPreload(0.5));

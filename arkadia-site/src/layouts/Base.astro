@@ -41,11 +41,10 @@ const schema = {
     longitude: info.geo.lng,
   },
   openingHours: orariSchema,
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: info.rating.valore,
-    reviewCount: info.rating.recensioni,
-  },
+  // NB: niente aggregateRating "self-serving" nello schema — Google ignora (e
+  // può penalizzare) le valutazioni che un'attività si attribuisce da sola
+  // senza un sistema di recensioni verificabile. Il rating reale resta
+  // visibile nella sezione Recensioni, dove cita Google/Facebook.
   sameAs: [info.social.instagram, info.social.facebook],
   hasMenu: info.menuCompletoUrl,
 };

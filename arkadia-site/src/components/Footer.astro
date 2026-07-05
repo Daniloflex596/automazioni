@@ -33,7 +33,7 @@ const anno = new Date().getFullYear();
   </div>
 
   <div class="wrap footer-bottom mono">
-    <span>© {anno} {info.nome} Pub · P.IVA {info.partitaIva}</span>
+    <span>© {anno} {info.nome} Pub{info.partitaIva && info.partitaIva !== '00000000000' ? ` · P.IVA ${info.partitaIva}` : ''}</span>
     <span>Un rifugio a Ciampino dal {info.annoFondazione}</span>
   </div>
 </footer>

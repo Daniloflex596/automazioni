@@ -1,7 +1,7 @@
 ---
 // ATTO VI — Il Brindisi. Climax: calice pieno + CTA. Form fluido che compone
 // un messaggio WhatsApp precompilato + tap-to-call. Nessun backend.
-import { prenotazione, info } from '../data/contenuti';
+import { prenotazione, info, giorniChiusura } from '../data/contenuti';
 ---
 
 <section id="brindisi" class="brindisi" data-scene-act="brindisi">
@@ -16,6 +16,7 @@ import { prenotazione, info } from '../data/contenuti';
       data-reveal
       data-whatsapp={info.whatsapp}
       data-email={info.email}
+      data-chiusura={giorniChiusura.join(',')}
       novalidate
     >
       <div class="campo">
@@ -65,10 +66,34 @@ import { prenotazione, info } from '../data/contenuti';
   const form = document.getElementById('form-prenota') as HTMLFormElement | null;
   if (form) {
     const nota = document.getElementById('form-nota');
+    const dataInput = form.querySelector('#p-data') as HTMLInputElement | null;
+
+    // Niente prenotazioni nel passato: la data minima è oggi.
+    const oggi = new Date();
+    const isoOggi = `${oggi.getFullYear()}-${String(oggi.getMonth() + 1).padStart(2, '0')}-${String(oggi.getDate()).padStart(2, '0')}`;
+    if (dataInput) dataInput.min = isoOggi;
+
+    // Giorni di chiusura (0=Dom … 6=Sab) letti dal data-attribute.
+    const chiusura = (form.dataset.chiusura || '')
+      .split(',')
+      .filter((s) => s !== '')
+      .map(Number);
+    const giornoChiuso = (iso: string) => {
+      if (!iso) return false;
+      const g = new Date(`${iso}T12:00:00`).getDay();
+      return chiusura.includes(g);
+    };
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!form.checkValidity()) {
         form.reportValidity();
+        return;
+      }
+      // Blocca le date in un giorno di chiusura (es. lunedì).
+      if (giornoChiuso(String(dataInput?.value || ''))) {
+        if (nota) nota.textContent = 'Quel giorno siamo chiusi — scegli un’altra data 🙏';
+        dataInput?.focus();
         return;
       }
       const d = new FormData(form);

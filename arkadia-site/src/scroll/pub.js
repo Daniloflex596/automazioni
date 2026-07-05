@@ -14,6 +14,11 @@ import Lenis from 'lenis';
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Refresh o apertura diretta: riparti sempre dall'ingresso del pub, mai dalla
+// posizione di prima. Un eventuale #sezione nell'URL resta onorato più sotto.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (!location.hash) window.scrollTo(0, 0);
+
 function detectTier() {
   if (reduced) return 'none';
   const conn = navigator.connection;
@@ -104,6 +109,18 @@ async function boot() {
 
   const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
   let pub = null;
+  // Segnala che l'orchestratore principale possiede già scroll e split-text:
+  // se il 3D fallisce e importiamo experience.js come fallback, quello NON
+  // deve creare un secondo Lenis né rifare lo split (evita jank + testo doppio).
+  window.__ARK_BOOTED__ = true;
+
+  // Posizione iniziale: onora un eventuale #sezione, altrimenti parti dall'alto.
+  const initialHash = location.hash;
+  if (initialHash && document.querySelector(initialHash)) {
+    requestAnimationFrame(() => lenis.scrollTo(initialHash, { immediate: true }));
+  } else {
+    lenis.scrollTo(0, { immediate: true });
+  }
 
   // Prossimità di una sezione al centro del viewport (0 lontana → 1 centrata):
   // pilota le micro-scene 3D (burger, mescita, brindisi) dalla narrazione DOM.

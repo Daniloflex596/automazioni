@@ -47,6 +47,11 @@ export const orari = [
   { giorni: 'Martedì – Domenica', valore: '19:00 – 24:00', chiuso: false },
 ];
 
+// Giorni di chiusura settimanale (0=Domenica, 1=Lunedì, … 6=Sabato).
+// Usati dal form prenotazione per impedire date in un giorno di chiusura.
+// ⚠️ Se cambiano gli orari, aggiorna qui.
+export const giorniChiusura = [1]; // Lunedì
+
 // Formato per Schema.org (openingHours). Ma–Do 19:00–24:00, Lunedì chiuso.
 export const orariSchema = [
   'Tu-Su 19:00-24:00',

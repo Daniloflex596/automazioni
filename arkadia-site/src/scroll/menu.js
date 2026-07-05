@@ -12,6 +12,12 @@ import Lenis from 'lenis';
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Refresh o apertura diretta (anche via QR): riparti sempre dall'inizio della
+// carta, mai dalla posizione di prima. I deep-link con #sezione (dalla home)
+// restano onorati più sotto, quando Lenis è pronto.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (!location.hash) window.scrollTo(0, 0);
+
 function detectTier() {
   if (reduced) return 'none';
   const conn = navigator.connection;
@@ -275,6 +281,16 @@ function initTabs() {
 function initScroll() {
   if (reduced) return;
   const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+
+  // Posizione iniziale: se l'URL punta a una sezione (#cat-…, deep-link dalla
+  // home) vacci tenendo conto della barra categorie sticky; altrimenti parti
+  // dall'alto — così un refresh riporta sempre in cima alla carta.
+  const initialHash = location.hash;
+  if (initialHash && document.querySelector(initialHash)) {
+    requestAnimationFrame(() => lenis.scrollTo(initialHash, { immediate: true, offset: -70 }));
+  } else {
+    lenis.scrollTo(0, { immediate: true });
+  }
 
   // Progress "pinta": stessa firma della home, si riempie con lo scroll.
   // È anche un bottone: un click riporta in cima alla carta.
