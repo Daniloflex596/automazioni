@@ -1,0 +1,124 @@
+[
+  {
+    "id": "mock_arcadia_pub",
+    "mock_zone": "Ciampino",
+    "mock_query": "pub",
+    "displayName": { "text": "Arcadia Pub" },
+    "types": ["bar", "pub", "restaurant"],
+    "rating": 4.7,
+    "userRatingCount": 384,
+    "priceLevel": "PRICE_LEVEL_MODERATE",
+    "websiteUri": "",
+    "nationalPhoneNumber": "06 1234 5670",
+    "formattedAddress": "Via dei Laghi 42, 00043 Ciampino RM",
+    "googleMapsUri": "https://maps.google.com/?cid=arcadia",
+    "regularOpeningHours": {
+      "weekdayDescriptions": [
+        "lunedì: 18:00–01:00",
+        "martedì: 18:00–01:00",
+        "mercoledì: 18:00–01:00",
+        "giovedì: 18:00–01:00",
+        "venerdì: 18:00–02:00",
+        "sabato: 18:00–02:00",
+        "domenica: 18:00–00:00"
+      ]
+    },
+    "reviews": [
+      { "text": { "text": "Selezione di birra artigianale pazzesca e hamburger enormi. Il sabato è sempre pieno, consiglio di prenotare." } },
+      { "text": { "text": "Le alette di pollo sono le migliori della zona, atmosfera top e staff gentilissimo." } },
+      { "text": { "text": "Locale sempre affollato, ottima birra e patatine fantastiche. Difficile trovare posto senza prenotazione." } },
+      { "text": { "text": "Hamburger spettacolare, birra IPA ottima. Tornerò di sicuro." } },
+      { "text": { "text": "Ambiente accogliente, birra artigianale di qualità, panini gustosi." } }
+    ]
+  },
+  {
+    "id": "mock_porchetta_re",
+    "mock_zone": "Frascati",
+    "mock_query": "porchetteria",
+    "displayName": { "text": "Il Re della Porchetta" },
+    "types": ["restaurant", "food"],
+    "rating": 4.6,
+    "userRatingCount": 512,
+    "priceLevel": "PRICE_LEVEL_INEXPENSIVE",
+    "websiteUri": "",
+    "nationalPhoneNumber": "06 9876 5432",
+    "formattedAddress": "Piazza del Mercato 8, 00044 Frascati RM",
+    "googleMapsUri": "https://maps.google.com/?cid=porchetta",
+    "regularOpeningHours": {
+      "weekdayDescriptions": [
+        "lunedì: Chiuso",
+        "martedì: 10:00–15:00",
+        "mercoledì: 10:00–15:00",
+        "giovedì: 10:00–15:00",
+        "venerdì: 10:00–15:00, 18:00–22:00",
+        "sabato: 10:00–22:00",
+        "domenica: 10:00–16:00"
+      ]
+    },
+    "reviews": [
+      { "text": { "text": "La porchetta è leggendaria, il panino più buono dei Castelli. C'è sempre la fila ma ne vale la pena." } },
+      { "text": { "text": "Supplì fantastici e porchetta da urlo. Prenotate per il pranzo della domenica." } },
+      { "text": { "text": "Panino con la porchetta enorme e saporito, salsiccia ottima. Sempre pieno." } },
+      { "text": { "text": "Fritti buonissimi, porchetta croccante al punto giusto." } }
+    ]
+  },
+  {
+    "id": "mock_sakura_ramen",
+    "mock_zone": "Morena",
+    "mock_query": "ramen",
+    "displayName": { "text": "Sakura Ramen House" },
+    "types": ["restaurant", "japanese_restaurant"],
+    "rating": 4.5,
+    "userRatingCount": 268,
+    "priceLevel": "PRICE_LEVEL_MODERATE",
+    "websiteUri": "",
+    "nationalPhoneNumber": "06 5544 3322",
+    "formattedAddress": "Via di Morena 120, 00118 Roma RM",
+    "googleMapsUri": "https://maps.google.com/?cid=sakura",
+    "regularOpeningHours": {
+      "weekdayDescriptions": [
+        "lunedì: Chiuso",
+        "martedì: 12:00–15:00, 19:00–23:00",
+        "mercoledì: 12:00–15:00, 19:00–23:00",
+        "giovedì: 12:00–15:00, 19:00–23:00",
+        "venerdì: 12:00–15:00, 19:00–23:30",
+        "sabato: 19:00–23:30",
+        "domenica: 12:00–15:00, 19:00–23:00"
+      ]
+    },
+    "reviews": [
+      { "text": { "text": "Ramen autentico e gyoza fantastici. Locale piccolo, consiglio di prenotare sempre." } },
+      { "text": { "text": "Il miglior ramen della zona sud di Roma, brodo ricco e noodles perfetti." } },
+      { "text": { "text": "Sushi freschissimo e ramen strepitoso. Posti limitati, prenotazione consigliata." } },
+      { "text": { "text": "Gyoza da paura e tempura leggera. Tornerò presto." } }
+    ]
+  },
+  {
+    "id": "mock_ha_gia_sito",
+    "mock_zone": "Ciampino",
+    "mock_query": "pub",
+    "displayName": { "text": "Old Bridge Pub (ha già sito)" },
+    "types": ["bar", "pub"],
+    "rating": 4.3,
+    "userRatingCount": 210,
+    "priceLevel": "PRICE_LEVEL_MODERATE",
+    "websiteUri": "https://oldbridgepub.it",
+    "nationalPhoneNumber": "06 1111 2222",
+    "formattedAddress": "Via Kennedy 5, 00043 Ciampino RM",
+    "reviews": [{ "text": { "text": "Bel pub, buona birra." } }]
+  },
+  {
+    "id": "mock_bar_scarso",
+    "mock_zone": "Ciampino",
+    "mock_query": "pub",
+    "displayName": { "text": "Bar Sport da Mario" },
+    "types": ["cafe", "bar"],
+    "rating": 3.6,
+    "userRatingCount": 24,
+    "priceLevel": "PRICE_LEVEL_INEXPENSIVE",
+    "websiteUri": "",
+    "nationalPhoneNumber": "06 3333 4444",
+    "formattedAddress": "Via Mura dei Francesi 200, 00043 Ciampino RM",
+    "reviews": [{ "text": { "text": "Caffè normale, niente di speciale." } }]
+  }
+]

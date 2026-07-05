@@ -1,0 +1,17 @@
+# dipendenze
+node_modules/
+site-template/node_modules/
+
+# build del template (rigenerabile con: cd site-template && npm ci && npm run build)
+site-template/dist/
+
+# cache API a pagamento (non versionare risposte Places)
+data/places-cache/
+
+# bundle copiati nei siti generati (duplicati del template; le shots e i dati sì)
+sites/*/assets/
+
+# segreti
+.env
+.dev.vars
+worker/.dev.vars

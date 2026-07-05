@@ -1,0 +1,195 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://local3d-prospector/business.schema.json",
+  "title": "Business Content Model",
+  "description": "Contratto dati unico che ogni template consuma. Ogni campo con contenuto esterno porta una 'source' verificabile. Nessun dato senza provenienza entra in un sito.",
+  "type": "object",
+  "required": ["meta", "identity", "contacts", "social_proof", "sections_order", "cta"],
+  "additionalProperties": false,
+  "definitions": {
+    "sourced_string": {
+      "type": "object",
+      "required": ["value", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "string" },
+        "source": { "$ref": "#/definitions/source_enum" }
+      }
+    },
+    "source_enum": {
+      "type": "string",
+      "enum": ["google_places", "client_onboarding", "derived_from_reviews", "manual", "placeholder"]
+    }
+  },
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["place_id", "slug", "owner_id", "category", "template", "build_mode"],
+      "additionalProperties": false,
+      "properties": {
+        "place_id": { "type": "string", "description": "Google Places ID, chiave di idempotenza" },
+        "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "owner_id": { "type": "string", "description": "Multi-tenant: chi possiede questo prospect (oggi 'danilo')" },
+        "category": { "type": "string" },
+        "template": { "type": "string", "enum": ["pub", "streetfood", "ethnic", "barber"] },
+        "build_mode": { "type": "string", "enum": ["demo", "live"], "description": "In 'live' scattano vincoli extra (foto solo del cliente)" },
+        "score": { "type": "number" },
+        "generated_at": { "type": "string" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "required": ["name", "claim", "tone"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "claim": { "type": "string", "description": "Sottotitolo/hero. Derivato dalle recensioni o dall'onboarding, mai inventato dal nulla." },
+        "tone": { "type": "string", "enum": ["street", "elegant", "cozy", "neon", "traditional"] }
+      }
+    },
+    "contacts": {
+      "type": "object",
+      "required": ["phone", "address", "hours"],
+      "additionalProperties": false,
+      "properties": {
+        "phone": { "$ref": "#/definitions/sourced_string" },
+        "address": {
+          "type": "object",
+          "required": ["value", "source"],
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "string" },
+            "maps_url": { "type": "string" },
+            "source": { "$ref": "#/definitions/source_enum" }
+          }
+        },
+        "hours": {
+          "type": "object",
+          "required": ["value", "source"],
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "array", "items": { "type": "string" } },
+            "source": { "$ref": "#/definitions/source_enum" }
+          }
+        },
+        "email": {
+          "type": "object",
+          "required": ["value", "source", "kind"],
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "string" },
+            "kind": { "type": "string", "enum": ["generic", "nominative"], "description": "Solo 'generic' è ammesso per l'outreach a freddo" },
+            "source": { "$ref": "#/definitions/source_enum" }
+          }
+        }
+      }
+    },
+    "social_proof": {
+      "type": "object",
+      "required": ["rating", "count", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "rating": { "type": "number", "minimum": 0, "maximum": 5 },
+        "count": { "type": "integer", "minimum": 0 },
+        "source": { "$ref": "#/definitions/source_enum" },
+        "themes": {
+          "type": "array",
+          "description": "Temi ricorrenti estratti dalle recensioni (es. 'porchetta leggendaria'). Aggregati, non citazioni con nome.",
+          "items": {
+            "type": "object",
+            "required": ["label", "evidence_count", "source"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string" },
+              "evidence_count": { "type": "integer" },
+              "source": { "$ref": "#/definitions/source_enum" }
+            }
+          }
+        },
+        "testimonials": {
+          "type": "array",
+          "description": "Estratti anonimizzati o testimonianze autorizzate. Mai recensioni ripubblicate con nome completo.",
+          "items": {
+            "type": "object",
+            "required": ["text", "author", "source"],
+            "additionalProperties": false,
+            "properties": {
+              "text": { "type": "string" },
+              "author": { "type": "string", "description": "Anonimizzato ('Marco R.') o 'autorizzato'" },
+              "source": { "$ref": "#/definitions/source_enum" }
+            }
+          }
+        }
+      }
+    },
+    "gallery": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url", "source", "rights"],
+        "additionalProperties": false,
+        "properties": {
+          "url": { "type": "string" },
+          "alt": { "type": "string" },
+          "source": { "$ref": "#/definitions/source_enum" },
+          "rights": { "type": "string", "enum": ["client_provided", "manager_uploaded_google", "placeholder", "unknown"] }
+        }
+      }
+    },
+    "loved": {
+      "type": "array",
+      "description": "'I più amati': piatti/prodotti citati nelle recensioni. Non è il menu ufficiale.",
+      "items": {
+        "type": "object",
+        "required": ["name", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "note": { "type": "string" },
+          "source": { "$ref": "#/definitions/source_enum" }
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "description": "Design tokens. Derivati da categoria+tono, overridabili. È dati, non codice.",
+      "additionalProperties": true,
+      "properties": {
+        "palette": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bg": { "type": "string" },
+            "surface": { "type": "string" },
+            "primary": { "type": "string" },
+            "accent": { "type": "string" },
+            "text": { "type": "string" },
+            "muted": { "type": "string" }
+          }
+        },
+        "font_display": { "type": "string" },
+        "font_body": { "type": "string" },
+        "fx_intensity": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    "sections_order": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["hero", "atmosphere", "loved", "reviews", "gallery", "hours", "contact", "cta"] }
+    },
+    "cta": {
+      "type": "object",
+      "required": ["mode"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "type": "string", "enum": ["demo", "live"] },
+        "headline": { "type": "string" },
+        "price_setup_eur": { "type": "number" },
+        "price_monthly_eur": { "type": "number" },
+        "guarantee_days": { "type": "integer" },
+        "wa_link": { "type": "string" },
+        "checkout_url": { "type": "string" },
+        "track_url": { "type": "string", "description": "Endpoint Worker per il tracking dei click sulla demo" }
+      }
+    }
+  }
+}

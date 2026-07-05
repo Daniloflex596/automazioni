@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "updated_at": "2026-07-05T06:26:32.574Z",
+  "businesses": {
+    "mock_arcadia_pub": {
+      "place_id": "mock_arcadia_pub",
+      "state": "approvata",
+      "history": [
+        {
+          "state": "qualificato",
+          "at": "2026-07-05T06:26:00.274Z"
+        },
+        {
+          "state": "demo-pronta",
+          "at": "2026-07-05T06:26:07.527Z"
+        },
+        {
+          "state": "approvata",
+          "at": "2026-07-05T06:26:32.574Z"
+        }
+      ],
+      "created_at": "2026-07-05T06:26:00.273Z",
+      "name": "Arcadia Pub",
+      "zone": "Ciampino",
+      "matched_query": "pub",
+      "template": "pub",
+      "score": 56,
+      "rating": 4.7,
+      "reviews_count": 384,
+      "updated_at": "2026-07-05T06:26:32.574Z",
+      "contact_checked": true,
+      "contact_email": "info@arcadiapub.example",
+      "contact_email_kind": "generic",
+      "slug": "arcadia-pub",
+      "site_dir": "sites/arcadia-pub",
+      "demo_token": "b17kza8jecjol730fgw4u9",
+      "demo_url": "https://api.local3d.example/d/b17kza8jecjol730fgw4u9",
+      "site_generated_at": "2026-07-05T06:26:00.320Z",
+      "wa_link": "https://wa.me/390612345670?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Arcadia%20Pub%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fb17kza8jecjol730fgw4u9%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+      "qa": {
+        "ok": true,
+        "warnings": [],
+        "loadMs": 565,
+        "jsKB": 1057,
+        "at": "2026-07-05T06:26:07.527Z"
+      },
+      "last_error": null,
+      "outreach_drafted": true
+    },
+    "mock_sakura_ramen": {
+      "place_id": "mock_sakura_ramen",
+      "state": "trovato",
+      "history": [],
+      "created_at": "2026-07-05T06:26:00.274Z",
+      "name": "Sakura Ramen House",
+      "zone": "Morena",
+      "matched_query": "ramen",
+      "template": "ethnic",
+      "score": 39,
+      "rating": 4.5,
+      "reviews_count": 268,
+      "updated_at": "2026-07-05T06:26:00.274Z"
+    },
+    "mock_porchetta_re": {
+      "place_id": "mock_porchetta_re",
+      "state": "demo-pronta",
+      "history": [
+        {
+          "state": "qualificato",
+          "at": "2026-07-05T06:26:00.274Z"
+        },
+        {
+          "state": "demo-pronta",
+          "at": "2026-07-05T06:26:14.375Z"
+        }
+      ],
+      "created_at": "2026-07-05T06:26:00.274Z",
+      "name": "Il Re della Porchetta",
+      "zone": "Frascati",
+      "matched_query": "porchetteria",
+      "template": "streetfood",
+      "score": 46,
+      "rating": 4.6,
+      "reviews_count": 512,
+      "updated_at": "2026-07-05T06:26:14.465Z",
+      "contact_checked": true,
+      "contact_email": "prenotazioni@reporchetta.example",
+      "contact_email_kind": "generic",
+      "slug": "il-re-della-porchetta",
+      "site_dir": "sites/il-re-della-porchetta",
+      "demo_token": "vc6fsvy5pykgn6y34jgj3z",
+      "demo_url": "https://api.local3d.example/d/vc6fsvy5pykgn6y34jgj3z",
+      "site_generated_at": "2026-07-05T06:26:00.322Z",
+      "wa_link": "https://wa.me/390698765432?text=Buongiorno!%20Sono%20Danilo%2C%20creo%20siti%20per%20locali%20della%20zona.%20Ho%20preparato%20un'anteprima%20gratuita%20del%20sito%20di%20Il%20Re%20della%20Porchetta%2C%20guardatela%20quando%20volete%3A%20https%3A%2F%2Fapi.local3d.example%2Fd%2Fvc6fsvy5pykgn6y34jgj3z%20%E2%80%94%20se%20vi%20piace%20ne%20parliamo%2C%20altrimenti%20nessun%20problema%20%F0%9F%99%82",
+      "qa": {
+        "ok": true,
+        "warnings": [],
+        "loadMs": 559,
+        "jsKB": 1057,
+        "at": "2026-07-05T06:26:14.375Z"
+      },
+      "last_error": null,
+      "outreach_drafted": true
+    }
+  }
+}

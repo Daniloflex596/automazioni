@@ -1,0 +1,29 @@
+{
+  "name": "local3d-prospector",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Motore semi-automatico: trova locali senza sito, genera demo 3D personalizzate, prepara l'outreach. L'umano approva pubblicazione e invio.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "scan": "node scripts/scan.mjs",
+    "score": "node scripts/score.mjs",
+    "generate": "node scripts/generate-site.mjs",
+    "verify": "node scripts/verify.mjs",
+    "contact": "node scripts/find-contact.mjs",
+    "outreach": "node scripts/outreach.mjs",
+    "report": "node scripts/report.mjs",
+    "pipeline": "node scripts/pipeline.mjs",
+    "pipeline:mock": "PROSPECTOR_MODE=mock node scripts/pipeline.mjs",
+    "registry": "node scripts/registry-cli.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

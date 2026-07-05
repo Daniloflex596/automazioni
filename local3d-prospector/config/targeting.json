@@ -1,0 +1,98 @@
+{
+  "$comment": "Configurazione della scansione e del targeting. Tutto ciò che riguarda 'chi cerchiamo e quanto vale' vive qui, non nel codice.",
+  "search": {
+    "zones": [
+      { "name": "Ciampino",       "lat": 41.7994, "lng": 12.6013, "radius_m": 3500 },
+      { "name": "Morena",         "lat": 41.8290, "lng": 12.5860, "radius_m": 3000 },
+      { "name": "Anagnina",       "lat": 41.8390, "lng": 12.5900, "radius_m": 3000 },
+      { "name": "Romanina",       "lat": 41.8480, "lng": 12.6100, "radius_m": 3000 },
+      { "name": "Capannelle",     "lat": 41.8180, "lng": 12.5750, "radius_m": 3000 },
+      { "name": "Marino",         "lat": 41.7690, "lng": 12.6570, "radius_m": 4000 },
+      { "name": "Frascati",       "lat": 41.8090, "lng": 12.6800, "radius_m": 4000 },
+      { "name": "Grottaferrata",  "lat": 41.7880, "lng": 12.6680, "radius_m": 3500 }
+    ],
+    "queries": [
+      "pub", "birreria", "cocktail bar", "american bar",
+      "porchetteria", "street food", "hamburgeria", "paninoteca",
+      "braceria", "steakhouse", "fraschetta",
+      "ristorante cinese", "ristorante giapponese", "sushi", "ramen",
+      "kebab", "pizzeria gourmet", "enoteca con cucina",
+      "barbiere", "barber shop"
+    ]
+  },
+  "filters": {
+    "$comment": "Filtri HARD: chi non li passa viene scartato prima di spendere sul tier caro dell'API.",
+    "exclude_if_has_website": true,
+    "min_rating": 4.0,
+    "min_reviews": 50,
+    "blacklist_types": [
+      "cafe", "bakery", "convenience_store", "gas_station",
+      "liquor_store", "supermarket", "lodging", "casino"
+    ],
+    "blacklist_name_keywords": [
+      "tabacchi", "tabaccheria", "sala slot", "sala giochi", "circolo",
+      "acli", "arci", "caf", "patronato", "edicola", "autolavaggio"
+    ]
+  },
+  "scoring": {
+    "$comment": "Punteggio SOFT: ordina i candidati che hanno già passato i filtri hard. Somma pesata, normalizzata 0-100.",
+    "category_weights": {
+      "pub": 10, "birreria": 10, "cocktail bar": 10, "american bar": 8,
+      "porchetteria": 10, "street food": 9, "hamburgeria": 9, "paninoteca": 7,
+      "braceria": 9, "steakhouse": 9, "fraschetta": 8,
+      "ristorante cinese": 8, "ristorante giapponese": 9, "sushi": 9, "ramen": 9,
+      "kebab": 6, "pizzeria gourmet": 6, "enoteca con cucina": 8,
+      "barbiere": 6, "barber shop": 6,
+      "_default": 4
+    },
+    "reviews_buckets": [
+      { "min": 50,  "points": 5 },
+      { "min": 150, "points": 12 },
+      { "min": 300, "points": 20 },
+      { "min": 600, "points": 28 },
+      { "min": 1000, "points": 35 }
+    ],
+    "price_level_points": { "0": 0, "1": 2, "2": 8, "3": 12, "4": 12 },
+    "hot_keywords": {
+      "$comment": "Segnali nelle recensioni che il locale è pieno e fattura: bonus se presenti.",
+      "points_each": 3,
+      "max_points": 15,
+      "terms": [
+        "sempre pieno", "prenotate", "prenotazione", "c'è coda", "fila",
+        "difficile trovare posto", "sempre affollato", "tutto esaurito",
+        "consiglio prenotare", "posti limitati"
+      ]
+    },
+    "category_to_template": {
+      "$comment": "Quale scena 3D usare per categoria. '_default' finché non esiste una scena dedicata.",
+      "pub": "pub", "birreria": "pub", "cocktail bar": "pub", "american bar": "pub",
+      "porchetteria": "streetfood", "street food": "streetfood", "hamburgeria": "streetfood",
+      "paninoteca": "streetfood", "braceria": "streetfood", "steakhouse": "streetfood",
+      "fraschetta": "streetfood",
+      "ristorante cinese": "ethnic", "ristorante giapponese": "ethnic", "sushi": "ethnic",
+      "ramen": "ethnic", "kebab": "ethnic",
+      "barbiere": "barber", "barber shop": "barber",
+      "_default": "pub"
+    }
+  },
+  "commercial": {
+    "$comment": "Prezzi e testi commerciali. Modificabili senza toccare il codice.",
+    "setup_price_eur": 890,
+    "monthly_price_eur": 59,
+    "annual_price_eur": 590,
+    "guarantee_days": 7,
+    "recurring_includes": [
+      "Dominio, hosting e certificato SSL",
+      "Prenotazioni online (basta il caos WhatsApp)",
+      "Menu e orari sempre aggiornati",
+      "Ottimizzazione della scheda Google",
+      "2 modifiche al mese incluse"
+    ]
+  },
+  "limits": {
+    "$comment": "Freni di sicurezza: la macchina prepara, non travolge.",
+    "max_new_candidates_per_run": 15,
+    "max_sites_generated_per_run": 8,
+    "max_outreach_drafts_per_run": 10
+  }
+}

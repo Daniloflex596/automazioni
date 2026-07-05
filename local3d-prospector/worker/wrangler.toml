@@ -1,0 +1,19 @@
+name = "local3d-api"
+main = "src/index.js"
+compatibility_date = "2024-10-01"
+
+# Bind del database. Crea con: wrangler d1 create local3d
+[[d1_databases]]
+binding = "DB"
+database_name = "local3d"
+database_id = "REPLACE_WITH_YOUR_D1_ID"
+
+# Segreti (mai in git): impostali con
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+#   wrangler secret put ADMIN_TOKEN
+[vars]
+PUBLIC_BASE_URL = "https://api.local3d.example"
+DEMO_TTL_DAYS = "45"
+SETUP_PRICE_EUR = "890"
+MONTHLY_PRICE_EUR = "59"

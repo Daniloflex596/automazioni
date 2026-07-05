@@ -1,0 +1,5 @@
+{
+  "mock_arcadia_pub": { "email": "info@arcadiapub.example", "source": "manual" },
+  "mock_porchetta_re": { "email": "prenotazioni@reporchetta.example", "source": "manual" },
+  "mock_sakura_ramen": { "email": "marco.rossi@gmail.example", "source": "manual" }
+}

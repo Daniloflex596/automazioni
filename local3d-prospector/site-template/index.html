@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0a0a0f" />
+    <title>Anteprima sito</title>
+    <!--
+      DATA INJECTION POINT — il generatore sostituisce il null qui sotto con il business.json.
+      Un solo bundle, N siti: si cambia solo questo blocco per cliente.
+    -->
+    <script id="business-data">
+      window.__BUSINESS__ = /*__BUSINESS_JSON__*/ null;
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Questo sito richiede JavaScript attivo.</noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
