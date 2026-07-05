@@ -2,6 +2,8 @@
 // Rotte: demo link + tracking, form (modifiche/onboarding), Stripe checkout + webhook, stato abbonamento.
 // Il webhook Stripe è ciò che ACCENDE/SPEGNE il sito del cliente (enforcement del canone).
 
+import { onboardingPage } from './pages.js';
+
 const json = (obj, status = 200, extra = {}) =>
   new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*', ...extra } });
 const now = () => Date.now();
@@ -60,6 +62,12 @@ export default {
           .bind('modify', payload.place_id || null, payload.slug || null, JSON.stringify(payload), 'new', now()).run();
         await logEvent(env, { place_id: payload.place_id, action: 'wants_change' });
         return htmlThanks('Richiesta ricevuta! Applichiamo la modifica e ti rimandiamo il link.');
+      }
+
+      // --- Pagina onboarding (GET): il success_url di Stripe atterra qui ---
+      if (path === '/onboarding' && method === 'GET') {
+        const html = onboardingPage({ place_id: url.searchParams.get('place_id') || '', slug: url.searchParams.get('slug') || '' });
+        return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
       }
 
       // --- Form onboarding (post-pagamento) ---
