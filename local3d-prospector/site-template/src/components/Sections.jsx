@@ -96,6 +96,21 @@ export function Hours({ business }) {
   );
 }
 
+export function Gallery({ business }) {
+  const imgs = business.gallery || [];
+  if (!imgs.length) return null;
+  return (
+    <section className="panel" data-section="gallery">
+      <motion.div className="panel-card wide" {...fade}>
+        <h2>Il locale</h2>
+        <div className="gallery-grid">
+          {imgs.map((g, i) => <img key={i} src={g.url} alt={g.alt || business.identity.name} loading="lazy" />)}
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
 export function Contact({ business }) {
   const { phone, address } = business.contacts;
   return (

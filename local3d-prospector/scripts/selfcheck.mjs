@@ -9,6 +9,7 @@ import { isGenericEmail, classifyEmail } from '../lib/contact.mjs';
 import { slugify } from '../lib/util.mjs';
 import { deriveTheme } from '../lib/theme.mjs';
 import { canTransition } from '../lib/registry.mjs';
+import { suggestDomains } from '../lib/domain.mjs';
 
 let pass = 0, fail = 0;
 const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.log(`  ✗ ${name}`); } };
@@ -82,6 +83,12 @@ ok('no ritorno indietro pagato→trovato', !canTransition('pagato', 'trovato'));
 ok('ok qualificato→demo-pronta', canTransition('qualificato', 'demo-pronta'));
 ok('da terminale non si esce (scartato→live)', !canTransition('scartato', 'live'));
 ok('scartato sempre ammesso', canTransition('qualificato', 'scartato'));
+
+section('Dominio');
+const doms = suggestDomains('Il Re della Porchetta', { city: 'Frascati' });
+ok('dominio riflette il nome (droppa "il/della")', doms[0] === 'reporchetta.it');
+ok('propone .com di fallback', doms.some((d) => d.endsWith('.com')));
+ok('dominio pub droppa "pub"', suggestDomains('Arcadia Pub')[0] === 'arcadia.it');
 
 console.log(`\n${fail === 0 ? '✓' : '✗'} ${pass} passati, ${fail} falliti`);
 process.exit(fail === 0 ? 0 : 1);

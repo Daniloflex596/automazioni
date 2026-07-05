@@ -1,0 +1,15 @@
+{
+  "$comment": "Dati di onboarding simulati (in reale arrivano dal form post-pagamento sul Worker).",
+  "mock_arcadia_pub": {
+    "referente": "Marco",
+    "telefono": "+39 333 1112223",
+    "dominio_preferito": "arcadiapub.it",
+    "menu": "Birre artigianali alla spina, hamburger, taglieri",
+    "photos": [
+      "https://picsum.photos/seed/arcadia1/800/600",
+      "https://picsum.photos/seed/arcadia2/800/600",
+      "https://picsum.photos/seed/arcadia3/800/600"
+    ],
+    "social": "@arcadiapub"
+  }
+}

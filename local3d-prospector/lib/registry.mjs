@@ -14,6 +14,7 @@ export const STATES = [
   'contattato',     // outreach inviato (dopo cancello umano INVIA)
   'interessato',    // ha aperto la demo / ha usato il form modifiche
   'pagato',         // ha acquistato
+  'provisioning',   // consegna in corso: dominio, DNS, deploy
   'live',           // sito definitivo online
   'attivo',         // canone in corso
   'sospeso',        // canone non pagato

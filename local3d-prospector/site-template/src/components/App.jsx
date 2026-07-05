@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Scene3D from './Scene3D.jsx';
 import DemoBanner from './DemoBanner.jsx';
-import { Hero, Atmosphere, Loved, Reviews, Hours, Contact } from './Sections.jsx';
+import { Hero, Atmosphere, Loved, Reviews, Gallery, Hours, Contact } from './Sections.jsx';
 import { perfBudget } from '../lib/device.js';
 import { attachScroll } from '../lib/scroll.js';
 
-const SECTION_COMPONENTS = { hero: Hero, atmosphere: Atmosphere, loved: Loved, reviews: Reviews, hours: Hours, contact: Contact };
+const SECTION_COMPONENTS = { hero: Hero, atmosphere: Atmosphere, loved: Loved, reviews: Reviews, gallery: Gallery, hours: Hours, contact: Contact };
 
 export default function App({ business }) {
   const [budget, setBudget] = useState({ level: 'medium', mobile: false });

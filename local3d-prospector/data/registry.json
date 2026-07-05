@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "updated_at": "2026-07-05T06:35:22.684Z",
+  "updated_at": "2026-07-05T11:00:36.344Z",
   "businesses": {
     "mock_arcadia_pub": {
       "place_id": "mock_arcadia_pub",
-      "state": "demo-pronta",
+      "state": "live",
       "history": [
         {
           "state": "qualificato",
@@ -13,6 +13,26 @@
         {
           "state": "demo-pronta",
           "at": "2026-07-05T06:35:16.435Z"
+        },
+        {
+          "state": "approvata",
+          "at": "2026-07-05T11:00:35.862Z"
+        },
+        {
+          "state": "contattato",
+          "at": "2026-07-05T11:00:36.076Z"
+        },
+        {
+          "state": "pagato",
+          "at": "2026-07-05T11:00:36.214Z"
+        },
+        {
+          "state": "provisioning",
+          "at": "2026-07-05T11:00:36.298Z"
+        },
+        {
+          "state": "live",
+          "at": "2026-07-05T11:00:36.344Z"
         }
       ],
       "created_at": "2026-07-05T06:35:08.861Z",
@@ -23,7 +43,7 @@
       "score": 56,
       "rating": 4.7,
       "reviews_count": 384,
-      "updated_at": "2026-07-05T06:35:22.683Z",
+      "updated_at": "2026-07-05T11:00:36.344Z",
       "contact_checked": true,
       "contact_email": "info@arcadiapub.example",
       "contact_email_kind": "generic",
@@ -41,7 +61,36 @@
         "at": "2026-07-05T06:35:16.435Z"
       },
       "last_error": null,
-      "outreach_drafted": true
+      "outreach_drafted": true,
+      "contacted_at": "2026-07-05T11:00:36.076Z",
+      "email_result": "sent(mock)",
+      "paid_at": "2026-07-05T11:00:36.214Z",
+      "fulfillment": {
+        "steps": {
+          "build_live": "done",
+          "domain_pick": "done",
+          "domain_register": "done",
+          "dns_ssl": "done",
+          "deploy": "done"
+        },
+        "live_dir": "sites/arcadia-pub-live",
+        "domain": "arcadia.it",
+        "domain_candidates": [
+          "arcadia.it",
+          "arcadiaciampino.it",
+          "arcadia-ciampino.it",
+          "arcadiaofficial.it",
+          "arcadia.com"
+        ],
+        "registrar_order": "mock-order-arcadia.it",
+        "cf_hostname_id": "mock-host-arcadia-pub",
+        "live_url": "https://arcadia.it",
+        "deployment": "mock-deploy-arcadia-pub"
+      },
+      "live_url": "https://arcadia.it",
+      "domain": "arcadia.it",
+      "blocked_reason": null,
+      "live_at": "2026-07-05T11:00:36.344Z"
     },
     "mock_sakura_ramen": {
       "place_id": "mock_sakura_ramen",
@@ -59,7 +108,7 @@
     },
     "mock_porchetta_re": {
       "place_id": "mock_porchetta_re",
-      "state": "demo-pronta",
+      "state": "contattato",
       "history": [
         {
           "state": "qualificato",
@@ -68,6 +117,14 @@
         {
           "state": "demo-pronta",
           "at": "2026-07-05T06:35:22.590Z"
+        },
+        {
+          "state": "approvata",
+          "at": "2026-07-05T11:00:36.025Z"
+        },
+        {
+          "state": "contattato",
+          "at": "2026-07-05T11:00:36.077Z"
         }
       ],
       "created_at": "2026-07-05T06:35:08.862Z",
@@ -78,7 +135,7 @@
       "score": 46,
       "rating": 4.6,
       "reviews_count": 512,
-      "updated_at": "2026-07-05T06:35:22.684Z",
+      "updated_at": "2026-07-05T11:00:36.077Z",
       "contact_checked": true,
       "contact_email": "prenotazioni@reporchetta.example",
       "contact_email_kind": "generic",
@@ -96,7 +153,9 @@
         "at": "2026-07-05T06:35:22.590Z"
       },
       "last_error": null,
-      "outreach_drafted": true
+      "outreach_drafted": true,
+      "contacted_at": "2026-07-05T11:00:36.077Z",
+      "email_result": "sent(mock)"
     }
   }
 }

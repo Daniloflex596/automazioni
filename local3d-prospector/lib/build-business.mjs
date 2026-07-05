@@ -30,10 +30,11 @@ export function buildBusiness(details, ctx) {
   const mined = mineReviews(reviewTexts, template);
   const tone = toneForTemplate(template);
 
-  // Galleria: in demo si possono usare foto della scheda (marker), in live SOLO client_provided.
-  // Qui in demo mettiamo placeholder marcati: la scena 3D usa gradienti/asset propri, non foto rubate.
-  const gallery = buildMode === 'demo'
-    ? [] // demo parte senza foto reali: la scena 3D è autosufficiente; le foto vere entrano post-vendita
+  // Galleria: in demo nessuna foto (la scena 3D è autosufficiente). In live SOLO foto del cliente,
+  // fornite nell'onboarding (rights=client_provided) — la compliance è imposta dal validatore.
+  const onboarding = ctx.onboarding || {};
+  const gallery = buildMode === 'live'
+    ? (onboarding.photos || []).map((url, i) => ({ url, alt: `${name} ${i + 1}`, source: 'client_onboarding', rights: 'client_provided' }))
     : [];
 
   const biz = {
@@ -71,7 +72,9 @@ export function buildBusiness(details, ctx) {
     gallery,
     loved: mined.loved,
     theme: deriveTheme(tone),
-    sections_order: ['hero', 'atmosphere', 'loved', 'reviews', 'hours', 'contact', 'cta'],
+    sections_order: gallery.length
+      ? ['hero', 'atmosphere', 'loved', 'reviews', 'gallery', 'hours', 'contact', 'cta']
+      : ['hero', 'atmosphere', 'loved', 'reviews', 'hours', 'contact', 'cta'],
     cta: {
       mode: buildMode,
       headline: buildMode === 'demo' ? `Anteprima per ${name}` : name,
