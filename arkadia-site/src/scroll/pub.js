@@ -15,9 +15,12 @@ const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Refresh o apertura diretta: riparti sempre dall'ingresso del pub, mai dalla
-// posizione di prima. Un eventuale #sezione nell'URL resta onorato più sotto.
+// posizione di prima. Su REFRESH riparti dall'alto anche con un #sezione
+// nell'URL; il deep-link resta onorato solo alla prima navigazione.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-if (!location.hash) window.scrollTo(0, 0);
+const navEntry = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+const isReload = navEntry ? navEntry.type === 'reload' : false;
+if (isReload || !location.hash) window.scrollTo(0, 0);
 
 function detectTier() {
   if (reduced) return 'none';
@@ -116,7 +119,7 @@ async function boot() {
 
   // Posizione iniziale: onora un eventuale #sezione, altrimenti parti dall'alto.
   const initialHash = location.hash;
-  if (initialHash && document.querySelector(initialHash)) {
+  if (!isReload && initialHash && document.querySelector(initialHash)) {
     requestAnimationFrame(() => lenis.scrollTo(initialHash, { immediate: true }));
   } else {
     lenis.scrollTo(0, { immediate: true });

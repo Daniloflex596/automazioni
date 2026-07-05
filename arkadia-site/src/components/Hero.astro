@@ -45,22 +45,35 @@ import { info } from '../data/contenuti';
     text-transform: uppercase;
     color: var(--schiuma);
     filter: drop-shadow(0 8px 40px var(--oro-glow));
-    /* Accensione da insegna: il nome sfarfalla e poi resta acceso,
-       come il neon dietro il bancone. One-shot all'ingresso. */
-    animation: neon-on 2.2s steps(1, end) 0.4s both;
+  }
+  /* Accensione da insegna al neon: parte quando il preloader si toglie
+     (body[data-ready]) — così si vede SEMPRE l'accensione, anche da PC dove
+     il 3D ci mette qualche istante a caricare — poi resta a pulsare piano
+     come un LED acceso dietro il bancone. */
+  :global(body[data-ready='true']) .hero-title {
+    animation:
+      neon-on 1.9s steps(1, end) 0.15s both,
+      neon-pulse 3.4s ease-in-out 2s infinite;
   }
   @keyframes neon-on {
-    0% { opacity: 0; }
-    7% { opacity: 1; }
-    11% { opacity: 0.25; }
-    16% { opacity: 1; }
-    20% { opacity: 0.4; }
+    0% { opacity: 0.12; }
+    6% { opacity: 1; }
+    10% { opacity: 0.28; }
+    15% { opacity: 1; }
+    19% { opacity: 0.42; }
     24% { opacity: 1; }
-    35% { opacity: 0.85; }
-    40%, 100% { opacity: 1; }
+    30% { opacity: 0.68; }
+    35% { opacity: 1; }
+    42% { opacity: 0.85; }
+    47%, 100% { opacity: 1; }
+  }
+  /* Pulsare del bagliore dorato (LED che respira) — visibile su ogni schermo */
+  @keyframes neon-pulse {
+    0%, 100% { filter: drop-shadow(0 6px 24px var(--oro-glow)); }
+    50% { filter: drop-shadow(0 8px 52px var(--oro)) drop-shadow(0 0 16px var(--oro-glow)); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-title {
+    :global(body[data-ready='true']) .hero-title {
       animation: none;
     }
   }

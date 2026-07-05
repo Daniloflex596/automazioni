@@ -55,6 +55,12 @@ const schema = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Disattiva il ripristino automatico dello scroll il prima possibile:
+         al refresh si riparte sempre dall'alto (la logica fine è negli script
+         di pagina). Inline nell'head per battere sul tempo il browser. -->
+    <script is:inline>
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    </script>
     <link rel="canonical" href={canonical} />
     <title>{title}</title>
     <meta name="description" content={description} />

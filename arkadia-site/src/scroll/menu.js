@@ -13,10 +13,13 @@ const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Refresh o apertura diretta (anche via QR): riparti sempre dall'inizio della
-// carta, mai dalla posizione di prima. I deep-link con #sezione (dalla home)
-// restano onorati più sotto, quando Lenis è pronto.
+// carta, mai dalla posizione di prima. Su REFRESH riparti dall'alto anche se
+// l'URL ha un #sezione; il deep-link (dalla home) resta onorato solo alla
+// prima navigazione, più sotto quando Lenis è pronto.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-if (!location.hash) window.scrollTo(0, 0);
+const navEntry = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+const isReload = navEntry ? navEntry.type === 'reload' : false;
+if (isReload || !location.hash) window.scrollTo(0, 0);
 
 function detectTier() {
   if (reduced) return 'none';
@@ -286,7 +289,7 @@ function initScroll() {
   // home) vacci tenendo conto della barra categorie sticky; altrimenti parti
   // dall'alto — così un refresh riporta sempre in cima alla carta.
   const initialHash = location.hash;
-  if (initialHash && document.querySelector(initialHash)) {
+  if (!isReload && initialHash && document.querySelector(initialHash)) {
     requestAnimationFrame(() => lenis.scrollTo(initialHash, { immediate: true, offset: -70 }));
   } else {
     lenis.scrollTo(0, { immediate: true });
