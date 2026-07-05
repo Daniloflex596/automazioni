@@ -9,6 +9,7 @@ import { runVerify } from './verify.mjs';
 import { runApplyChanges } from './apply-changes.mjs';
 import { runOutreach } from './outreach.mjs';
 import { runProvision } from './provision.mjs';
+import { runEnforce } from './enforce.mjs';
 import { runReport } from './report.mjs';
 import { runCockpit } from './cockpit.mjs';
 import { logger, isMock } from '../lib/util.mjs';
@@ -23,13 +24,14 @@ async function main() {
   s.applyChanges = await runApplyChanges(); // applica le modifiche richieste
   s.verify = await runVerify();             // QA meccanica (nuove + modificate)
   s.outreach = await runOutreach();         // bozze pronte (non inviate)
-  s.provision = await runProvision();       // CONSEGNA i clienti già paganti
+  s.provision = await runProvision();       // CONSEGNA i clienti (sottodominio + dominio finale)
+  s.enforce = await runEnforce();            // "per sempre": allinea sito ↔ canone
   runReport();
   runCockpit();
 
   logger.step('\n── RIEPILOGO NIGHTLY ──');
   logger.info(`Qualificati: ${s.scan.qualified} · Demo generate: ${s.generate.created} · QA ok: ${s.verify.passed}/${s.verify.verified}`);
-  logger.info(`Modifiche applicate: ${s.applyChanges.applied} · Bozze outreach: ${s.outreach.drafted} · Consegnati LIVE: ${s.provision.live}`);
+  logger.info(`Modifiche: ${s.applyChanges.applied} · Bozze outreach: ${s.outreach.drafted} · Sottodominio: ${s.provision.subdomain} · Dominio finale: ${s.provision.final} · Sospesi: ${s.enforce.suspended} · Riattivati: ${s.enforce.reactivated}`);
   logger.ok(`Nightly completata in ${((Date.now() - t0) / 1000).toFixed(1)}s. Apri outbox/cockpit.html.`);
 }
 

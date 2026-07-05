@@ -19,18 +19,19 @@ export async function checkDomainAvailability(domain) {
   return data?.products?.[0]?.status === 'available';
 }
 
-export async function registerDomain(domain, { registrant }) {
+export async function registerDomain(domain, { registrant, autoRenew = true }) {
   if (isMock() || !process.env.REGISTRAR_API_KEY) {
-    return { id: `mock-order-${domain}`, domain, registrant: registrant?.name, mode: 'mock' };
+    return { id: `mock-order-${domain}`, domain, registrant: registrant?.name, auto_renew: autoRenew, mode: 'mock' };
   }
-  // TODO reale (Gandi): POST https://api.gandi.net/v5/domain/domains con owner=registrant (dati cliente)
+  // TODO reale (Gandi): POST https://api.gandi.net/v5/domain/domains con owner=registrant + auto-renew ON.
+  // auto-renew ON = il dominio si rinnova da solo ogni anno finché il canone è attivo ("per sempre").
   const res = await fetch('https://api.gandi.net/v5/domain/domains', {
     method: 'POST',
     headers: { authorization: `Bearer ${process.env.REGISTRAR_API_KEY}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ fqdn: domain, owner: mapRegistrant(registrant) }),
+    body: JSON.stringify({ fqdn: domain, owner: mapRegistrant(registrant), autorenew: autoRenew }),
   });
   const data = await res.json();
-  return { id: data?.id || `order-${domain}`, domain, mode: 'live' };
+  return { id: data?.id || `order-${domain}`, domain, auto_renew: autoRenew, mode: 'live' };
 }
 
 // ---- 2. CLOUDFLARE: custom hostname + SSL (SSL for SaaS) ----
@@ -51,12 +52,29 @@ export async function attachCustomHostname(domain, slug) {
 }
 
 // ---- 3. DEPLOY del sito statico (Cloudflare Pages) ----
-export async function deploySite(dir, slug, domain) {
+export async function deploySite(dir, slug, host) {
   if (isMock() || !process.env.CF_API_TOKEN) {
-    return { id: `mock-deploy-${slug}`, url: `https://${domain}`, mode: 'mock' };
+    return { id: `mock-deploy-${slug}`, url: `https://${host}`, mode: 'mock' };
   }
   // TODO reale: wrangler pages deploy <dir> --project-name <proj>  (o Cloudflare API direct upload)
-  return { id: `deploy-${slug}`, url: `https://${domain}`, mode: 'live' };
+  return { id: `deploy-${slug}`, url: `https://${host}`, mode: 'live' };
+}
+
+// ---- 4. ENFORCEMENT "per sempre": sospendi/riattiva in base al canone ----
+// Canone attivo → sito online. Canone fermo → pagina "sospeso" (o hostname rimosso). Ripagato → riattiva.
+export async function suspendSite(domain, cfHostnameId) {
+  if (isMock() || !process.env.CF_API_TOKEN) return { domain, suspended: true, mode: 'mock' };
+  // TODO reale: rimuovi/disabilita il custom hostname o servi una pagina "sospeso".
+  return { domain, suspended: true, mode: 'live' };
+}
+export async function reactivateSite(domain, cfHostnameId) {
+  if (isMock() || !process.env.CF_API_TOKEN) return { domain, suspended: false, mode: 'mock' };
+  return { domain, suspended: false, mode: 'live' };
+}
+export async function setAutoRenew(domain, on) {
+  if (isMock() || !process.env.REGISTRAR_API_KEY) return { domain, auto_renew: on, mode: 'mock' };
+  // TODO reale (Gandi): PATCH .../domains/<domain>/autorenew
+  return { domain, auto_renew: on, mode: 'live' };
 }
 
 function mapRegistrant(r) {

@@ -16,6 +16,7 @@
     "outreach": "node scripts/outreach.mjs",
     "send": "node scripts/send.mjs",
     "provision": "node scripts/provision.mjs",
+    "enforce": "node scripts/enforce.mjs",
     "report": "node scripts/report.mjs",
     "cockpit": "node scripts/cockpit.mjs",
     "selfcheck": "node scripts/selfcheck.mjs",

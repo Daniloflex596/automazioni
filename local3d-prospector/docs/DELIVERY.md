@@ -40,22 +40,45 @@ rispetta la **suppress-list** (chi ha detto STOP), applica un rate-limit, e segn
 Tutto loggato per-azienda in `outbox/SENT.log`. È esattamente il "approvo e lui manda tutte le email a
 tutte le aziende, ben divise".
 
-### FASE B — Consegna (post-vendita) — `npm run provision`
-Quando un cliente paga (Stripe → il backend lo segna `pagato`), la consegna parte. Per ogni cliente
-pagante esegue, **in ordine e in modo idempotente** (se si interrompe, riprende da dove era):
+### FASE B — Consegna (post-vendita) — `npm run provision`, in DUE tempi
+Il sito completo col dominio esiste **solo dopo il pagamento**. La consegna è in due fasi, per dare al
+cliente un link che funziona subito senza rischiare i soldi del dominio durante la garanzia.
 
+**B1 — appena paga (istantaneo, gratis, rischio zero):**
 ```
-1. build LIVE del sito con le FOTO del cliente (dall'onboarding)   → compliance imposta dal validatore
-2. sceglie il dominio che rispecchia il nome    (Arcadia Pub → arcadia.it)
-3. registra il dominio  INTESTATO AL CLIENTE    (dati dall'onboarding)
-4. DNS + SSL su Cloudflare                        (certificato automatico)
-5. deploy del sito
-6. stato → live
-7. mette in coda il messaggio di consegna         (lo mandi tu su WhatsApp)
+Stripe conferma il pagamento → il backend segna 'pagato' → provision:
+  build LIVE 'provisional' (senza banner di vendita) → deploy su SOTTODOMINIO
+  → sito online in minuti su  nomelocale.siti-tuo.it
+```
+Il cliente ha già il suo link funzionante. Non servono ancora le foto.
+
+**B2 — dopo la garanzia (es. 7 giorni) E ricevute le foto, se non ha chiesto rimborso:**
+```
+provision (nella nightly):
+  1. sceglie il dominio dal nome   (Arcadia Pub → arcadia.it)
+  2. lo registra INTESTATO AL CLIENTE, auto-renew ON  ("per sempre")
+  3. DNS + SSL su Cloudflare
+  4. rebuild con le FOTO del cliente + deploy sul dominio vero
+  5. stato → attivo · messaggio di consegna in coda
 ```
 
-Ogni passo è salvato in `registry → <cliente> → fulfillment.steps`. Se rilanci `provision`, salta ciò
-che è già fatto. Se manca l'onboarding (foto), il cliente resta in attesa e non va live a metà.
+**Perché due fasi:** il dominio .it costa ~€12 non rimborsabili. Comprarlo prima della fine della
+garanzia = perderli a ogni rimborso. Il sottodominio dà gratificazione immediata a rischio zero; il
+dominio vero si registra solo quando il cliente è "definitivo". Risponde alla domanda "conviene fare
+un blocco pagamento e poi il resto?": sì — **il link vero e il dominio arrivano solo dopo il pagamento**,
+e il dominio (costo reale) solo dopo la finestra di rimborso.
+
+Ogni passo è in `registry → <cliente> → fulfillment`. Idempotente: se rilanci, riprende da dove era.
+
+### "Per sempre" — `npm run enforce`
+Il sito resta online finché il **canone** è attivo. Questo passo (nella nightly) allinea sito e abbonamento:
+```
+canone ATTIVO   → online + dominio in auto-renew (si rinnova ogni anno da solo)
+canone FALLITO  → dopo il dunning di Stripe: sito SOSPESO, auto-renew OFF
+RIPAGATO        → riattivato
+```
+Lo stato dell'abbonamento arriva dal **webhook Stripe** (il backend lo tiene aggiornato). Così il
+"real all'infinito" è vero finché paga, e si spegne da solo se smette — senza che tu faccia niente.
 
 ## Dove vivono le chiavi (un solo posto)
 

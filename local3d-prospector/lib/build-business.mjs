@@ -45,6 +45,7 @@ export function buildBusiness(details, ctx) {
       category,
       template,
       build_mode: buildMode,
+      ...(ctx.provisional ? { provisional: true } : {}),
       score: ctx.score ?? 0,
       generated_at: new Date().toISOString(),
     },

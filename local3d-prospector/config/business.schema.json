@@ -33,6 +33,7 @@
         "category": { "type": "string" },
         "template": { "type": "string", "enum": ["pub", "streetfood", "ethnic", "barber"] },
         "build_mode": { "type": "string", "enum": ["demo", "live"], "description": "In 'live' scattano vincoli extra (foto solo del cliente)" },
+        "provisional": { "type": "boolean", "description": "Live temporaneo su sottodominio subito dopo il pagamento, prima che arrivino le foto (nessuna galleria richiesta)" },
         "score": { "type": "number" },
         "generated_at": { "type": "string" }
       }

@@ -23,8 +23,9 @@ function complianceRules(biz) {
         errors.push(`gallery: foto con rights='${img.rights}' vietata in build LIVE (solo client_provided)`);
       }
     }
-    // In live servono foto vere del cliente.
-    if (!(biz.gallery || []).some((g) => g.rights === 'client_provided')) {
+    // In live servono foto vere del cliente — TRANNE nel live 'provisional' su sottodominio
+    // (subito dopo il pagamento, prima che il cliente mandi le foto).
+    if (!biz.meta.provisional && !(biz.gallery || []).some((g) => g.rights === 'client_provided')) {
       errors.push('gallery: build LIVE richiede almeno una foto fornita dal cliente');
     }
   }
