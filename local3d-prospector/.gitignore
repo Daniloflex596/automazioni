@@ -4,6 +4,7 @@ site-template/node_modules/
 
 # build del template (rigenerabile con: cd site-template && npm ci && npm run build)
 site-template/dist/
+site-template/dist-single/
 
 # cache API a pagamento (non versionare risposte Places)
 data/places-cache/

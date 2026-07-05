@@ -22,26 +22,46 @@ code{background:#000;padding:.25rem .5rem;border-radius:6px;font-size:.75rem;col
 .empty{color:#6a6a78;font-style:italic}
 </style></head><body>
 <h1>Local3D · Cockpit</h1>
-<div class="sub">Governa i due cancelli. Aggiornato: 2026-07-05T11:00:36.344Z</div>
+<div class="sub">Governa i due cancelli. Aggiornato: 2026-07-05T11:17:31.073Z</div>
 <div class="kpis">
   <div class="kpi"><b>3</b><span>prospect totali</span></div>
-  <div class="kpi"><b>0</b><span>demo da approvare</span></div>
-  <div class="kpi"><b>0</b><span>contatti da inviare</span></div>
-  <div class="kpi"><b>1</b><span>clienti</span></div>
-  <div class="kpi"><b>€59</b><span>MRR stimato</span></div>
+  <div class="kpi"><b>2</b><span>demo da approvare</span></div>
+  <div class="kpi"><b>2</b><span>contatti da inviare</span></div>
+  <div class="kpi"><b>0</b><span>clienti</span></div>
+  <div class="kpi"><b>€0</b><span>MRR stimato</span></div>
 </div>
 
-<h2>🟢 Cancello 1 — Demo da approvare (0)</h2>
-<div class="grid"><p class="empty">Niente in attesa.</p></div>
+<h2>🟢 Cancello 1 — Demo da approvare (2)</h2>
+<div class="grid"><div class="card">
+    <div class="chead"><h3>Arcadia Pub</h3><span class="score">56</span></div>
+    <div class="meta">4.7★ (384) · Ciampino · pub · <span class="state s-demo-pronta">demo-pronta</span></div>
+    <div class="shots"><a href="../sites/arcadia-pub/shots/desktop-hero.png" target="_blank"><img src="../sites/arcadia-pub/shots/desktop-hero.png" loading="lazy"></a><a href="../sites/arcadia-pub/shots/mobile-hero.png" target="_blank"><img src="../sites/arcadia-pub/shots/mobile-hero.png" loading="lazy"></a><a href="../sites/arcadia-pub/shots/desktop-cta.png" target="_blank"><img src="../sites/arcadia-pub/shots/desktop-cta.png" loading="lazy"></a></div>
+    <div class="meta small">QA ✓ 1068KB · 568ms</div>
+    <div class="meta small">Demo: <code>https://api.local3d.example/d/7v95sab34j3bxo4r76x2l9</code></div>
+    <div class="actions">
+      <code>npm run registry -- approve mock_arcadia_pub</code>
+      <code>npm run registry -- reject mock_arcadia_pub</code>
+    </div>
+  </div><div class="card">
+    <div class="chead"><h3>Il Re della Porchetta</h3><span class="score">46</span></div>
+    <div class="meta">4.6★ (512) · Frascati · streetfood · <span class="state s-demo-pronta">demo-pronta</span></div>
+    <div class="shots"><a href="../sites/il-re-della-porchetta/shots/desktop-hero.png" target="_blank"><img src="../sites/il-re-della-porchetta/shots/desktop-hero.png" loading="lazy"></a><a href="../sites/il-re-della-porchetta/shots/mobile-hero.png" target="_blank"><img src="../sites/il-re-della-porchetta/shots/mobile-hero.png" loading="lazy"></a><a href="../sites/il-re-della-porchetta/shots/desktop-cta.png" target="_blank"><img src="../sites/il-re-della-porchetta/shots/desktop-cta.png" loading="lazy"></a></div>
+    <div class="meta small">QA ✓ 1068KB · 555ms</div>
+    <div class="meta small">Demo: <code>https://api.local3d.example/d/4khys6on9w6klnl5g6ogic</code></div>
+    <div class="actions">
+      <code>npm run registry -- approve mock_porchetta_re</code>
+      <code>npm run registry -- reject mock_porchetta_re</code>
+    </div>
+  </div></div>
 
 <h2>✅ Approvate — pronte a pubblicare/inviare (0)</h2>
 <div class="grid"><p class="empty">Niente.</p></div>
 
 <h2>📊 Funnel</h2>
-<div class="frow"><span class="fname">trovato</span><span class="fbar" style="width:100%"></span><span class="fnum">1</span></div><div class="frow"><span class="fname">contattato</span><span class="fbar" style="width:100%"></span><span class="fnum">1</span></div><div class="frow"><span class="fname">live</span><span class="fbar" style="width:100%"></span><span class="fnum">1</span></div>
+<div class="frow"><span class="fname">trovato</span><span class="fbar" style="width:50%"></span><span class="fnum">1</span></div><div class="frow"><span class="fname">demo-pronta</span><span class="fbar" style="width:100%"></span><span class="fnum">2</span></div>
 
-<h2>📨 Cancello 2 — Contatti pronti (0)</h2>
-<p class="empty">Niente in coda.</p>
+<h2>📨 Cancello 2 — Contatti pronti (2)</h2>
+<div class="meta">• <b>Arcadia Pub</b> — info@arcadiapub.example · <code>npm run registry -- sent mock_arcadia_pub</code></div><div class="meta">• <b>Il Re della Porchetta</b> — prenotazioni@reporchetta.example · <code>npm run registry -- sent mock_porchetta_re</code></div>
 
 <h2>🔥 Lead caldi</h2>
 <p class="meta small">In produzione arrivano dal backend: <code>curl -H "Authorization: Bearer $ADMIN_TOKEN" $WORKER_BASE/admin/leads</code> — chi ha aperto/cliccato la demo è il momento di chiamare.</p>

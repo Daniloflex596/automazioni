@@ -3,12 +3,14 @@
 // (coerente col piano: prima UN template eccellente, poi il secondo dopo le prime vendite).
 import BarScene from './BarScene.jsx';
 import StreetFoodScene from './StreetFoodScene.jsx';
+import EthnicScene from './EthnicScene.jsx';
+import BarberScene from './BarberScene.jsx';
 
 const REGISTRY = {
   pub: BarScene,
   streetfood: StreetFoodScene,
-  ethnic: BarScene,   // riusa il pub ri-tematizzato finché non ha una scena dedicata
-  barber: BarScene,
+  ethnic: EthnicScene,
+  barber: BarberScene,
 };
 
 export function sceneFor(template) {

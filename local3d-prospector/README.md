@@ -37,9 +37,33 @@ I due cancelli umani, dalla CLI:
 ```bash
 npm run registry -- list                 # vedi il funnel
 npm run registry -- approve <place_id>    # CANCELLO 1: la demo è ok
-npm run registry -- sent <place_id>       # CANCELLO 2: contatto inviato
-npm run registry -- paid <place_id>       # cliente pagante
+npm run send                              # CANCELLO 2: invia tutte le approvate in blocco
+npm run registry -- paid <place_id>       # (di solito lo fa Stripe) cliente pagante
+npm run provision                         # CONSEGNA: dominio + DNS + SSL + deploy → live
 ```
+
+## Comandi
+
+| Comando | Cosa fa |
+|---|---|
+| `npm run nightly` | Run notturna completa: prepara le demo (fino ai cancelli) **e** consegna i clienti già paganti |
+| `npm run pipeline` | Come nightly ma senza provisioning |
+| `npm run scan` | Trova e qualifica i locali (Google Places) |
+| `npm run generate` | Genera i siti dei qualificati |
+| `npm run verify` | QA meccanica + screenshot (Playwright) |
+| `npm run apply-changes` | Applica le richieste "vorrei cambiare qualcosa" (parametri vincolati) |
+| `npm run send` | Invia in blocco le email delle demo approvate (WhatsApp in coda) |
+| `npm run provision` | Consegna automatica dei clienti paganti → sito live |
+| `npm run cockpit` | Rigenera il cruscotto `outbox/cockpit.html` |
+| `npm run selfcheck` | 32 test sulle invarianti |
+
+Dettaglio della fase vendita+consegna in **[docs/DELIVERY.md](docs/DELIVERY.md)**.
+
+## Le 4 scene 3D
+
+Una scena parametrica per categoria (stessa architettura, atmosfera diversa):
+**pub** (bancone + bottiglie luminose), **streetfood** (griglia + braci), **ethnic** (lanterne + vapore),
+**barber** (palo rotante + specchi + forbici). La palette arriva dai design tokens.
 
 ## Passare al LIVE
 

@@ -21,6 +21,8 @@
     "selfcheck": "node scripts/selfcheck.mjs",
     "pipeline": "node scripts/pipeline.mjs",
     "pipeline:mock": "PROSPECTOR_MODE=mock node scripts/pipeline.mjs",
+    "nightly": "node scripts/nightly.mjs",
+    "apply-changes": "node scripts/apply-changes.mjs",
     "registry": "node scripts/registry-cli.mjs"
   },
   "dependencies": {
