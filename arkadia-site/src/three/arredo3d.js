@@ -102,7 +102,7 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
   const salottoLight = new THREE.PointLight(0xffb851, isHigh ? 6 : 4, 4.5, 2);
   salottoLight.position.set(-3.6, 1.4, -15.0);
   scene.add(salottoLight);
-  // libreria a parete con libri colorati e due fumetti in mostra
+  // libreria a parete con libri colorati
   const libreria = new THREE.Group();
   libreria.position.set(-5.0, 0, -17.3);
   root.add(libreria);
@@ -138,17 +138,6 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
     libri.instanceMatrix.needsUpdate = true;
   }
   libreria.add(libri);
-  // due albi in mostra sul ripiano alto, appoggiati alla parete
-  [0, 1].forEach((i) => {
-    const albo = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.3, 0.42),
-      new THREE.MeshBasicMaterial({ map: makePosterTex(i + 4) })
-    );
-    albo.position.set(0.14, 1.93, -0.28 + i * 0.55);
-    albo.rotation.y = Math.PI / 2;
-    albo.rotation.x = -0.06;
-    libreria.add(albo);
-  });
 
   // -- LA PEDANA (parete destra, z -14..-18.5): rialzo di legno con
   //    ringhiera, scaletta, due tavoli con sgabelli e il filo di lucine.
@@ -612,10 +601,7 @@ export function addArredo({ root, scene, mat, C, isHigh }) {
   const frCestello = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.1, 10, 1, true), mat(0x6a7078, { r: 0.4, m: 0.7, side: THREE.DoubleSide }));
   frCestello.position.set(0.05, 0.2, 0);
   frCestello.rotation.z = -0.15;
-  const frManico = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.3, 6), mat(0x1a0f08, { r: 0.7 }));
-  frManico.rotation.z = Math.PI / 2 - 0.5;
-  frManico.position.set(0.24, 0.32, 0);
-  friggitrice.add(frCestello, frManico);
+  friggitrice.add(frCestello);
   const olioBott = new THREE.Group();
   olioBott.position.set(-4.45, 0.96, -9.15);
   root.add(olioBott);

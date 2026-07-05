@@ -339,13 +339,19 @@ body[data-ready='true'] #pinta-progress {
   display: inline-block;
   overflow: hidden;
   vertical-align: top;
-  /* spazio per i descender (g, p, q) senza rompere l'effetto maschera */
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
+  /* Spazio ABBONDANTE sotto la baseline per i discendenti (g, p, q, j) del
+     serif Fraunces con line-height 0.95: l'overflow:hidden clippa al bordo
+     del padding-box, quindi il padding e' zona VISIBILE. Il margin negativo
+     annulla il padding cosi' interlinea e altezza restano identiche. */
+  padding-bottom: 0.36em;
+  margin-bottom: -0.36em;
 }
 .split-inner {
   display: inline-block;
-  transform: translateY(110%);
+  /* translateY accoppiato al padding: il buffer nascosto (1.50-1.00)*0.95em
+     ≈ 0.48em deve essere >= padding-bottom, altrimenti la cima delle parole
+     spunterebbe dalla maschera prima del reveal. */
+  transform: translateY(150%);
   transition: transform 0.9s var(--ease-out);
   will-change: transform;
 }

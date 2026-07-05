@@ -129,16 +129,31 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   tapBase.position.y = 0.25;
   taps.add(tapBase);
   const handleCols = [C.oro, C.ambra, C.rame, 0x3b5e4a, C.schiuma];
+  const tapOtt = () => mat(C.ottone, { r: 0.2, m: 0.95 });
   for (let i = 0; i < 5; i++) {
     const z = -0.85 + i * 0.42;
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.28, 10), mat(C.ottone, { r: 0.2, m: 0.95 }));
-    neck.position.set(0.12, 0.34, z);
-    taps.add(neck);
-    const spout = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.16, 10), mat(C.ottone, { r: 0.2, m: 0.95 }));
-    spout.position.set(0.18, 0.22, z);
+    // Font a colonna: montante verticale ANCORATO alla colonna madre, corpo
+    // rubinetto orizzontale che sporge verso il bicchiere, beccuccio rivolto
+    // in GIÙ con l'outlet appena sopra il bordo, e la leva-manopola in cima.
+    const riser = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.03, 0.3, 12), tapOtt());
+    riser.position.set(0.1, 0.35, z);
+    taps.add(riser);
+    const faucet = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.13, 12), tapOtt());
+    faucet.rotation.z = Math.PI / 2;
+    faucet.position.set(0.15, 0.48, z);
+    taps.add(faucet);
+    const spout = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.016, 0.16, 12), tapOtt());
+    spout.position.set(0.18, 0.4, z); // outlet (fondo) a taps-y 0.32 = bar-y 1.54
     taps.add(spout);
-    const handle = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), mat(handleCols[i], { r: 0.4, e: handleCols[i], ei: 0.15 }));
-    handle.position.set(0.12, 0.52, z);
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.008, 8, 16), tapOtt());
+    collar.rotation.x = Math.PI / 2;
+    collar.position.set(0.18, 0.47, z);
+    taps.add(collar);
+    const handleStem = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.1, 8), tapOtt());
+    handleStem.position.set(0.1, 0.56, z);
+    taps.add(handleStem);
+    const handle = new THREE.Mesh(new THREE.SphereGeometry(0.055, 14, 12), mat(handleCols[i], { r: 0.4, e: handleCols[i], ei: 0.15 }));
+    handle.position.set(0.1, 0.63, z);
     taps.add(handle);
   }
 
@@ -181,13 +196,21 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     liq.scale.y = 0.001;
     const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.026, 14), mat(TRIO_FOAM[i], { r: 0.95 }));
     foam.visible = false;
+    // Getto: filo pieno e tondo (leggero svaso in basso), colore birra con
+    // emissive → dà volume; parte dal beccuccio e arriva alla superficie.
     const jet = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.011, 0.015, 1, 8, 1, true),
-      new THREE.MeshBasicMaterial({ color: TRIO_COL[i], transparent: true, opacity: 0 })
+      new THREE.CylinderGeometry(0.006, 0.009, 1, 10),
+      mat(TRIO_COL[i], { r: 0.3, e: TRIO_EMI[i], ei: 0.3, transparent: true, opacity: 0 })
     );
-    g.add(glassM, liq, foam, jet);
+    // Spruzzo dove il getto tocca la superficie del liquido.
+    const splash = new THREE.Mesh(
+      new THREE.SphereGeometry(0.022, 10, 8),
+      mat(TRIO_FOAM[i], { r: 0.9, transparent: true, opacity: 0 })
+    );
+    splash.scale.y = 0.4;
+    g.add(glassM, liq, foam, jet, splash);
     bar.add(g);
-    trio.push({ liq, foam, jet });
+    trio.push({ liq, foam, jet, splash });
   });
   // Secchiello del ghiaccio sul bancone con due bottiglie in fresco.
   const secchiello = new THREE.Group();
@@ -539,7 +562,10 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   dartFl.position.x = -0.13;
   dartArrow.add(dartFl);
   const dartFrom = new THREE.Vector3(3.4, 1.75, -19.6);
-  const dartTo = new THREE.Vector3(4.9, 2.1, -20.5);
+  // Arrivo: la punta si conficca ESATTAMENTE nel centro del bersaglio.
+  // Bullseye a (5.14, 2.1, -20.5); apice punta = origine.x + 0.16 → 5.02
+  // porta l'apice a 5.18 (≈4 cm dentro il disco) e l'asta a filo parete.
+  const dartTo = new THREE.Vector3(5.02, 2.1, -20.5);
   dartArrow.position.copy(dartFrom);
   root.add(dartArrow);
 
@@ -1282,12 +1308,18 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       const top3 = t3.liq.scale.y + 0.01;
       t3.foam.visible = spinaAmt > 0.12;
       t3.foam.position.y = top3 + 0.013;
-      t3.jet.material.opacity += ((pouring3 ? 0.85 : 0) - t3.jet.material.opacity) * 0.12;
+      t3.jet.material.opacity += ((pouring3 ? 0.9 : 0) - t3.jet.material.opacity) * 0.12;
       t3.jet.visible = t3.jet.material.opacity > 0.02;
+      t3.splash.material.opacity = t3.jet.material.opacity * 0.75;
+      t3.splash.visible = t3.jet.visible;
       if (t3.jet.visible) {
-        const h3 = Math.max(0.03, 0.44 - top3);
+        // Il getto va dall'OUTLET del beccuccio (fisso) alla superficie mobile
+        // del liquido; lo spruzzo sta dove il getto tocca la birra.
+        const OUT = 0.32; // outlet beccuccio (coordinate gruppo) = bar-y 1.54
+        const h3 = Math.max(0.006, OUT - top3);
         t3.jet.scale.y = h3;
-        t3.jet.position.y = top3 + h3 / 2;
+        t3.jet.position.y = (OUT + top3) / 2;
+        t3.splash.position.y = top3;
       }
     });
 
@@ -1315,13 +1347,22 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       dust.position.y = Math.sin(time * 0.25) * 0.12;
     }
 
-    // Sala Giochi: la freccetta vola verso il bersaglio (con leggera parabola)
-    // e i dadi rotolano finché la sezione non è centrata.
+    // Sala Giochi: la freccetta vola in parabola e si CONFICCA dritta nel
+    // centro del bersaglio quando la sezione è centrata (g→1); i dadi
+    // rotolano finché non è centrata.
     const g = giochiAmt * giochiAmt * (3 - 2 * giochiAmt); // smoothstep
     dartArrow.position.lerpVectors(dartFrom, dartTo, g);
-    dartArrow.position.y += Math.sin(g * Math.PI) * 0.22; // arco di volo
-    dartArrow.rotation.z = (1 - g) * -0.35;
+    // arco che culmina un filo prima e scende deciso sul bersaglio
+    const arcT = Math.pow(g, 0.85) * Math.PI;
+    dartArrow.position.y += Math.sin(arcT) * 0.24;
+    // il naso segue la traiettoria (su in salita, giù in discesa); il fattore
+    // (1-g) lo riporta perfettamente dritto una volta piantato (g=1)
+    const arcVel = Math.PI * Math.cos(arcT); // derivata dell'arco
+    dartArrow.rotation.z = (1 - g) * (-0.24 + arcVel * 0.05);
     dartArrow.rotation.y = (1 - g) * 0.4;
+    // "thunk" all'impatto: micro-vibrazione smorzata solo nell'ultimo tratto,
+    // nulla a g=1 (la freccetta resta ferma e piantata)
+    if (g > 0.9 && g < 1) dartArrow.rotation.z += Math.sin(time * 52) * 0.045 * ((1 - g) / 0.1);
     const roll = 1 - g;
     die1.rotation.x += roll * 0.12;
     die1.rotation.z += roll * 0.09;
