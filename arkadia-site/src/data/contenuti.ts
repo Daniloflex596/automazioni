@@ -240,7 +240,7 @@ export const giochi = {
   lista: [
     {
       nome: 'Giochi da tavolo',
-      desc: 'Una selezione sempre pronta al bancone: scegli la scatola e occupate il tavolo.',
+      desc: 'Da Monopoly a Bang!, da Exploding Kittens a Coco Rido: scegli la scatola e occupate il tavolo.',
       icona: 'dado',
     },
     {
@@ -267,12 +267,55 @@ export const giochi = {
 };
 
 /**
- * LA SCAFFALATA — i giochi da tavolo disponibili al bancone.
- * ⚠️ LISTA IN ARRIVO dal titolare: aggiungere qui ogni scatola con
- * { nome, desc?, giocatori?, durata? }. Finché è vuota, /menu mostra
- * una nota "chiedi al bancone".
+ * IL GIOCO DEL MESE — messo in evidenza nella sala giochi della home.
+ * ⚠️ Il titolare può cambiarlo ogni mese: basta aggiornare qui nome e testo.
  */
-export const giochiTavolo: { nome: string; desc?: string; giocatori?: string; durata?: string }[] = [];
+export const giocoDelMese = {
+  nome: 'Exploding Kittens',
+  desc: 'La roulette russa coi gattini: rapido, cattivo, esilarante. Chiedi la scatola al bancone.',
+};
+
+/**
+ * LA SCAFFALATA — i giochi da tavolo disponibili al bancone, raggruppati.
+ * ⚠️ Il titolare può aggiungere/togliere scatole qui: ogni voce è
+ * { nome, desc?, giocatori?, durata? } dentro un gruppo. Se l'array è
+ * vuoto, /menu mostra una nota "chiedi al bancone".
+ */
+export const giochiTavolo: {
+  gruppo: string;
+  giochi: { nome: string; desc?: string; giocatori?: string; durata?: string }[];
+}[] = [
+  {
+    gruppo: 'I grandi classici',
+    giochi: [
+      { nome: 'Monopoly', desc: 'Compra, costruisci e manda in bancarotta gli amici.', giocatori: '2–8', durata: '60–120 min' },
+      { nome: 'Risiko', desc: 'Conquista il mondo un territorio alla volta.', giocatori: '2–6', durata: '90+ min' },
+      { nome: 'Cluedo', desc: 'L’omicidio è servito: scopri chi, dove e con quale arma.', giocatori: '2–6', durata: '45 min' },
+      { nome: 'Trivial Pursuit', desc: 'Sei spicchi di cultura generale: rispondi e completa la ruota.', giocatori: '2–6', durata: '60 min' },
+      { nome: 'Scarabeo', desc: 'Le parole valgono punti: incastra le lettere sul tabellone.', giocatori: '2–4', durata: '45 min' },
+      { nome: 'Scacchi & Dama', desc: 'I due grandi duelli di sempre, testa a testa.', giocatori: '2', durata: 'a piacere' },
+    ],
+  },
+  {
+    gruppo: 'Carte & strategia',
+    giochi: [
+      { nome: '7 Wonders', desc: 'Costruisci la tua civiltà passando le carte ai vicini.', giocatori: '3–7', durata: '30 min' },
+      { nome: 'Bang!', desc: 'Sceriffi contro fuorilegge: la sfida in stile western.', giocatori: '4–7', durata: '30 min' },
+      { nome: 'Exploding Kittens', desc: 'Non pescare la bomba: party game rapido e feroce.', giocatori: '2–5', durata: '15 min' },
+      { nome: 'Carte napoletane & francesi', desc: 'Scopa, briscola, burraco, poker: il mazzo giusto ce l’abbiamo.', giocatori: '2+', durata: 'a piacere' },
+    ],
+  },
+  {
+    gruppo: 'Party & risate',
+    giochi: [
+      { nome: 'Taboo', desc: 'Fai indovinare la parola… senza dire quelle vietate.', giocatori: '4+', durata: '30 min' },
+      { nome: 'Coco Rido', desc: 'Completa la frase più assurda. Vietato ai bacchettoni (18+).', giocatori: '3–12', durata: '30 min' },
+      { nome: 'What Do You Meme?', desc: 'La didascalia più folle vince: da veri social-addicted (18+).', giocatori: '3+', durata: '30 min' },
+      { nome: 'Er Giro de Peppe', desc: 'Il gioco più romano che c’è: trova parcheggio prima degli altri.', giocatori: '2–6', durata: '45 min' },
+      { nome: 'Giochi per bere', desc: 'La scatola giusta per far salire la serata in compagnia.', giocatori: 'gruppo', durata: 'a piacere' },
+    ],
+  },
+];
 
 /**
  * LA TAVOLA — Atto IV. Piatti signature.

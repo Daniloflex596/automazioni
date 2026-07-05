@@ -427,23 +427,34 @@ const menuDesc =
 
         {
           giochiTavolo.length > 0 ? (
-            <ul class="menu-list">
-              {giochiTavolo.map((g) => (
-                <li class="menu-item" data-reveal>
-                  <div class="mi-main">
-                    <h3 class="mi-nome">{g.nome}</h3>
-                    {g.desc && <p class="mi-desc">{g.desc}</p>}
-                    {(g.giocatori || g.durata) && (
-                      <p class="mi-desc mono gioco-meta">
-                        {g.giocatori && <span>{g.giocatori} giocatori</span>}
-                        {g.giocatori && g.durata && ' · '}
-                        {g.durata && <span>{g.durata}</span>}
-                      </p>
-                    )}
-                  </div>
-                </li>
+            <Fragment>
+              {giochiTavolo.map((gruppo) => (
+                <Fragment>
+                  <p class="sub-h" data-reveal>{gruppo.gruppo}</p>
+                  <ul class="menu-list">
+                    {gruppo.giochi.map((g) => (
+                      <li class="menu-item menu-item--gioco" data-reveal>
+                        <div class="mi-main">
+                          <h3 class="mi-nome">{g.nome}</h3>
+                          {g.desc && <p class="mi-desc">{g.desc}</p>}
+                        </div>
+                        {(g.giocatori || g.durata) && (
+                          <span class="mi-prezzo mono gioco-meta">
+                            {g.giocatori && <span>{g.giocatori}</span>}
+                            {g.giocatori && g.durata && ' · '}
+                            {g.durata && <span>{g.durata}</span>}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </Fragment>
               ))}
-            </ul>
+              <p class="giochi-nota" data-reveal>
+                E poi freccette, biliardino, Nintendo Switch e mazzi di carte sempre
+                pronti al bancone. La scelta cambia spesso: chiedi pure.
+              </p>
+            </Fragment>
           ) : (
             <p class="giochi-nota" data-reveal>
               La lista completa della scaffalata sta arrivando qui, scatola per scatola.
@@ -857,6 +868,16 @@ const menuDesc =
     font-size: 0.7rem;
     letter-spacing: var(--tracking-mono);
     text-transform: uppercase;
+  }
+  /* Righe della scaffalata giochi: niente icona 3D né bottone ordina,
+     solo nome+descrizione a sinistra e "giocatori · durata" a destra. */
+  .menu-item--gioco {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+  .menu-item--gioco .gioco-meta {
+    white-space: nowrap;
+    align-self: center;
   }
 
   @media (max-width: 720px) {

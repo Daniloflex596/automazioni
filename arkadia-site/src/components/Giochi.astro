@@ -1,7 +1,7 @@
 ---
 // LA SALA GIOCHI — giochi da tavolo, freccette, Nintendo Switch, carte,
 // biliardino. Icone SVG disegnate in palette (nessun asset esterno).
-import { giochi } from '../data/contenuti';
+import { giochi, giocoDelMese } from '../data/contenuti';
 const base = import.meta.env.BASE_URL.endsWith('/')
   ? import.meta.env.BASE_URL
   : import.meta.env.BASE_URL + '/';
@@ -12,6 +12,12 @@ const base = import.meta.env.BASE_URL.endsWith('/')
     <p class="occhiello" data-reveal>{giochi.occhiello}</p>
     <h2 class="giochi-titolo" data-split>{giochi.titolo}</h2>
     <p class="giochi-intro sottoluce" data-reveal>{giochi.intro}</p>
+
+    <div class="gioco-mese" data-reveal>
+      <span class="gm-badge mono">★ Gioco del mese</span>
+      <h3 class="gm-nome">{giocoDelMese.nome}</h3>
+      <p class="gm-desc">{giocoDelMese.desc}</p>
+    </div>
 
     <ul class="giochi-grid" data-stagger>
       {
@@ -87,6 +93,44 @@ const base = import.meta.env.BASE_URL.endsWith('/')
     margin-top: 1.25rem;
     max-width: 46ch;
     color: var(--schiuma-soft);
+  }
+  /* Gioco del mese: card in evidenza, compatta, sopra la griglia.
+     Il titolare la cambia dal file contenuti.ts (giocoDelMese). */
+  .gioco-mese {
+    margin-top: 1.75rem;
+    max-width: 24rem;
+    border: 1px solid var(--oro);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+    background: color-mix(in srgb, var(--oro) 8%, var(--notte) 55%);
+  }
+  .gm-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+  .gm-nome {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1.15;
+    margin-top: 0.35rem;
+    color: var(--schiuma);
+  }
+  .gm-desc {
+    margin-top: 0.35rem;
+    color: var(--schiuma-soft);
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+  @media (max-width: 560px) {
+    .gioco-mese {
+      max-width: 88%;
+      padding: 0.8rem 0.95rem;
+    }
+    .gm-nome { font-size: 1.2rem; }
+    .gm-desc { font-size: 0.8rem; }
   }
   /* Lista compatta in colonna stretta a sinistra: le card sono leggere e
      semi-trasparenti (niente blur), così la sala giochi 3D dietro — bersaglio,
