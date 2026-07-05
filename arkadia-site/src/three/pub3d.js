@@ -1460,6 +1460,17 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 
     renderer.render(scene, camera);
   }
+
+  // PRE-RISCALDO GPU: qualche render lungo tutto il percorso PRIMA che il
+  // preloader si tolga. Shader compilati e texture caricate subito: il primo
+  // scroll (specialmente su mobile) non incontra micro-scatti da upload
+  // pigro dei pezzi di scena che entrano in campo per la prima volta.
+  [0.06, 0.18, 0.35, 0.55, 0.75, 0.95].forEach((t) => {
+    applyCamera(t);
+    renderer.render(scene, camera);
+  });
+  applyCamera(0);
+
   frame();
 
   // Ridimensiona SOLO se la misura stabile è cambiata davvero (rotazione,
