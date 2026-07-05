@@ -4,7 +4,7 @@ import '@fontsource-variable/fraunces';
 import '@fontsource-variable/inter';
 import '@fontsource/space-mono';
 import '../styles/global.css';
-import { info, meta, orariSchema } from '../data/contenuti';
+import { info, meta } from '../data/contenuti';
 
 // Base path (es. '/automazioni/') → i file in public/ vivono sotto questo prefisso.
 // Normalizzo per avere sempre esattamente uno slash finale.
@@ -13,8 +13,12 @@ const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
 const asset = (p: string) => `${base}${p.replace(/^\//, '')}`;
 // Titolo/descrizione sovrascrivibili per pagina (default: home).
 const { title = meta.titolo, description = meta.descrizione } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+// Canonical con slash finale coerente con sitemap/routing statico.
+const canonicalPath = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonical = new URL(canonicalPath, Astro.site).toString();
 const ogImageUrl = new URL(asset(meta.ogImage), Astro.site).toString();
+// Il menu completo VIVE nel sito (pagina /menu/): lo schema punta lì.
+const menuUrl = new URL(asset('menu/'), Astro.site).toString();
 
 // Schema.org Restaurant — nutre la ricerca locale e i rich result.
 const schema = {
@@ -40,13 +44,19 @@ const schema = {
     latitude: info.geo.lat,
     longitude: info.geo.lng,
   },
-  openingHours: orariSchema,
+  // Orari strutturati (Martedì–Domenica 19:00–24:00; lunedì chiuso).
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    opens: '19:00',
+    closes: '23:59',
+  },
   // NB: niente aggregateRating "self-serving" nello schema — Google ignora (e
   // può penalizzare) le valutazioni che un'attività si attribuisce da sola
   // senza un sistema di recensioni verificabile. Il rating reale resta
   // visibile nella sezione Recensioni, dove cita Google/Facebook.
   sameAs: [info.social.instagram, info.social.facebook],
-  hasMenu: info.menuCompletoUrl,
+  hasMenu: menuUrl,
 };
 ---
 
@@ -76,7 +86,11 @@ const schema = {
     <meta property="og:locale" content="it_IT" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${info.nome} Pub — birreria a Ciampino`} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     <link rel="icon" href={asset('/favicon.svg')} type="image/svg+xml" />
     <link rel="sitemap" href={asset('/sitemap.xml')} />

@@ -15,7 +15,6 @@ import { prenotazione, info, giorniChiusura } from '../data/contenuti';
       class="form"
       data-reveal
       data-whatsapp={info.whatsapp}
-      data-email={info.email}
       data-chiusura={giorniChiusura.join(',')}
       novalidate
     >
@@ -94,6 +93,14 @@ import { prenotazione, info, giorniChiusura } from '../data/contenuti';
       if (giornoChiuso(String(dataInput?.value || ''))) {
         if (nota) nota.textContent = 'Quel giorno siamo chiusi — scegli un’altra data 🙏';
         dataInput?.focus();
+        return;
+      }
+      // Fascia oraria di apertura: 19:00–24:00.
+      const oraInput = form.querySelector('#p-ora') as HTMLInputElement | null;
+      const ora = String(oraInput?.value || '');
+      if (ora && ora < '19:00') {
+        if (nota) nota.textContent = 'Apriamo alle 19:00 — scegli un orario dalle 19:00 alle 24:00 🍺';
+        oraInput?.focus();
         return;
       }
       const d = new FormData(form);

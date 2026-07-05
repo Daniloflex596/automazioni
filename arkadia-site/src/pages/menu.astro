@@ -19,6 +19,10 @@ const tagLabel = { surgelato: 'abbattuto', veg: 'veg', piccante: 'piccante', che
 // Ogni prodotto ha la SUA icona: bicchiere giusto, colore giusto,
 // guarnizione giusta. j() serializza la spec nel data-attribute.
 const j = (o: object) => JSON.stringify(o);
+// Un prezzo è ORDINABILE dal carrello solo se è un numero pulito (es. "5,50").
+// Esclude i placeholder "—" e i prezzi ambigui/doppi (es. "4,50 / 7,00"), così
+// il carrello non calcola mai un importo sbagliato.
+const prezzoOrdinabile = (p: string) => /^\d+([.,]\d+)?$/.test(String(p).trim());
 const icSpina: Record<string, object> = {
   Bionda: { t: 'pinta', c: 'e8c04a' },
   Rossa: { t: 'pinta', c: '96420f' },
@@ -209,7 +213,7 @@ const menuDesc =
                 </dl>
                 <button
                   class="ord-btn mono"
-                  data-ord={j({ n: `${b.nome} (spina)`, f: birre.formati.map((f, i) => (b.prezzi[i] !== '—' ? { f, p: b.prezzi[i] } : null)).filter(Boolean) })}
+                  data-ord={j({ n: `${b.nome} (spina)`, f: birre.formati.map((f, i) => (prezzoOrdinabile(b.prezzi[i]) ? { f, p: b.prezzi[i] } : null)).filter(Boolean) })}
                   aria-label={`Aggiungi ${b.nome} all'ordine`}
                 >+</button>
               </article>

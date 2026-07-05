@@ -1269,6 +1269,9 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   function frame() {
     if (!running) return;
     raf = requestAnimationFrame(frame);
+    // Tab in background: niente render (risparmio GPU/batteria). Il cap su dt
+    // sotto evita salti quando si torna in primo piano.
+    if (document.hidden) return;
     const dtRaw = clock.getDelta();
     const dt = Math.min(dtRaw, 0.05); // cap per le animazioni fisiche
     const time = clock.elapsedTime;

@@ -16,6 +16,10 @@ const KEY = 'arkadia-carrello-v1';
 const wa = document.getElementById('contenuto')?.dataset.whatsapp || '';
 const prezzoNum = (p) => parseFloat(String(p).replace(',', '.')) || 0;
 const eur = (n) => '€ ' + n.toFixed(2).replace('.', ',');
+// Escape difensivo: i nomi/formati arrivano da dati controllati (data-ord),
+// ma passano da localStorage; li ripuliamo prima di inserirli via innerHTML.
+const esc = (s) =>
+  String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 let items = [];
 try {
@@ -98,7 +102,7 @@ function renderPanel() {
   items.forEach((it, idx) => {
     const li = document.createElement('li');
     li.innerHTML = `
-      <span class="crl-n">${it.n}${it.f ? ` <em>${it.f}</em>` : ''}</span>
+      <span class="crl-n">${esc(it.n)}${it.f ? ` <em>${esc(it.f)}</em>` : ''}</span>
       <span class="crl-q">
         <button data-idx="${idx}" data-d="-1" aria-label="Togli uno">−</button>
         <b>${it.q}</b>
@@ -143,7 +147,7 @@ function openPicker(data) {
   data.f.forEach((o) => {
     const b = document.createElement('button');
     b.className = 'crl-opt';
-    b.innerHTML = `<span>${o.f}</span><span class="mono">€ ${o.p}</span>`;
+    b.innerHTML = `<span>${esc(o.f)}</span><span class="mono">€ ${esc(o.p)}</span>`;
     b.addEventListener('click', () => {
       picker.hidden = true;
       overlay.hidden = true;
