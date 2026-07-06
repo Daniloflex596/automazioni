@@ -2,7 +2,12 @@
 // Layout base: <head> con SEO locale, Open Graph, Schema.org Restaurant.
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/inter';
-import '@fontsource/space-mono';
+// Space Mono: solo subset latino (il sito è in italiano) — evita di spedire in
+// dist i tagli cirillico/greco/vietnamita che non useremo. I font variabili qui
+// sopra non hanno un entry "solo latino", quindi restano completi (il browser
+// scarica comunque i subset in lazy via unicode-range: a runtime non cambia).
+import '@fontsource/space-mono/latin-400.css';
+import '@fontsource/space-mono/latin-700.css';
 import '../styles/global.css';
 import { info, meta } from '../data/contenuti';
 
