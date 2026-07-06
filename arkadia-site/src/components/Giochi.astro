@@ -1,0 +1,253 @@
+---
+// LA SALA GIOCHI — giochi da tavolo, freccette, Nintendo Switch, carte,
+// biliardino. Icone SVG disegnate in palette (nessun asset esterno).
+import { giochi, giocoDelMese } from '../data/contenuti';
+const base = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
+---
+
+<section id="giochi" class="giochi" data-scene-act="sala">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>{giochi.occhiello}</p>
+    <h2 class="giochi-titolo" data-split>{giochi.titolo}</h2>
+    <p class="giochi-intro sottoluce" data-reveal>{giochi.intro}</p>
+
+    <div class="gioco-mese" data-reveal>
+      <span class="gm-badge mono">★ Gioco del mese</span>
+      <h3 class="gm-nome">{giocoDelMese.nome}</h3>
+      <p class="gm-desc">{giocoDelMese.desc}</p>
+    </div>
+
+    <ul class="giochi-grid" data-stagger>
+      {
+        giochi.lista.map((g) => (
+          <li class="gioco">
+            <span class="gioco-icona" aria-hidden="true">
+              {g.icona === 'dado' && (
+                <svg viewBox="0 0 48 48" fill="none">
+                  <rect x="8" y="8" width="32" height="32" rx="7" stroke="var(--oro)" stroke-width="2.5" />
+                  <circle cx="17.5" cy="17.5" r="2.6" fill="var(--oro)" />
+                  <circle cx="30.5" cy="17.5" r="2.6" fill="var(--oro)" />
+                  <circle cx="24" cy="24" r="2.6" fill="var(--schiuma)" />
+                  <circle cx="17.5" cy="30.5" r="2.6" fill="var(--oro)" />
+                  <circle cx="30.5" cy="30.5" r="2.6" fill="var(--oro)" />
+                </svg>
+              )}
+              {g.icona === 'freccette' && (
+                <svg viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="17" stroke="var(--oro)" stroke-width="2.5" />
+                  <circle cx="24" cy="24" r="10.5" stroke="var(--schiuma-soft)" stroke-width="2" />
+                  <circle cx="24" cy="24" r="4" fill="var(--rame)" />
+                  <path d="M24 24 L37 11 M33 11 h4 v4" stroke="var(--schiuma)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              )}
+              {g.icona === 'console' && (
+                <svg viewBox="0 0 48 48" fill="none">
+                  <rect x="14.5" y="9" width="19" height="30" rx="3" stroke="var(--oro)" stroke-width="2.5" />
+                  <rect x="6" y="12" width="8.5" height="24" rx="3.5" stroke="var(--schiuma-soft)" stroke-width="2" />
+                  <rect x="33.5" y="12" width="8.5" height="24" rx="3.5" stroke="var(--schiuma-soft)" stroke-width="2" />
+                  <circle cx="10.2" cy="19" r="2.4" fill="var(--luppolo)" />
+                  <circle cx="37.8" cy="29" r="2.4" fill="var(--rame)" />
+                </svg>
+              )}
+              {g.icona === 'carte' && (
+                <svg viewBox="0 0 48 48" fill="none">
+                  <rect x="8" y="11" width="18" height="26" rx="3" stroke="var(--schiuma-soft)" stroke-width="2" transform="rotate(-8 17 24)" />
+                  <rect x="21" y="10" width="18" height="26" rx="3" stroke="var(--oro)" stroke-width="2.5" transform="rotate(7 30 23)" />
+                  <path d="M31.5 19.5 c1.6-2.4 5.2-1.4 5.2 1.3 c0 2-2.7 3.9-5.2 5.9 c-2.5-2-5.2-3.9-5.2-5.9 c0-2.7 3.6-3.7 5.2-1.3 z" fill="var(--rame)" />
+                </svg>
+              )}
+              {g.icona === 'biliardino' && (
+                <svg viewBox="0 0 48 48" fill="none">
+                  <rect x="6" y="14" width="36" height="22" rx="4" stroke="var(--oro)" stroke-width="2.5" />
+                  <path d="M2 20 h44 M2 30 h44" stroke="var(--schiuma-soft)" stroke-width="2" stroke-linecap="round" />
+                  <rect x="13" y="17" width="4.5" height="6.5" rx="1.5" fill="var(--rame)" />
+                  <rect x="28" y="17" width="4.5" height="6.5" rx="1.5" fill="var(--rame)" />
+                  <rect x="20" y="27" width="4.5" height="6.5" rx="1.5" fill="var(--luppolo)" />
+                  <rect x="34" y="27" width="4.5" height="6.5" rx="1.5" fill="var(--luppolo)" />
+                  <circle cx="25" cy="25" r="2" fill="var(--schiuma)" />
+                </svg>
+              )}
+            </span>
+            <div class="gioco-testo">
+              <h3 class="gioco-nome">{g.nome}</h3>
+              <p class="gioco-desc">{g.desc}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <a class="z-cta mono" href={`${base}menu/#cat-giochi`} data-reveal>La scaffalata dei giochi, in carta →</a>
+  </div>
+</section>
+
+<style>
+  .giochi-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.5rem;
+    max-width: 18ch;
+  }
+  .giochi-intro {
+    margin-top: 1.25rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+  }
+  /* Gioco del mese: card in evidenza, compatta, sopra la griglia.
+     Il titolare la cambia dal file contenuti.ts (giocoDelMese). */
+  .gioco-mese {
+    margin-top: 1.75rem;
+    max-width: 24rem;
+    border: 1px solid var(--oro);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+    background: color-mix(in srgb, var(--oro) 8%, var(--notte) 55%);
+  }
+  .gm-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+  .gm-nome {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1.15;
+    margin-top: 0.35rem;
+    color: var(--schiuma);
+  }
+  .gm-desc {
+    margin-top: 0.35rem;
+    color: var(--schiuma-soft);
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+  @media (max-width: 560px) {
+    .gioco-mese {
+      max-width: 88%;
+      padding: 0.8rem 0.95rem;
+    }
+    .gm-nome { font-size: 1.2rem; }
+    .gm-desc { font-size: 0.8rem; }
+  }
+  /* Lista compatta in colonna stretta a sinistra: le card sono leggere e
+     semi-trasparenti (niente blur), così la sala giochi 3D dietro — bersaglio,
+     arcade, biliardino — resta LA protagonista della sezione. */
+  .giochi-grid {
+    list-style: none;
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    max-width: 24rem;
+  }
+  .gioco {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    border: 1px solid var(--linea);
+    border-left: 2px solid var(--oro);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    background: color-mix(in srgb, var(--notte) 38%, transparent);
+    transition: border-color 0.35s, background 0.35s, transform 0.35s var(--ease-out);
+  }
+  .gioco:hover {
+    border-color: var(--oro);
+    background: color-mix(in srgb, var(--notte) 55%, transparent);
+    transform: translateX(4px);
+  }
+  .gioco-icona {
+    display: inline-block;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+  }
+  .gioco-testo {
+    min-width: 0;
+  }
+  .gioco-icona svg {
+    transition: transform 0.5s var(--ease-out);
+    transform-origin: 50% 50%;
+  }
+  /* Ogni gioco prende vita all'hover della card */
+  .gioco:nth-child(1):hover .gioco-icona svg {
+    transform: rotate(360deg); /* il dado tira */
+  }
+  .gioco:nth-child(2):hover .gioco-icona svg {
+    animation: dart-hit 0.5s var(--ease-out); /* la freccetta colpisce */
+  }
+  .gioco:nth-child(3):hover .gioco-icona svg {
+    animation: joycon 0.45s var(--ease-inout); /* i joy-con vibrano */
+  }
+  .gioco:nth-child(4):hover .gioco-icona svg {
+    transform: rotate(-9deg) scale(1.08); /* le carte si aprono a ventaglio */
+  }
+  .gioco:nth-child(5):hover .gioco-icona svg {
+    animation: joycon 0.45s var(--ease-inout); /* le stecche del biliardino */
+  }
+  .z-cta {
+    display: inline-block;
+    margin-top: 2.4rem;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.3rem;
+  }
+  .z-cta:hover { color: var(--oro); }
+  @keyframes dart-hit {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.22); }
+    70% { transform: scale(0.96); }
+    100% { transform: scale(1); }
+  }
+  @keyframes joycon {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2.5px) rotate(-2deg); }
+    75% { transform: translateX(2.5px) rotate(2deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gioco-icona svg,
+    .gioco:hover .gioco-icona svg {
+      transition: none;
+      animation: none;
+      transform: none;
+    }
+  }
+  .gioco-nome {
+    font-size: 1.15rem;
+    line-height: 1.2;
+    text-shadow: 0 1px 10px rgba(14, 10, 7, 0.9);
+  }
+  .gioco-desc {
+    margin-top: 0.3rem;
+    color: var(--schiuma-soft);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    text-shadow: 0 1px 8px rgba(14, 10, 7, 0.9);
+  }
+  @media (max-width: 560px) {
+    .giochi-grid {
+      max-width: 88%;
+      gap: 0.55rem;
+    }
+    .gioco {
+      padding: 0.7rem 0.85rem;
+      background: color-mix(in srgb, var(--notte) 32%, transparent);
+    }
+    .gioco-icona {
+      width: 32px;
+      height: 32px;
+    }
+    .gioco-nome {
+      font-size: 1.05rem;
+    }
+    .gioco-desc {
+      font-size: 0.78rem;
+    }
+  }
+</style>

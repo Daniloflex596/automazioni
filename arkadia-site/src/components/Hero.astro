@@ -1,0 +1,124 @@
+---
+// ATTO I — La Soglia. Il calice 3D (renderizzato dietro, nel canvas #scena)
+// a schermo pieno; nome protagonista con split-text; invito allo scroll.
+import { info } from '../data/contenuti';
+---
+
+<section id="soglia" class="hero" data-scene-act="soglia">
+  <div class="wrap hero-inner">
+    <p class="occhiello" data-reveal>{info.sottotitolo}</p>
+
+    <h1 class="hero-title" data-split aria-label={info.nome}>{info.nome}</h1>
+
+    <p class="hero-claim" data-reveal>{info.claim}</p>
+
+    <a class="hero-scroll" href="#rifugio" aria-label="Scorri per entrare">
+      <span class="mono">scorri per entrare</span>
+      <span class="hero-arrow" aria-hidden="true"></span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    /* Viewport GRANDE (barra indirizzi ritirata): su Chrome/Safari mobile
+       la barra collassa al primo scroll e il viewport cresce di ~60px — se
+       l'hero fosse alto 100svh (schermo CON barra), in quel momento
+       spunterebbe di colpo la sezione sotto: lo "scalino" all'ingresso.
+       Con 100lvh l'hero copre già lo schermo pieno e non si muove nulla. */
+    min-height: 100vh;
+    min-height: 100lvh;
+    display: flex;
+    align-items: center;
+    padding-block: 0;
+  }
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: left;
+    align-items: flex-start;
+  }
+  .hero-title {
+    font-size: var(--fs-display);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--schiuma);
+    filter: drop-shadow(0 8px 40px var(--oro-glow));
+  }
+  /* Accensione da insegna al neon: parte quando il preloader si toglie
+     (body[data-ready]) — così si vede SEMPRE l'accensione, anche da PC dove
+     il 3D ci mette qualche istante a caricare — poi resta a pulsare piano
+     come un LED acceso dietro il bancone. */
+  :global(body[data-ready='true']) .hero-title {
+    animation:
+      neon-on 1.9s steps(1, end) 0.15s both,
+      neon-pulse 3.4s ease-in-out 2s infinite;
+  }
+  @keyframes neon-on {
+    0% { opacity: 0.12; }
+    6% { opacity: 1; }
+    10% { opacity: 0.28; }
+    15% { opacity: 1; }
+    19% { opacity: 0.42; }
+    24% { opacity: 1; }
+    30% { opacity: 0.68; }
+    35% { opacity: 1; }
+    42% { opacity: 0.85; }
+    47%, 100% { opacity: 1; }
+  }
+  /* Pulsare del bagliore dorato (LED che respira) — visibile su ogni schermo */
+  @keyframes neon-pulse {
+    0%, 100% { filter: drop-shadow(0 6px 24px var(--oro-glow)); }
+    50% { filter: drop-shadow(0 8px 52px var(--oro)) drop-shadow(0 0 16px var(--oro-glow)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(body[data-ready='true']) .hero-title {
+      animation: none;
+    }
+  }
+  /* Riflesso dorato sul nome — applicato anche alle parti "splittate" così
+     resta visibile dopo lo split-text (il background-clip va sui figli). */
+  .hero-title,
+  .hero-title :global(.split-inner) {
+    background: linear-gradient(180deg, var(--schiuma) 28%, var(--oro) 135%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-claim {
+    color: var(--schiuma-soft);
+    font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+    font-style: italic;
+    font-family: var(--font-display);
+    max-width: 32ch;
+    white-space: pre-line; /* il claim va a capo tra le due frasi */
+    line-height: 1.35;
+  }
+  .hero-scroll {
+    margin-top: 2rem;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--fs-small);
+    color: var(--schiuma-soft);
+    letter-spacing: var(--tracking-mono);
+  }
+  .hero-arrow {
+    width: 1px;
+    height: 44px;
+    background: linear-gradient(180deg, var(--oro), transparent);
+    position: relative;
+    animation: drip 2.4s var(--ease-inout) infinite;
+  }
+  @keyframes drip {
+    0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+    40% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+    60% { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+    100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-arrow { animation: none; opacity: 0.6; }
+  }
+</style>

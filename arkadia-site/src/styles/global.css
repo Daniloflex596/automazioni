@@ -1,0 +1,778 @@
+/* ============================================================================
+   ARKADIA — STILE GLOBALE
+   ============================================================================ */
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto; /* lo smooth scrolling è gestito da Lenis */
+}
+
+/* Niente movimento orizzontale della pagina su mobile: il viewport è
+   inchiodato all'asse verticale (clip non crea scroller, a differenza di
+   hidden) e l'overscroll laterale non si propaga mai alla pagina. */
+html {
+  overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
+body {
+  background: var(--notte);
+  color: var(--schiuma);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
+/* Lenis: durante lo smooth scroll disattiva lo snap nativo */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 560;
+  line-height: var(--lh-display);
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--oro);
+  color: var(--notte);
+}
+
+/* --- Utilità layout --- */
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.occhiello {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--oro);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.occhiello::before {
+  content: '';
+  width: 2.5rem;
+  height: 1px;
+  background: var(--oro);
+  opacity: 0.7;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-mono);
+}
+
+/* Scena 3D fissa dietro i contenuti */
+#scena {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Scrim direzionale: scurisce il lato del testo (sinistra) per garantire il
+   contrasto AA, lasciando il calice leggibile a destra. */
+#scena::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    /* vignettatura cinematografica */
+    radial-gradient(ellipse at 50% 50%, transparent 62%, rgba(8, 5, 3, 0.38) 100%),
+    linear-gradient(
+      90deg,
+      rgba(14, 10, 7, 0.78) 0%,
+      rgba(14, 10, 7, 0.45) 38%,
+      rgba(14, 10, 7, 0.05) 66%,
+      rgba(14, 10, 7, 0.3) 100%
+    ),
+    radial-gradient(ellipse at 72% 50%, transparent 48%, rgba(14, 10, 7, 0.35) 100%);
+  pointer-events: none;
+}
+
+/* Grana pellicola: velo di rumore animato sopra tutto, quasi impercettibile
+   ma dà la pasta "girato in notturna". SVG turbolenza inline, zero asset. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -60px;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(4) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-24px, 16px); }
+  50% { transform: translate(18px, -22px); }
+  75% { transform: translate(-14px, -12px); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+    opacity: 0.03;
+  }
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+section {
+  position: relative;
+  padding-block: var(--section-pad);
+}
+
+/* Colonna di lettura a sinistra: lascia spazio al calice (destra) su desktop. */
+@media (min-width: 821px) {
+  main > section > .wrap {
+    max-width: 62%;
+    margin-inline: max(var(--gutter), calc((100% - var(--maxw)) / 2 + var(--gutter))) auto;
+    margin-left: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+  }
+}
+
+/* Su mobile il calice è centrato dietro: rinforza lo scrim in verticale. */
+@media (max-width: 820px) {
+  #scena::after {
+    background: linear-gradient(
+      180deg,
+      rgba(14, 10, 7, 0.42) 0%,
+      rgba(14, 10, 7, 0.25) 40%,
+      rgba(14, 10, 7, 0.48) 100%
+    );
+  }
+  #scena-canvas {
+    opacity: 0.75;
+  }
+}
+
+/* --- Reveal di base (progressive enhancement) --- */
+/* Blur-in cinematografico: gli elementi "mettono a fuoco" entrando in scena. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(6px);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 0.9s var(--ease-out),
+    filter 0.9s var(--ease-out);
+  will-change: opacity, transform, filter;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+/* Sottotitoli di sezione "illuminati": quando entrano in scena si accendono
+   come sotto la lampada del pub — più leggibili sopra la scena 3D. */
+.sottoluce.is-visible {
+  animation: sottoluce-on 1.4s var(--ease-out) 0.25s both;
+}
+@keyframes sottoluce-on {
+  from {
+    color: var(--schiuma-soft);
+    text-shadow: 0 1px 10px rgba(14, 10, 7, 0.9), 0 0 0 rgba(232, 176, 75, 0);
+  }
+  to {
+    color: #eee1c6;
+    text-shadow: 0 1px 10px rgba(14, 10, 7, 0.9), 0 0 22px rgba(232, 176, 75, 0.34);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sottoluce.is-visible {
+    animation: none;
+    color: #eee1c6;
+    text-shadow: 0 1px 10px rgba(14, 10, 7, 0.9);
+  }
+}
+/* Stagger: i figli diretti di un contenitore [data-stagger] entrano a cascata. */
+[data-stagger] > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+[data-stagger].is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+[data-stagger].is-visible > *:nth-child(1) { transition-delay: 0.05s; }
+[data-stagger].is-visible > *:nth-child(2) { transition-delay: 0.13s; }
+[data-stagger].is-visible > *:nth-child(3) { transition-delay: 0.21s; }
+[data-stagger].is-visible > *:nth-child(4) { transition-delay: 0.29s; }
+[data-stagger].is-visible > *:nth-child(5) { transition-delay: 0.37s; }
+[data-stagger].is-visible > *:nth-child(6) { transition-delay: 0.45s; }
+[data-stagger].is-visible > *:nth-child(7) { transition-delay: 0.53s; }
+[data-stagger].is-visible > *:nth-child(8) { transition-delay: 0.61s; }
+
+/* --- Progress "pinta": indicatore di scroll a bordo destro --- */
+/* La pinta si riempie con lo scroll: la firma del sito anche nella UI. */
+#pinta-progress {
+  position: fixed;
+  right: clamp(0.6rem, 2vw, 1.4rem);
+  bottom: clamp(1rem, 4vh, 2rem);
+  width: 26px;
+  height: 40px;
+  z-index: 40;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s, transform 0.25s var(--ease-out);
+}
+body[data-ready='true'] #pinta-progress:hover {
+  transform: scale(1.12);
+}
+body[data-ready='true'] #pinta-progress {
+  opacity: 0.9;
+  pointer-events: auto;
+}
+#pinta-progress .pp-glass {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--schiuma-soft);
+  border-radius: 3px 3px 9px 9px;
+  overflow: hidden;
+  background: rgba(23, 16, 11, 0.55);
+  backdrop-filter: blur(3px);
+}
+#pinta-progress .pp-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0%;
+  background: linear-gradient(180deg, var(--oro), var(--ambra));
+}
+#pinta-progress .pp-foam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--schiuma);
+  border-radius: 50%;
+  transform: translateY(-1.5px);
+  opacity: 0;
+}
+
+/* --- CTA sheen: bagliore che attraversa i bottoni primari all'hover --- */
+.btn-primary,
+.topbar-cta {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after,
+.topbar-cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -80%;
+  width: 55%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.55s var(--ease-out);
+  pointer-events: none;
+}
+.btn-primary:hover::after,
+.topbar-cta:hover::after {
+  left: 125%;
+}
+
+/* Split-text: ogni parola sale come schiuma quando la sezione entra in scena */
+.split-line {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* Spazio ABBONDANTE sotto la baseline per i discendenti (g, p, q, j) del
+     serif Fraunces con line-height 0.95: l'overflow:hidden clippa al bordo
+     del padding-box, quindi il padding e' zona VISIBILE. Il margin negativo
+     annulla il padding cosi' interlinea e altezza restano identiche. */
+  padding-bottom: 0.36em;
+  margin-bottom: -0.36em;
+}
+.split-inner {
+  display: inline-block;
+  /* translateY accoppiato al padding: il buffer nascosto (1.50-1.00)*0.95em
+     ≈ 0.48em deve essere >= padding-bottom, altrimenti la cima delle parole
+     spunterebbe dalla maschera prima del reveal. */
+  transform: translateY(150%);
+  transition: transform 0.9s var(--ease-out);
+  will-change: transform;
+}
+[data-split].is-visible .split-inner {
+  transform: translateY(0);
+}
+
+/* --- Focus visibile (accessibilità) --- */
+:focus-visible {
+  outline: 2px solid var(--oro);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* --- Rispetto di prefers-reduced-motion --- */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-stagger] > *,
+  .split-inner {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+  .btn-primary::after,
+  .topbar-cta::after {
+    display: none !important;
+  }
+  #pinta-progress {
+    display: none !important;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip-link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--oro);
+  color: var(--notte);
+  padding: 0.75rem 1.25rem;
+  z-index: 100;
+  font-weight: 600;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* --- Liste menu nel mondo 3D (zone della home) --- */
+.mlista {
+  list-style: none;
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+  display: grid;
+  gap: 0;
+}
+.mriga {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.25rem;
+  padding: 1.1rem 0.75rem;
+  margin-inline: -0.75rem;
+  border-top: 1px solid var(--linea);
+  border-radius: var(--radius);
+  transition: background 0.35s, box-shadow 0.35s;
+}
+.mriga:last-child {
+  border-bottom: 1px solid var(--linea);
+}
+.mriga:hover {
+  background: linear-gradient(90deg, rgba(232, 176, 75, 0.07), transparent 70%);
+  box-shadow: inset 2px 0 0 var(--oro);
+}
+.mriga:hover .mnome {
+  color: var(--oro);
+}
+.mnome {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.3s;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.mdesc {
+  margin-top: 0.25rem;
+  color: var(--schiuma-soft);
+  font-size: 0.92rem;
+  max-width: 46ch;
+}
+.mprezzo {
+  color: var(--oro);
+  font-size: 0.98rem;
+  white-space: nowrap;
+}
+.mprezzo em {
+  font-style: normal;
+  color: var(--schiuma-soft);
+  font-size: 0.85rem;
+}
+.msub {
+  margin-top: 2.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--oro);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.msub span {
+  color: var(--schiuma-soft);
+  letter-spacing: var(--tracking-mono);
+}
+.mtag {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--notte);
+  background: var(--oro);
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+}
+.mtag--verde {
+  background: var(--luppolo);
+  color: var(--schiuma);
+}
+
+/* ============================================================
+   CARRELLO / ORDINA — UI iniettata da carrello.js (feature isolata:
+   rimuovi carrello.js, i bottoni .ord-btn e questo blocco per spegnerla)
+   ============================================================ */
+#crl-fab {
+  position: fixed;
+  left: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 45;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  border: none;
+  background: var(--oro);
+  color: var(--notte);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(232, 176, 75, 0.35);
+  transition: transform 0.25s var(--ease-out), background 0.25s;
+}
+#crl-fab:hover { background: var(--schiuma); }
+#crl-fab.has-items { animation: crl-pop 0.35s var(--ease-out); }
+@keyframes crl-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+#crl-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  padding-inline: 5px;
+  border-radius: 999px;
+  background: var(--rame);
+  color: var(--schiuma);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  display: grid;
+  place-items: center;
+}
+#crl-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 46;
+  background: rgba(10, 7, 4, 0.55);
+  backdrop-filter: blur(2px);
+}
+#crl-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 47;
+  width: min(400px, 100vw);
+  background: var(--notte-2, #17110b);
+  border-left: 1px solid var(--linea);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(102%);
+  transition: transform 0.3s var(--ease-out);
+  overflow: hidden;
+}
+#crl-panel.is-open { transform: none; }
+.crl-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--linea);
+}
+.crl-head h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--schiuma);
+}
+#crl-close {
+  background: none;
+  border: none;
+  color: var(--schiuma-soft);
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+#crl-close:hover { color: var(--oro); }
+#crl-list {
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 1.25rem;
+}
+#crl-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-block: 0.8rem;
+  border-bottom: 1px solid var(--linea);
+}
+.crl-n {
+  flex: 1;
+  color: var(--schiuma);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+.crl-n em {
+  color: var(--oro);
+  font-style: normal;
+  font-size: 0.8rem;
+}
+.crl-q {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.crl-q button {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--linea);
+  background: transparent;
+  color: var(--schiuma);
+  cursor: pointer;
+  line-height: 1;
+}
+.crl-q button:hover { border-color: var(--oro); color: var(--oro); }
+.crl-q b {
+  min-width: 1.2ch;
+  text-align: center;
+  color: var(--schiuma);
+  font-family: var(--font-mono);
+}
+.crl-p {
+  color: var(--oro);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+#crl-vuoto {
+  padding: 1.5rem 1.25rem;
+  color: var(--schiuma-soft);
+  font-size: 0.95rem;
+}
+#crl-vuoto b { color: var(--oro); }
+.crl-foot {
+  padding: 1rem 1.25rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--linea);
+  display: grid;
+  gap: 0.7rem;
+}
+.crl-tot {
+  display: flex;
+  justify-content: space-between;
+  color: var(--schiuma-soft);
+}
+.crl-tot strong {
+  color: var(--schiuma);
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+}
+.crl-btn-oro {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.95rem 1.2rem;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--oro);
+  color: var(--notte);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.2s var(--ease-out);
+}
+.crl-btn-oro:hover { background: var(--schiuma); }
+.crl-btn-oro:active { transform: scale(0.98); }
+.crl-btn-oro:disabled { opacity: 0.45; cursor: default; }
+.crl-nota {
+  font-size: 0.72rem;
+  color: var(--schiuma-soft);
+  text-align: center;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+#crl-svuota {
+  background: none;
+  border: none;
+  color: var(--schiuma-soft);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+#crl-svuota:hover { color: var(--rame); }
+#crl-picker {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 48;
+  width: min(380px, calc(100vw - 2rem));
+  background: var(--notte-2, #17110b);
+  border: 1px solid var(--linea);
+  border-radius: calc(var(--radius) * 2);
+  padding: 1.1rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+#crl-picker-nome {
+  font-family: var(--font-display);
+  color: var(--schiuma);
+  font-size: 1.15rem;
+  margin-bottom: 0.8rem;
+}
+#crl-picker-opts {
+  display: grid;
+  gap: 0.5rem;
+}
+.crl-opt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--schiuma);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.crl-opt:hover {
+  border-color: var(--oro);
+  background: rgba(232, 176, 75, 0.08);
+}
+.crl-opt .mono { color: var(--oro); }
+#crl-picker-chiudi {
+  margin-top: 0.8rem;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--schiuma-soft);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+#crl-picker-chiudi:hover { color: var(--oro); }
+#crl-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%) translateY(8px);
+  z-index: 49;
+  background: var(--notte-2, #17110b);
+  border: 1px solid var(--oro);
+  color: var(--schiuma);
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s var(--ease-out);
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: calc(100vw - 2rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#crl-toast.is-on {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+@media (max-width: 720px) {
+  #crl-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 82svh;
+    border-left: none;
+    border-top: 1px solid var(--linea);
+    border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
+    transform: translateY(102%);
+  }
+  #crl-panel.is-open { transform: none; }
+}

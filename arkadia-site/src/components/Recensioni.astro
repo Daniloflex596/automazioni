@@ -1,0 +1,171 @@
+---
+// DICONO DI NOI — recensioni reali (Google), trascritte testualmente.
+// Fondale 3D: lo sguardo panoramico sul locale (stazione "il luogo").
+// La CTA porta alle recensioni Google (coerente con rating e citazioni).
+const GOOGLE_REVIEWS =
+  'https://www.google.com/maps/search/?api=1&query=Arkadia+Pub+Ciampino';
+const RECENSIONI = [
+  {
+    testo: 'Miglior Pub della zona a mani basse.',
+    autore: 'Alessandro F.',
+    fonte: 'Google',
+    top: true,
+  },
+  {
+    testo:
+      'Locale stupendo, personale educatissimo, si mangia da dio. Edoardo il proprietario è gentilissimo e disponibile: da andarci tutte le settimane.',
+    autore: 'Marco L.',
+    fonte: 'Google',
+  },
+  {
+    testo: 'Ambiente familiare, ottime birre, buon cibo cucinato al momento: sentirsi a casa.',
+    autore: 'Diego S.',
+    fonte: 'Google',
+  },
+  {
+    testo:
+      'Birre non comuni e piatti ricercati e di qualità. Il pub che non ti aspetti a Ciampino, ma che se non ci fosse se ne sentirebbe la mancanza.',
+    autore: 'Federico P.',
+    fonte: 'Google',
+  },
+  {
+    testo:
+      'Birre sia alla spina che in bottiglia, di qualità e sempre particolari. Panini con hamburger e patate fritte abbondanti e artigianali.',
+    autore: 'Fabrizio D.',
+    fonte: 'Google',
+  },
+  {
+    testo:
+      'Panini ottimi: si riescono a distinguere tutti gli ingredienti di prima qualità. Il personale è allo stesso modo cordiale e rapido.',
+    autore: 'Maria Rita R.',
+    fonte: 'Google',
+  },
+];
+---
+
+<section id="recensioni" class="recensioni" data-scene-act="recensioni">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>Dicono di noi</p>
+    <h2 class="rec-titolo" data-split>Parola a chi c'è passato</h2>
+    <p class="rec-rating" data-reveal>
+      <span class="rec-stelle" aria-hidden="true">★★★★★</span>
+      <span><strong>4,6 su 5</strong> — più di 150 recensioni su Google</span>
+    </p>
+
+    <ul class="rec-grid" data-stagger>
+      {
+        RECENSIONI.map((r) => (
+          <li class:list={['rec-card', { 'rec-card--top': r.top }]}>
+            <p class="rec-stelline mono" aria-label="5 stelle su 5">★★★★★</p>
+            <blockquote class="rec-testo">«{r.testo}»</blockquote>
+            <p class="rec-autore mono">{r.autore} · su {r.fonte}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <a class="rec-cta mono" href={GOOGLE_REVIEWS} target="_blank" rel="noopener">
+      Leggi tutte le recensioni su Google →
+    </a>
+  </div>
+</section>
+
+<style>
+  .recensioni {
+    padding-block: clamp(4rem, 12vh, 8rem);
+  }
+  .rec-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  .rec-rating {
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--schiuma-soft);
+  }
+  .rec-rating strong {
+    color: var(--schiuma);
+  }
+  .rec-stelle {
+    color: var(--oro);
+    letter-spacing: 0.2em;
+    font-size: 1.1rem;
+    text-shadow: 0 0 18px rgba(232, 176, 75, 0.55);
+  }
+  .rec-grid {
+    list-style: none;
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1rem, 2.5vw, 1.5rem);
+  }
+  .rec-card {
+    border: 1px solid var(--linea);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.6rem;
+    background: color-mix(in srgb, var(--notte) 55%, transparent);
+    backdrop-filter: blur(4px);
+    transition: border-color 0.35s, transform 0.35s var(--ease-out), box-shadow 0.35s;
+  }
+  .rec-card:hover {
+    border-color: rgba(232, 176, 75, 0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  }
+  /* La citazione-manifesto occupa tutta la riga e parla più forte */
+  .rec-card--top {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding-block: 2.2rem;
+    background: linear-gradient(180deg, rgba(232, 176, 75, 0.08), color-mix(in srgb, var(--notte) 55%, transparent));
+  }
+  .rec-card--top .rec-testo {
+    font-size: clamp(1.5rem, 3.6vw, 2.2rem);
+    max-width: none;
+  }
+  .rec-stelline {
+    color: var(--oro);
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+  }
+  .rec-testo {
+    margin-top: 0.9rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.5;
+    color: var(--schiuma);
+    max-width: 52ch;
+  }
+  .rec-autore {
+    margin-top: 1rem;
+    font-size: 0.68rem;
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+  }
+  .rec-cta {
+    display: inline-block;
+    margin-top: 2.5rem;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.3rem;
+  }
+  .rec-cta:hover {
+    color: var(--oro);
+  }
+  @media (max-width: 720px) {
+    .rec-grid {
+      grid-template-columns: 1fr;
+    }
+    .rec-card--top {
+      text-align: left;
+      padding-block: 1.7rem;
+    }
+  }
+</style>

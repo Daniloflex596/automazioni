@@ -1,0 +1,49 @@
+/* ============================================================================
+   ARKADIA — DESIGN TOKENS
+   Palette derivata dal soggetto: la birra e la sera a Ciampino.
+   ============================================================================ */
+:root {
+  /* --- Colori (vedi contenuti/piano per la motivazione di ognuno) --- */
+  --notte: #0e0a07;   /* pub di sera: sfondo dominante */
+  --notte-2: #17100b; /* elevazione leggera */
+  --ambra: #c77b29;   /* birra ambrata di Fiandra: il liquido protagonista */
+  --oro: #e8b04b;     /* ora d'oro / luppolo dorato: accenti e luci */
+  --schiuma: #f4e9d0; /* schiuma: testo e respiro */
+  --rame: #7a2e1e;    /* spina in rame: accento caldo secondario */
+  --luppolo: #3b5e4a; /* verde luppolo: freschezza / gluten-free / km0 */
+
+  /* Derivati */
+  --schiuma-soft: rgba(244, 233, 208, 0.66);
+  --schiuma-faint: rgba(244, 233, 208, 0.14);
+  --oro-glow: rgba(232, 176, 75, 0.35);
+  --linea: rgba(244, 233, 208, 0.16);
+
+  /* --- Tipografia --- */
+  --font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'SFMono-Regular', ui-monospace, monospace;
+
+  /* Scala fluida */
+  --fs-display: clamp(3rem, 12vw, 9rem);
+  --fs-h1: clamp(2.6rem, 8vw, 6rem);
+  --fs-h2: clamp(2rem, 5vw, 3.5rem);
+  --fs-h3: 1.5rem;
+  --fs-body: 1.125rem;
+  --fs-small: 0.875rem;
+
+  --lh-display: 0.95;
+  --lh-body: 1.6;
+
+  --tracking-wide: 0.28em;
+  --tracking-mono: 0.14em;
+
+  /* --- Spazi & layout --- */
+  --gutter: clamp(1.25rem, 5vw, 5rem);
+  --maxw: 1280px;
+  --section-pad: clamp(5rem, 12vh, 11rem);
+  --radius: 4px;
+
+  /* --- Motion --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+}

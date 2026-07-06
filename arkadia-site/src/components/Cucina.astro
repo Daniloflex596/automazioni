@@ -1,0 +1,76 @@
+---
+// ZONA CUCINA — i tre panini più in voga del mese. L'esperienza è nella
+// scena 3D: i tre hamburger sono ricostruiti SUL TAVOLO (pane diverso per
+// ognuno) e scrollando si aprono strato per strato mentre ci passi vicino.
+import { hamburger, categorieMenu } from '../data/contenuti';
+// I tre panini più in voga del mese (evidenza in home; lista completa su /menu)
+const IN_VOGA = [
+  { ...hamburger[0], frase: 'Il più scelto in assoluto: chi lo prova, lo riordina.' },
+  { ...hamburger[1], frase: 'Per chi non ha paura della bomba calabra.' },
+  { ...hamburger[3], frase: 'Tre formaggi e bacon: il comfort assoluto.' },
+];
+const base = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
+---
+
+<section id="cucina" class="cucina" data-scene-act="cucina">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>La Cucina</p>
+    <h2 class="z-titolo" data-split>Duecento grammi di fama</h2>
+    <p class="z-slogan sottoluce" data-reveal>
+      I tre panini che questo mese si sono presi la scena, sempre con patatine. Gli altri — dal Cocò al Bimbo Burger — ti aspettano in carta.
+    </p>
+
+    <ul class="mlista" data-stagger>
+      {
+        IN_VOGA.map((v) => (
+          <li class="mriga">
+            <div>
+              <h3 class="mnome">
+                {v.nome}
+                {v.badge && <span class="mtag">{v.badge}</span>}
+                {v.tag?.includes('piccante') && <span class="mtag">piccante</span>}
+              </h3>
+              {v.desc && <p class="mdesc">{v.desc}</p>}
+              <p class="mfrase">«{v.frase}»</p>
+            </div>
+            <span class="mprezzo mono">€ {v.prezzo}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <a class="z-cta mono" href={`${base}menu/#cat-hamburger`}>Tutti gli hamburger in carta →</a>
+  </div>
+</section>
+
+<style>
+  .z-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  .z-slogan {
+    margin-top: 1rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+  }
+  .mfrase {
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--oro);
+    font-size: 0.95rem;
+  }
+  .z-cta {
+    display: inline-block;
+    margin-top: 2.2rem;
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.3rem;
+  }
+  .z-cta:hover { color: var(--oro); }
+</style>

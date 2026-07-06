@@ -1,0 +1,114 @@
+---
+import { info, orari } from '../data/contenuti';
+const anno = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <p class="footer-nome">{info.nome}</p>
+      <p class="footer-claim mono">{info.sottotitolo}</p>
+    </div>
+
+    <div class="footer-col">
+      <h3 class="footer-h">Dove</h3>
+      <p>{info.indirizzo}</p>
+      <p>{info.cap} {info.citta} ({info.provincia})</p>
+    </div>
+
+    <div class="footer-col">
+      <h3 class="footer-h">Orari</h3>
+      {orari.map((o) => <p>{o.giorni}: <span class="mono">{o.valore}</span></p>)}
+    </div>
+
+    <div class="footer-col">
+      <h3 class="footer-h">Contatti</h3>
+      <p><a href={`tel:${info.telefonoHref}`}>{info.telefono}</a></p>
+      <p><a href={`https://wa.me/${info.whatsapp}`} target="_blank" rel="noopener">WhatsApp</a></p>
+      <p class="footer-social">
+        <a href={info.social.instagram} target="_blank" rel="noopener">Instagram</a>
+        <a href={info.social.facebook} target="_blank" rel="noopener">Facebook</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap footer-bottom mono">
+    <span>© {anno} {info.nome} Pub{info.partitaIva && info.partitaIva !== '00000000000' ? ` · P.IVA ${info.partitaIva}` : ''}</span>
+    <span>Un rifugio a Ciampino dal {info.annoFondazione}</span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    z-index: 2; /* copre la scena 3D fissa sottostante */
+    border-top: 1px solid var(--linea);
+    padding-block: clamp(3rem, 8vh, 5rem) 2rem;
+    background: var(--notte);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 2.5rem;
+  }
+  .footer-nome {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+  .footer-claim {
+    font-size: var(--fs-small);
+    color: var(--schiuma-soft);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+  .footer-h {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+    margin-bottom: 1rem;
+  }
+  .footer-col p {
+    font-size: 0.95rem;
+    color: var(--schiuma);
+    margin-bottom: 0.4rem;
+  }
+  .footer-col a:hover {
+    color: var(--oro);
+  }
+  .footer-social {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  .footer-social a {
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 2px;
+  }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--linea);
+    font-size: 0.75rem;
+    color: rgba(244, 233, 208, 0.72); /* AA su fondo notte */
+  }
+  @media (max-width: 760px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 460px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

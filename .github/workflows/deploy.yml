@@ -1,0 +1,48 @@
+name: Deploy Arkadia su GitHub Pages
+
+# Builda il sito Astro in arkadia-site/ e lo pubblica su GitHub Pages.
+# Prerequisito (una tantum): Settings → Pages → Build and deployment →
+# Source = "GitHub Actions".
+
+on:
+  push:
+    branches:
+      - main
+      - claude/restaurant-scrollytelling-3d-bwuk4w
+    paths:
+      - 'arkadia-site/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un solo deploy alla volta; non annulla un deploy in corso.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build con Astro
+        uses: withastro/action@v3
+        with:
+          path: ./arkadia-site
+          node-version: 20
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy su GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

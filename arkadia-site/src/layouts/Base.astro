@@ -1,0 +1,118 @@
+---
+// Layout base: <head> con SEO locale, Open Graph, Schema.org Restaurant.
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/inter';
+import '@fontsource/space-mono';
+import '../styles/global.css';
+import { info, meta } from '../data/contenuti';
+
+// Base path (es. '/automazioni/') → i file in public/ vivono sotto questo prefisso.
+// Normalizzo per avere sempre esattamente uno slash finale.
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const asset = (p: string) => `${base}${p.replace(/^\//, '')}`;
+// Titolo/descrizione sovrascrivibili per pagina (default: home).
+const { title = meta.titolo, description = meta.descrizione } = Astro.props;
+// Canonical con slash finale coerente con sitemap/routing statico.
+const canonicalPath = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonical = new URL(canonicalPath, Astro.site).toString();
+const ogImageUrl = new URL(asset(meta.ogImage), Astro.site).toString();
+// Il menu completo VIVE nel sito (pagina /menu/): lo schema punta lì.
+const menuUrl = new URL(asset('menu/'), Astro.site).toString();
+
+// Schema.org Restaurant — nutre la ricerca locale e i rich result.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Restaurant',
+  name: `${info.nome} Pub`,
+  description: meta.descrizione,
+  servesCuisine: ['Pub', 'Hamburger', 'Birreria'],
+  priceRange: info.fasciaPrezzo,
+  url: canonical,
+  telephone: info.telefonoHref,
+  image: ogImageUrl,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: info.indirizzo,
+    addressLocality: info.citta,
+    postalCode: info.cap,
+    addressRegion: info.provincia,
+    addressCountry: 'IT',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: info.geo.lat,
+    longitude: info.geo.lng,
+  },
+  // Orari strutturati (Martedì–Domenica 19:00–24:00; lunedì chiuso).
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    opens: '19:00',
+    closes: '23:59',
+  },
+  // NB: niente aggregateRating "self-serving" nello schema — Google ignora (e
+  // può penalizzare) le valutazioni che un'attività si attribuisce da sola
+  // senza un sistema di recensioni verificabile. Il rating reale resta
+  // visibile nella sezione Recensioni, dove cita Google/Facebook.
+  sameAs: [info.social.instagram, info.social.facebook],
+  hasMenu: menuUrl,
+};
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Disattiva il ripristino automatico dello scroll il prima possibile:
+         al refresh si riparte sempre dall'alto (la logica fine è negli script
+         di pagina). Inline nell'head per battere sul tempo il browser. -->
+    <script is:inline>
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    </script>
+    <link rel="canonical" href={canonical} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={meta.keywords} />
+    <meta name="theme-color" content="#0e0a07" />
+    <meta name="author" content={`${info.nome} Pub`} />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="restaurant" />
+    <meta property="og:site_name" content={`${info.nome} Pub`} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${info.nome} Pub — birreria a Ciampino`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <link rel="icon" href={asset('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={asset('/sitemap.xml')} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+    <!-- Progressive enhancement: senza JavaScript i contenuti "rivelati allo
+         scroll" (opacity:0 in attesa della classe .is-visible) resterebbero
+         invisibili. Con JS disattivato li forziamo visibili. -->
+    <noscript>
+      <style>
+        [data-reveal],
+        [data-stagger] > *,
+        .split-inner {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenuto">Salta al contenuto</a>
+    <slot />
+  </body>
+</html>

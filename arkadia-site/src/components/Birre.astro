@@ -1,0 +1,162 @@
+---
+// ATTO III — La Spina. Climax dell'elemento 3D: qui avviene la mescita.
+// Le birre alla spina reali, con la griglia formati/prezzo (tap-list vera).
+import { birre } from '../data/contenuti';
+// Base path normalizzato con slash finale (BASE_URL può arrivare senza).
+const base = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
+---
+
+<section id="spina" class="spina" data-scene-act="spina">
+  <div class="wrap">
+    <p class="occhiello" data-reveal>{birre.occhiello}</p>
+    <h2 class="spina-titolo" data-split>Le tre che scorrono di più</h2>
+    <p class="spina-intro sottoluce" data-reveal>
+      Bionde belghe, rosse di carattere e una novità che cambia ogni mese: questo è l'assaggio del bancone. In carta ne vivono più di venti, tra spina e bottiglia.
+    </p>
+
+    <ul class="taplist" data-stagger>
+      {
+        [
+          { nome: 'Birra del Mese', stile: 'La novità in spina', prezzo: '4,50 – 7,00', novita: true, nota: 'Cambia di continuo: chiedi qual è quella di stasera.' },
+          { nome: 'La Rossa', stile: 'Ambrata alla spina', prezzo: '5,30 – 8,00', nota: 'Maltata e tostata, il carattere del bancone.' },
+          { nome: 'Chouffe Red', stile: 'Alla ciliegia · 8° · 33cl', prezzo: '7,00', novita: true, nota: 'La più particolare in bottiglia: rossa, belga, alla ciliegia.' },
+        ].map((b) => (
+          <li class="tap">
+            <div class="tap-head">
+              <h3 class="tap-nome">
+                {b.nome}
+                {b.novita && <span class="tap-badge">novità</span>}
+              </h3>
+              <p class="tap-stile mono">{b.stile}</p>
+              <p class="tap-nota">{b.nota}</p>
+            </div>
+            <span class="tap-prezzo mono">€ {b.prezzo}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <a class="spina-cta" href={`${base}menu/`} data-reveal>
+      <span>Apri la carta delle birre</span>
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .spina-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.5rem;
+  }
+  .spina-intro {
+    max-width: 46ch;
+    margin-top: 1.25rem;
+    color: var(--schiuma-soft);
+  }
+  .taplist {
+    list-style: none;
+    margin-top: clamp(3rem, 8vh, 5rem);
+    display: grid;
+    gap: 0;
+  }
+  .tap {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-block: 1.75rem;
+    padding-inline: 0.75rem;
+    margin-inline: -0.75rem;
+    border-top: 1px solid var(--linea);
+    border-radius: var(--radius);
+    transition: background 0.35s, box-shadow 0.35s;
+  }
+  .tap:last-of-type {
+    border-bottom: 1px solid var(--linea);
+  }
+  /* Hover: la riga si accende come sotto la luce della lampada */
+  .tap:hover {
+    background: linear-gradient(90deg, rgba(232, 176, 75, 0.07), transparent 70%);
+    box-shadow: inset 2px 0 0 var(--oro);
+  }
+  .tap:hover .tap-nome {
+    color: var(--oro);
+  }
+  .tap-nome {
+    transition: color 0.3s;
+  }
+  .tap-prezzo {
+    color: var(--oro);
+    font-size: 1.05rem;
+    white-space: nowrap;
+  }
+  .tap-nome {
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .tap-badge {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--notte);
+    background: var(--oro);
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+  }
+  .tap-stile {
+    font-size: var(--fs-small);
+    color: var(--oro);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+  .tap-nota {
+    margin-top: 0.6rem;
+    color: var(--schiuma-soft);
+    max-width: 48ch;
+  }
+  /* Griglia formati/prezzi: la scheda tecnica reale della spina */
+  .tap-formati {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+  }
+  .tap-formati div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .tap-formati dt {
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+    opacity: 0.7;
+  }
+  .tap-formati dd {
+    font-size: 1rem;
+    color: var(--schiuma);
+  }
+  .spina-cta {
+    margin-top: 3rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma);
+    border-bottom: 1px solid var(--oro);
+    padding-bottom: 0.35rem;
+    transition: gap 0.3s var(--ease-out), color 0.3s;
+  }
+  .spina-cta:hover {
+    gap: 1.25rem;
+    color: var(--oro);
+  }
+</style>

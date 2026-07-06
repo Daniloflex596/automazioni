@@ -1,0 +1,151 @@
+---
+// ATTO V — Dentro Arkadia. Atmosfera, orari, indirizzo, mappa stilizzata (SVG).
+import { luogo, orari, info } from '../data/contenuti';
+---
+
+<section id="luogo" class="luogo" data-scene-act="luogo">
+  <div class="wrap luogo-grid">
+    <div class="luogo-testo">
+      <p class="occhiello" data-reveal>{luogo.occhiello}</p>
+      <h2 class="luogo-titolo" data-split>{luogo.titolo}</h2>
+      <p class="luogo-desc" data-reveal>{luogo.descrizione}</p>
+
+      <dl class="orari" data-reveal>
+        {
+          orari.map((o) => (
+            <div class:list={['orario-riga', { chiuso: o.chiuso }]}>
+              <dt>{o.giorni}</dt>
+              <dd class="mono">{o.valore}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <address class="indirizzo" data-reveal>
+        {info.indirizzo} · {info.cap} {info.citta} ({info.provincia})
+      </address>
+    </div>
+
+    <a
+      class="mappa"
+      href={luogo.mapsUrl}
+      target="_blank"
+      rel="noopener"
+      aria-label={`Apri ${info.nome} in Google Maps`}
+      data-reveal
+    >
+      <!-- Mappa stilizzata in palette (non l'embed Google grezzo) -->
+      <svg viewBox="0 0 400 400" role="img" aria-hidden="true" class="mappa-svg">
+        <rect width="400" height="400" fill="var(--notte-2)" />
+        <g stroke="var(--linea)" stroke-width="1" fill="none">
+          <path d="M0 120 H400 M0 250 H400 M120 0 V400 M270 0 V400" />
+          <path d="M0 60 L160 220 M400 90 L250 300" opacity="0.6" />
+        </g>
+        <circle cx="200" cy="185" r="70" fill="var(--oro-glow)" />
+        <g class="mappa-pin">
+          <path
+            d="M200 130 c-24 0 -42 18 -42 41 c0 30 42 64 42 64 s42 -34 42 -64 c0 -23 -18 -41 -42 -41 z"
+            fill="var(--ambra)"
+          />
+          <circle cx="200" cy="171" r="15" fill="var(--notte)" />
+        </g>
+        <text x="200" y="270" text-anchor="middle" class="mappa-label">ARKADIA</text>
+      </svg>
+      <span class="mappa-cta mono">apri in maps →</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .luogo-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    align-items: start;
+  }
+  .luogo-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.5rem;
+  }
+  .luogo-desc {
+    margin-top: 1.25rem;
+    max-width: 44ch;
+    color: var(--schiuma-soft);
+  }
+  .orari {
+    margin-top: 2.5rem;
+    display: grid;
+    gap: 0.75rem;
+    max-width: 30rem;
+  }
+  .orario-riga {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--linea);
+  }
+  .orario-riga dt {
+    color: var(--schiuma);
+  }
+  .orario-riga dd {
+    color: var(--oro);
+    font-size: var(--fs-small);
+  }
+  .orario-riga.chiuso dd {
+    color: var(--schiuma-soft);
+    opacity: 0.6;
+  }
+  .indirizzo {
+    margin-top: 1.75rem;
+    font-style: normal;
+    color: var(--schiuma-soft);
+  }
+  .mappa {
+    display: block;
+    max-width: 400px;
+    border: 1px solid var(--linea);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.4s;
+  }
+  .mappa:hover {
+    border-color: var(--oro);
+  }
+  .mappa-svg {
+    width: 100%;
+    height: auto;
+  }
+  .mappa-pin {
+    transform-origin: 200px 235px;
+    animation: bob 3s var(--ease-inout) infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .mappa-label {
+    fill: var(--schiuma-soft);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 4px;
+  }
+  .mappa-cta {
+    position: absolute;
+    bottom: 0.85rem;
+    right: 1rem;
+    font-size: var(--fs-small);
+    color: var(--schiuma);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+  }
+  @media (max-width: 760px) {
+    .luogo-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mappa-pin { animation: none; }
+  }
+</style>

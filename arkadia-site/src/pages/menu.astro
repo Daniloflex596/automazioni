@@ -1,0 +1,976 @@
+---
+import Base from '../layouts/Base.astro';
+import Preloader from '../components/Preloader.astro';
+import Footer from '../components/Footer.astro';
+import IconaCategoria from '../components/IconaCategoria.astro';
+import {
+  birre, birreBottiglia, categorieMenu, info,
+  fritti, hamburger, dessert, daBere, caffetteria, cocktail, prezzoCocktail,
+  giochiTavolo,
+} from '../data/contenuti';
+
+// Base path normalizzato con slash finale (BASE_URL può arrivare senza).
+const base = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
+const tagLabel = { surgelato: 'abbattuto', veg: 'veg', piccante: 'piccante', chef: 'consigliato', noCarne: 'no carne' };
+
+// ---- ICONE 3D per ogni singola voce (spec per icone3d.js) --------------
+// Ogni prodotto ha la SUA icona: bicchiere giusto, colore giusto,
+// guarnizione giusta. j() serializza la spec nel data-attribute.
+const j = (o: object) => JSON.stringify(o);
+// Un prezzo è ORDINABILE dal carrello solo se è un numero pulito (es. "5,50").
+// Esclude i placeholder "—" e i prezzi ambigui/doppi (es. "4,50 / 7,00"), così
+// il carrello non calcola mai un importo sbagliato.
+const prezzoOrdinabile = (p: string) => /^\d+([.,]\d+)?$/.test(String(p).trim());
+const icSpina: Record<string, object> = {
+  Bionda: { t: 'pinta', c: 'e8c04a' },
+  Rossa: { t: 'pinta', c: '96420f' },
+  IPA: { t: 'pinta', c: 'd07818' },
+  'Birra del Mese': { t: 'pinta', c: 'c89020' },
+};
+const icBottiglia = (b: { nome: string; stile: string }) => {
+  const s = b.stile.toLowerCase();
+  if (b.nome === 'Chouffe Red') return { t: 'bottiglia', c: '4a1016', lab: 'c01830' };
+  if (s.includes('sidro')) return { t: 'bottiglia', c: '3a5e2a', lab: b.nome.includes('Fragola') ? 'e05070' : 'b8d060' };
+  if (s.includes('pils')) return { t: 'bottiglia', c: '3a5e2a', lab: 'f0d060' };
+  if (s.includes('lambic')) return { t: 'bottiglia', c: '38160e', lab: 'a01830' };
+  if (s.includes('dark')) return { t: 'bottiglia', c: '241208', lab: '6a4a20' };
+  if (s.includes('blanche')) return { t: 'bottiglia', c: '8a6a3a', lab: 'f0e6d0' };
+  if (s.includes('strong')) return { t: 'bottiglia', c: '38160e', lab: '903020' };
+  if (s.includes('i.p.a')) return { t: 'bottiglia', c: '5a3212', lab: 'd07818' };
+  if (s.includes('ambrata') || s.includes('bitter')) return { t: 'bottiglia', c: '5a3212', lab: 'b06020' };
+  if (s.includes('saison')) return { t: 'bottiglia', c: '5a3212', lab: 'e8d080' };
+  if (s.includes('pale')) return { t: 'bottiglia', c: '5a3212', lab: 'c87830' };
+  return { t: 'bottiglia', c: '5a3212', lab: 'e8b04b' };
+};
+const icFritti: Record<string, object> = {
+  'Tagliere "Colesterolo"': { t: 'tagliere' },
+  'Patatine "Montparnasse"': { t: 'friescup', cheese: 1 },
+  'Onion Rings': { t: 'rings' },
+  'Nuggets di Pollo': { t: 'nuggets' },
+  'Palline di Melanzana': { t: 'palline' },
+  'Patatine Cacio e Pepe': { t: 'friescup', pepe: 1 },
+  'Patate Stick': { t: 'stick' },
+};
+const icBurger: Record<string, object> = {
+  Brexit: { t: 'burger', pane: 'sesamo', s: ['insalata', 'patty', 'bacon', 'cheddar', 'anelli'] },
+  'Hellfire Club': { t: 'burger', pane: 'rustico', s: ['insalata', 'patty', 'stracciatella', 'bomba'] },
+  'Cocò': { t: 'burger', pane: 'classico', s: ['insalata', 'cotoletta', 'secchi', 'stracciatella'] },
+  Cheeseburger: { t: 'burger', pane: 'brioche', s: ['patty', 'cheddar', 'bacon', 'tomino'] },
+  'Insalatona Arkadia': { t: 'bowl' },
+  'Peppa Pig': { t: 'salsiccia' },
+  'Bimbo Burger': { t: 'burger', pane: 'classico', s: ['insalata', 'patty', 'pomodoro'], mini: 1 },
+};
+const icDessert: Record<string, object> = {
+  'Crêpe alla Nutella': { t: 'crepe' },
+  Pannacotta: { t: 'pannacotta' },
+  'Dolce del Giorno': { t: 'torta' },
+};
+const icDistillati: Record<string, object> = {
+  Whisky: { t: 'tumbler', c: 'c87828', ice: 1 },
+  Rum: { t: 'tumbler', c: '7a3a14' },
+  'Grappe / Gin': { t: 'shot', c: 'e8e8e0' },
+  Amari: { t: 'shot', c: '6a3a18' },
+};
+const icVini: Record<string, object> = {
+  'Vino Bianco': { t: 'vino', c: 'e8d890' },
+  'Vino Rosso': { t: 'vino', c: '7a1626' },
+};
+const icCaffe: Record<string, object> = {
+  'Caffè Invernale': { t: 'mug', c: 'c87828' },
+  'Tè / Camomilla / Infusi': { t: 'tisana' },
+  'Caffè': { t: 'tazzina' },
+};
+const icCocktail: Record<string, object> = {
+  Spritz: { t: 'goblet', c: 'e06010', slice: 'e89030', ice: 1 },
+  Negroni: { t: 'tumbler', c: '8e1420', ice: 1, twist: 1 },
+  'Negroni Sbagliato': { t: 'flute', c: 'c84838' },
+  Americano: { t: 'highball', c: 'a02030', slice: 'e89030' },
+  Boulevardier: { t: 'coupe', c: '7a1620' },
+  Mojito: { t: 'highball', c: 'a8d080', mint: 1, lime: 1 },
+  'Cuba Libre': { t: 'highball', c: '3a1c0c', lime: 1, straw: 1 },
+  'Piña Colada': { t: 'goblet', c: 'f0e0b8', slice: 'f0d060' },
+  'Gin Tonic': { t: 'balloon', c: 'dce8e0', lime: 1 },
+  'Gin Lemon': { t: 'highball', c: 'f0d060' },
+  'Vodka Tonic': { t: 'highball', c: 'e0ecec' },
+  'Vodka Lemon': { t: 'highball', c: 'f0d860' },
+  'Caipiroska Fragola': { t: 'tumbler', c: 'e04858', frutto: 1, ice: 1 },
+  'Sex on the Beach': { t: 'highball', c: 'f09030', c2: 'c02040', straw: 1 },
+  'Long Island': { t: 'highball', c: '4a2410', slice: 'f0d060', straw: 1 },
+  Alexander: { t: 'coupe', c: '2858c8' },
+  'Japanese Ice Tea': { t: 'highball', c: '58b848', lime: 1 },
+  Samu: { t: 'tumbler', c: 'f07020' },
+};
+const menuTitolo = `Menu · ${info.nome} Pub — Birre, hamburger e cocktail a Ciampino`;
+const menuDesc =
+  'Il menu completo di Arkadia Pub: birre alla spina e in bottiglia (belghe, italiane, artigianali), hamburger da 200gr, fritti, dessert, cocktail e caffetteria.';
+---
+
+<Base title={menuTitolo} description={menuDesc}>
+  <Preloader />
+
+  <div id="scena" aria-hidden="true">
+    <canvas id="scena-canvas"></canvas>
+    <svg id="scena-fallback" viewBox="0 0 200 300" preserveAspectRatio="xMidYMid meet" style="display:none">
+      <defs>
+        <linearGradient id="fbLiquid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#e8b04b" />
+          <stop offset="1" stop-color="#c77b29" />
+        </linearGradient>
+        <radialGradient id="fbGlow" cx="0.5" cy="0.4" r="0.6">
+          <stop offset="0" stop-color="rgba(232,176,75,0.5)" />
+          <stop offset="1" stop-color="rgba(14,10,7,0)" />
+        </radialGradient>
+        <clipPath id="fbClip">
+          <path d="M66,58 C66,150 84,203 100,203 C116,203 134,150 134,58 Z" />
+        </clipPath>
+      </defs>
+      <rect x="0" y="0" width="200" height="300" fill="url(#fbGlow)" />
+      <g clip-path="url(#fbClip)">
+        <rect class="fb-fill" x="60" y="210" width="80" height="0" fill="url(#fbLiquid)" />
+      </g>
+      <ellipse class="fb-foam" cx="100" cy="210" rx="34" ry="6" fill="#f4e9d0" style="opacity:0" />
+      <g fill="none" stroke="rgba(244,233,208,0.55)" stroke-width="2" stroke-linecap="round">
+        <path d="M60,55 L140,55" />
+        <path d="M64,55 C64,150 82,205 100,205 C118,205 136,150 136,55" />
+        <path d="M100,205 L100,258" />
+        <path d="M74,272 Q100,256 126,272" />
+      </g>
+    </svg>
+  </div>
+
+  <main id="contenuto" data-whatsapp={info.whatsapp}>
+    <!-- Barra di navigazione minimale -->
+    <nav class="topbar">
+      <a class="topbar-back" href={base}>
+        <span aria-hidden="true">←</span> <span>Arkadia</span>
+      </a>
+      <a class="topbar-cta" href={`${base}#brindisi`}>Prenota</a>
+    </nav>
+
+    <!-- Hero del menu -->
+    <header class="menu-hero">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Il Menu</p>
+        <h1 class="menu-h1" data-split>Tutto quello che versiamo e serviamo</h1>
+        <p class="menu-lead" data-reveal>
+          Dalla spina alla bottiglia, dai panini ai dolci. Ecco cosa trovi da Arkadia.
+        </p>
+      </div>
+    </header>
+
+    <!-- Tab categorie (sticky) -->
+    <div class="tabs" id="tabs">
+      <div class="wrap tabs-row">
+        {
+          categorieMenu.map((c) => (
+            <a
+              class:list={['tab', { 'is-soon': !c.pronta }]}
+              href={`#cat-${c.id}`}
+              data-tab={c.id}
+            >
+              {c.nome}
+              {!c.pronta && <span class="tab-soon">presto</span>}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- ===================== BIRRE ===================== -->
+    <section class="cat" id="cat-birre" data-scene-act="spina">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Birre</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="birre" />
+          <h2 class="cat-titolo" data-split>Alla spina</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{birre.slogan}</p>
+
+        <div class="spina-tabella">
+          {
+            birre.spina.map((b) => (
+              <article class="spina-riga" data-reveal>
+                <canvas class="micona micona--spina" width="128" height="160" data-icona={j(icSpina[b.nome] ?? { t: 'pinta', c: 'e8c04a' })} aria-hidden="true"></canvas>
+                <div class="spina-info">
+                  <h3 class="spina-nome">
+                    {b.nome}
+                    {b.novita && <span class="badge">novità</span>}
+                  </h3>
+                  <p class="spina-stile mono">{b.stile}</p>
+                  <p class="spina-nota">{b.nota}</p>
+                </div>
+                <dl class="spina-formati mono" aria-label="Formati e prezzi">
+                  {birre.formati.map((f, i) =>
+                    b.prezzi[i] !== '—' ? (
+                      <div>
+                        <dt>{f}</dt>
+                        <dd>€ {b.prezzi[i]}</dd>
+                      </div>
+                    ) : null
+                  )}
+                </dl>
+                <button
+                  class="ord-btn mono"
+                  data-ord={j({ n: `${b.nome} (spina)`, f: birre.formati.map((f, i) => (prezzoOrdinabile(b.prezzi[i]) ? { f, p: b.prezzi[i] } : null)).filter(Boolean) })}
+                  aria-label={`Aggiungi ${b.nome} all'ordine`}
+                >+</button>
+              </article>
+            ))
+          }
+        </div>
+
+        <h2 class="cat-titolo cat-titolo--sub" data-split>In bottiglia</h2>
+        <p class="cat-slogan sottoluce" data-reveal>
+          Belghe, italiane, artigianali e sidri. Diciotto etichette, dal chiaro al forte.
+        </p>
+
+        <ul class="bottiglie">
+          {
+            birreBottiglia.map((b) => (
+              <li class="bottiglia" data-reveal>
+                <canvas class="micona micona--bott" width="128" height="160" data-icona={j(icBottiglia(b))} aria-hidden="true"></canvas>
+                <div class="bottiglia-main">
+                  <h3 class="bottiglia-nome">
+                    {b.nome}
+                    {b.novita && <span class="badge">novità</span>}
+                  </h3>
+                  <p class="bottiglia-meta mono">
+                    {b.stile} · {b.grad} · {b.formato}
+                  </p>
+                </div>
+                <span class="bottiglia-prezzo mono">€ {b.prezzo}</span>
+                <button class="ord-btn mono" data-ord={j({ n: b.nome, p: b.prezzo })} aria-label={`Aggiungi ${b.nome} all'ordine`}>+</button>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== FRITTI & SFIZI ===================== -->
+    <section class="cat" id="cat-fritti" data-scene-act="tavola">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Fritti & Sfizi</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="fritti" />
+          <h2 class="cat-titolo" data-split>Fritti & Sfizi</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{categorieMenu[1].slogan}</p>
+        <ul class="menu-list">
+          {fritti.map((v) => (
+            <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icFritti[v.nome] ?? { t: 'friescup' })} aria-hidden="true"></canvas>
+              <div class="mi-main">
+                <h3 class="mi-nome">
+                  {v.nome}
+                  {v.tag?.map((t) => <span class:list={['tag', `tag--${t}`]}>{tagLabel[t]}</span>)}
+                </h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              <span class="mi-prezzo mono">€ {v.prezzo}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== HAMBURGER ===================== -->
+    <section class="cat" id="cat-hamburger" data-scene-act="tavola">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Hamburger</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="hamburger" />
+          <h2 class="cat-titolo" data-split>Hamburger</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{categorieMenu[2].slogan} — tutti serviti con patatine.</p>
+        <ul class="menu-list">
+          {hamburger.map((v) => (
+            <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icBurger[v.nome] ?? { t: 'burger', pane: 'classico', s: ['insalata', 'patty', 'cheddar'] })} aria-hidden="true"></canvas>
+              <div class="mi-main">
+                <h3 class="mi-nome">
+                  {v.nome}
+                  {v.badge && <span class="tag tag--chef">{v.badge}</span>}
+                  {v.tag?.map((t) => <span class:list={['tag', `tag--${t}`]}>{tagLabel[t]}</span>)}
+                </h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              <span class="mi-prezzo mono">€ {v.prezzo}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== DESSERT ===================== -->
+    <section class="cat" id="cat-dessert" data-scene-act="tavola">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Dessert</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="dessert" />
+          <h2 class="cat-titolo" data-split>Dessert</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{categorieMenu[3].slogan}</p>
+        <ul class="menu-list">
+          {dessert.map((v) => (
+            <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icDessert[v.nome] ?? { t: 'torta' })} aria-hidden="true"></canvas>
+              <div class="mi-main">
+                <h3 class="mi-nome">{v.nome}</h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              {v.prezzo && <span class="mi-prezzo mono">€ {v.prezzo}</span>}
+              {v.prezzo && (
+                <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== DA BERE ===================== -->
+    <section class="cat" id="cat-da-bere" data-scene-act="luogo">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Da Bere</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="da-bere" />
+          <h2 class="cat-titolo" data-split>Da bere</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{categorieMenu[4].slogan}</p>
+
+        <h3 class="sub-h mono" data-reveal>Distillati <span>bicchiere · shot</span></h3>
+        <ul class="menu-list">
+          {daBere.distillati.map((v) => (
+            <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icDistillati[v.nome] ?? { t: 'tumbler', c: 'c87828' })} aria-hidden="true"></canvas>
+              <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
+              <span class="mi-prezzo mono">€ {v.prezzo} <em>/ {v.shot}</em></span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, f: [{ f: 'Bicchiere', p: v.prezzo }, { f: 'Shot', p: v.shot }] })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+            </li>
+          ))}
+        </ul>
+
+        <h3 class="sub-h mono" data-reveal>Vini <span>calice · bottiglia</span></h3>
+        <ul class="menu-list">
+          {daBere.vini.map((v) => (
+            <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icVini[v.nome] ?? { t: 'vino', c: '7a1626' })} aria-hidden="true"></canvas>
+              <div class="mi-main"><h3 class="mi-nome">{v.nome}</h3></div>
+              <span class="mi-prezzo mono">€ {v.calice} <em>/ {v.bottiglia}</em></span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, f: [{ f: 'Calice', p: v.calice }, { f: 'Bottiglia', p: v.bottiglia }] })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== CAFFETTERIA ===================== -->
+    <section class="cat" id="cat-caffetteria" data-scene-act="brindisi">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Caffetteria</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="caffetteria" />
+          <h2 class="cat-titolo" data-split>Caffetteria</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{categorieMenu[5].slogan}</p>
+        <ul class="menu-list">
+          {caffetteria.map((v) => (
+            <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icCaffe[v.nome] ?? { t: 'tazzina' })} aria-hidden="true"></canvas>
+              <div class="mi-main">
+                <h3 class="mi-nome">{v.nome}</h3>
+                {v.desc && <p class="mi-desc">{v.desc}</p>}
+              </div>
+              <span class="mi-prezzo mono">€ {v.prezzo}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: v.prezzo })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== COCKTAIL ===================== -->
+    <section class="cat" id="cat-cocktail" data-scene-act="brindisi">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Cocktail</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="cocktail" />
+          <h2 class="cat-titolo" data-split>Cocktail</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{categorieMenu[6].slogan} — tutti a € {prezzoCocktail}.</p>
+        <ul class="menu-list menu-list--cols">
+          {cocktail.map((v) => (
+            <li class="menu-item" data-reveal>
+              <canvas class="micona" width="128" height="160" data-icona={j(icCocktail[v.nome] ?? { t: 'tumbler', c: 'e06010' })} aria-hidden="true"></canvas>
+              <div class="mi-main">
+                <h3 class="mi-nome">{v.nome}</h3>
+                <p class="mi-desc">{v.desc}</p>
+              </div>
+              <span class="mi-prezzo mono">€ {prezzoCocktail}</span>
+              <button class="ord-btn mono" data-ord={j({ n: v.nome, p: prezzoCocktail })} aria-label={`Aggiungi ${v.nome} all'ordine`}>+</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== SALA GIOCHI ===================== -->
+    <section class="cat" id="cat-giochi" data-scene-act="sala">
+      <div class="wrap">
+        <p class="occhiello" data-reveal>Sala Giochi</p>
+        <div class="cat-head" data-reveal>
+          <IconaCategoria tipo="giochi" />
+          <h2 class="cat-titolo" data-split>La scaffalata dei giochi</h2>
+        </div>
+        <p class="cat-slogan sottoluce" data-reveal>{categorieMenu[7].slogan}.</p>
+
+        {
+          giochiTavolo.length > 0 ? (
+            <Fragment>
+              {giochiTavolo.map((gruppo) => (
+                <Fragment>
+                  <p class="sub-h" data-reveal>{gruppo.gruppo}</p>
+                  <ul class="menu-list">
+                    {gruppo.giochi.map((g) => (
+                      <li class="menu-item menu-item--gioco" data-reveal>
+                        <div class="mi-main">
+                          <h3 class="mi-nome">{g.nome}</h3>
+                          {g.desc && <p class="mi-desc">{g.desc}</p>}
+                        </div>
+                        {(g.giocatori || g.durata) && (
+                          <span class="mi-prezzo mono gioco-meta">
+                            {g.giocatori && <span>{g.giocatori}</span>}
+                            {g.giocatori && g.durata && ' · '}
+                            {g.durata && <span>{g.durata}</span>}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </Fragment>
+              ))}
+              <p class="giochi-nota" data-reveal>
+                E poi freccette, biliardino, Nintendo Switch e mazzi di carte sempre
+                pronti al bancone. La scelta cambia spesso: chiedi pure.
+              </p>
+            </Fragment>
+          ) : (
+            <p class="giochi-nota" data-reveal>
+              La lista completa della scaffalata sta arrivando qui, scatola per scatola.
+              Intanto chiedi al bancone: la scelta è ampia e cambia spesso — e freccette,
+              biliardino, Nintendo Switch e carte non aspettano nessuno.
+            </p>
+          )
+        }
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+
+  <script>
+    import '../scroll/menu.js';
+    import '../scroll/carrello.js';
+  </script>
+</Base>
+
+<style>
+  #scena-canvas {
+    width: 100%;
+    height: 100%;
+  }
+  #scena-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(70vw, 46vh);
+    height: auto;
+    opacity: 0.9;
+  }
+  @media (min-width: 821px) {
+    #scena-fallback {
+      left: 74%;
+      width: min(30vw, 56vh);
+    }
+  }
+
+  /* Sul menu il calice vive SOLO nell'hero e scorre via con la pagina:
+     le liste (dense di testo) restano pulite e a piena larghezza. */
+  #scena {
+    position: absolute;
+    height: 100svh;
+  }
+  @media (min-width: 821px) {
+    .menu-hero .wrap {
+      max-width: 60%;
+    }
+    /* annulla la colonna al 62% ereditata dalla home: qui liste piene */
+    main > section.cat > .wrap {
+      max-width: var(--maxw);
+      margin-inline: auto;
+    }
+  }
+
+  .topbar {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem var(--gutter);
+    max-width: var(--maxw);
+    margin-inline: auto;
+  }
+  .topbar-back {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    display: inline-flex;
+    gap: 0.5rem;
+    color: var(--schiuma);
+  }
+  .topbar-back:hover { color: var(--oro); }
+  .topbar-cta {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--notte);
+    background: var(--oro);
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+  }
+
+  .menu-hero {
+    padding-block: clamp(3rem, 10vh, 7rem) clamp(2rem, 5vh, 3rem);
+  }
+  .menu-h1 {
+    font-size: var(--fs-h1);
+    max-width: 16ch;
+    margin-top: 1rem;
+  }
+  .menu-lead {
+    margin-top: 1.25rem;
+    max-width: 46ch;
+    color: var(--schiuma-soft);
+    font-size: 1.2rem;
+  }
+
+  /* Tab sticky */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: color-mix(in srgb, var(--notte) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-block: 1px solid var(--linea);
+  }
+  /* Sfumature ai bordi: coprono le pillole troncate dal lato dove la riga
+     continua; si spengono quando la riga è a inizio/fine corsa. */
+  .tabs::before,
+  .tabs::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    width: 38px;
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.25s;
+  }
+  .tabs::before {
+    left: 0;
+    background: linear-gradient(to right, var(--notte) 15%, transparent);
+  }
+  .tabs::after {
+    right: 0;
+    background: linear-gradient(to left, var(--notte) 15%, transparent);
+  }
+  .tabs.at-start::before { opacity: 0; }
+  .tabs.at-end::after { opacity: 0; }
+  .tabs-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-block: 0.85rem;
+    scrollbar-width: none;
+    /* Lo swipe oltre il fine-corsa resta nella riga: mai trascinare la pagina */
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+  }
+  .tabs-row::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: color 0.3s, border-color 0.3s, background 0.3s;
+  }
+  .tab:hover { color: var(--schiuma); border-color: var(--schiuma-soft); }
+  .tab.is-active {
+    color: var(--notte);
+    background: var(--oro);
+    border-color: var(--oro);
+  }
+  .tab-soon {
+    margin-left: 0.4rem;
+    opacity: 0.5;
+    font-size: 0.6rem;
+  }
+
+  .cat {
+    padding-block: clamp(3.5rem, 9vh, 7rem);
+    scroll-margin-top: 70px;
+  }
+  .cat-titolo {
+    font-size: var(--fs-h2);
+    margin-top: 1.25rem;
+  }
+  /* Intestazione con icona illustrata della categoria */
+  .cat-head {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.9rem, 2.5vw, 1.4rem);
+    margin-top: 1.25rem;
+  }
+  .cat-head .cat-titolo {
+    margin-top: 0;
+  }
+  .cat-titolo--sub {
+    margin-top: clamp(3rem, 8vh, 5rem);
+  }
+  .cat-slogan {
+    margin-top: 1rem;
+    max-width: 48ch;
+    color: var(--schiuma-soft);
+  }
+
+  /* Spina */
+  .spina-tabella {
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    display: grid;
+    gap: 0;
+  }
+  .spina-riga {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+    padding-block: 1.75rem;
+    border-top: 1px solid var(--linea);
+  }
+  .spina-riga:last-child { border-bottom: 1px solid var(--linea); }
+  .spina-nome {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .spina-stile {
+    font-size: var(--fs-small);
+    color: var(--oro);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    margin-top: 0.45rem;
+  }
+  .spina-nota {
+    margin-top: 0.55rem;
+    color: var(--schiuma-soft);
+    max-width: 48ch;
+  }
+  .spina-formati {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.75rem;
+  }
+  .spina-formati div { display: flex; flex-direction: column; gap: 0.15rem; }
+  .spina-formati dt {
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+    opacity: 0.7;
+  }
+  .spina-formati dd { font-size: 1rem; color: var(--schiuma); }
+
+  /* Bottiglie */
+  .bottiglie {
+    list-style: none;
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 clamp(2rem, 5vw, 4rem);
+  }
+  .bottiglia {
+    /* Stessa griglia dei menu-item: nomi e prezzi sempre incolonnati */
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    column-gap: 1rem;
+    padding-block: 1.15rem;
+    border-top: 1px solid var(--linea);
+  }
+  .bottiglia .bottiglia-prezzo { justify-self: end; }
+  .bottiglia-nome {
+    font-size: 1.15rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .bottiglia-meta {
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    color: var(--schiuma-soft);
+  }
+  .bottiglia-prezzo {
+    color: var(--oro);
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--notte);
+    background: var(--oro);
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+  }
+
+  /* Liste voci (fritti, hamburger, dessert, da bere, caffetteria, cocktail) */
+  .menu-list {
+    list-style: none;
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+    display: grid;
+    gap: 0;
+  }
+  .menu-list--cols {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: clamp(2rem, 5vw, 4rem);
+  }
+  .menu-item {
+    /* Griglia a colonne fisse: icona | nome+descrizione | prezzo | ordina.
+       Così i nomi partono TUTTI dalla stessa x e i prezzi sono incolonnati
+       a destra — niente più righe sfalsate su desktop. */
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    column-gap: clamp(1rem, 2.2vw, 1.5rem);
+    padding-block: 1.25rem;
+    padding-inline: 0.75rem;
+    margin-inline: -0.75rem;
+    border-top: 1px solid var(--linea);
+    border-radius: var(--radius);
+    transition: background 0.35s, box-shadow 0.35s;
+  }
+  .menu-item .mi-prezzo { justify-self: end; }
+  /* Hover: la voce si accende come sotto la lampada del pub */
+  .menu-item:hover {
+    background: linear-gradient(90deg, rgba(232, 176, 75, 0.07), transparent 70%);
+    box-shadow: inset 2px 0 0 var(--oro);
+  }
+  .menu-item:hover .mi-nome {
+    color: var(--oro);
+  }
+  .mi-nome {
+    transition: color 0.3s;
+  }
+  /* Il badge "novità" respira */
+  .badge,
+  .tag--chef {
+    animation: badge-glow 2.8s var(--ease-inout) infinite;
+  }
+  @keyframes badge-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 176, 75, 0.4); }
+    55% { box-shadow: 0 0 0 6px rgba(232, 176, 75, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .badge,
+    .tag--chef {
+      animation: none;
+    }
+  }
+  .mi-nome {
+    font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+    font-family: var(--font-display);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+  .mi-desc {
+    margin-top: 0.4rem;
+    color: var(--schiuma-soft);
+    max-width: 52ch;
+    font-size: 0.98rem;
+  }
+  .mi-prezzo {
+    color: var(--oro);
+    font-size: 1.05rem;
+    white-space: nowrap;
+  }
+  .mi-prezzo em {
+    color: var(--schiuma-soft);
+    font-style: normal;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.14rem 0.45rem;
+    border-radius: 999px;
+    background: var(--schiuma-faint);
+    color: var(--schiuma-soft);
+  }
+  .tag--chef { background: var(--oro); color: var(--notte); }
+  .tag--piccante { background: var(--rame); color: var(--schiuma); }
+  .tag--veg { background: var(--luppolo); color: var(--schiuma); }
+  .sub-h {
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    font-size: var(--fs-small);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--oro);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .sub-h span {
+    color: var(--schiuma-soft);
+    opacity: 0.7;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+  }
+  .giochi-nota {
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+    max-width: 52ch;
+    color: var(--schiuma-soft);
+    border-left: 2px solid var(--oro);
+    padding-left: 1.1rem;
+  }
+  .gioco-meta {
+    color: var(--oro);
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+  }
+  /* Righe della scaffalata giochi: niente icona 3D né bottone ordina,
+     solo nome+descrizione a sinistra e "giocatori · durata" a destra. */
+  .menu-item--gioco {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+  .menu-item--gioco .gioco-meta {
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  @media (max-width: 720px) {
+    .bottiglie { grid-template-columns: 1fr; }
+    .menu-list--cols { grid-template-columns: 1fr; }
+  }
+
+  /* ---- Ordina: il "+" accanto a ogni voce (carrello in carrello.js) ---- */
+  .ord-btn {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    align-self: center;
+    border-radius: 999px;
+    border: 1px solid var(--oro);
+    background: transparent;
+    color: var(--oro);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s, transform 0.2s var(--ease-out);
+  }
+  .ord-btn:hover {
+    background: var(--oro);
+    color: var(--notte);
+  }
+  .ord-btn:active {
+    transform: scale(0.88);
+  }
+  .spina-riga {
+    position: relative;
+  }
+  .spina-riga .ord-btn {
+    position: absolute;
+    top: 1.75rem;
+    right: 0;
+  }
+  @media (max-width: 720px) {
+    .ord-btn {
+      width: 38px;
+      height: 38px;
+    }
+  }
+
+  /* ---- Icone 3D per voce (renderer condiviso, vedi icone3d.js) ---- */
+  .micona {
+    width: 60px;
+    height: 75px;
+    flex: 0 0 auto;
+    align-self: center;
+    filter: drop-shadow(0 6px 14px rgba(232, 176, 75, 0.14));
+  }
+  .menu-item {
+    align-items: center;
+  }
+  .bottiglia {
+    align-items: center;
+  }
+  .bottiglia .micona {
+    width: 46px;
+    height: 58px;
+  }
+  .spina-riga {
+    grid-template-columns: auto 1fr;
+    column-gap: clamp(1rem, 2.5vw, 1.6rem);
+  }
+  .spina-riga .micona {
+    grid-row: 1 / 3;
+    align-self: center;
+    width: 72px;
+    height: 90px;
+  }
+  @media (max-width: 720px) {
+    .micona {
+      width: 48px;
+      height: 60px;
+    }
+    .spina-riga .micona {
+      width: 56px;
+      height: 70px;
+    }
+    .bottiglia .micona {
+      width: 40px;
+      height: 50px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .micona {
+      display: none;
+    }
+  }
+</style>
