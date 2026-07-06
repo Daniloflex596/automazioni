@@ -10,7 +10,7 @@
  *  scroll la fa percorrere un path fermandola alle "stazioni":
  *    0 soglia · 1 storia · 2 bancone(birre) · 3 tavolo(cibo) · 4 sala · 5 séparé
  *
- *  API: initPub(canvas, {quality}) -> { setProgress(t), dispose, introRunning() }
+ *  API: initPub(canvas, {quality}) -> { setProgress(t), setZone(...), dispose, … }
  * ============================================================================
  */
 import * as THREE from 'three';
@@ -53,7 +53,12 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     legno: 0x3a2416, legnoTop: 0x5a3a20, muro: 0x1c1410, muroWarm: 0x2a1d12,
     ottone: 0xb98a3e, ambra: 0xc77b29, oro: 0xe8b04b, schiuma: 0xf4e9d0, rame: 0x7a2e1e,
   };
-  const mat = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, roughness: opts.r ?? 0.85, metalness: opts.m ?? 0, emissive: opts.e ?? 0x000000, emissiveIntensity: opts.ei ?? 1, ...opts });
+  // Factory materiali: r/m/e/ei sono scorciatoie per roughness/metalness/
+  // emissive/emissiveIntensity; vengono ESTRATTE (non ri-iniettate) così Three
+  // non emette warning per chiavi non riconosciute. Il resto (side, transparent,
+  // opacity, map, …) passa intatto.
+  const mat = (color, { r = 0.85, m = 0, e = 0x000000, ei = 1, ...rest } = {}) =>
+    new THREE.MeshStandardMaterial({ color, roughness: r, metalness: m, emissive: e, emissiveIntensity: ei, ...rest });
 
   const root = new THREE.Group();
   scene.add(root);
@@ -1249,9 +1254,6 @@ export function initPub(canvas, { quality = 'high' } = {}) {
   let running = true;
   let raf = 0;
   const clock = new THREE.Clock();
-  const INTRO_DUR = 2.6;
-  let introElapsed = 0;
-  let introActive = false; // si parte già dentro: locale intero in vista
 
   const camPos = new THREE.Vector3();
   const camLook = new THREE.Vector3();
@@ -1276,19 +1278,9 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     const dt = Math.min(dtRaw, 0.05); // cap per le animazioni fisiche
     const time = clock.elapsedTime;
 
-    if (introActive) {
-      // Timeline su TEMPO REALE (non su dt cappato): a bassi framerate
-      // l'intro deve comunque durare INTRO_DUR secondi, non dilatarsi.
-      const k = Math.min(1, time / INTRO_DUR);
-      const eased = 1 - Math.pow(1 - k, 3); // easeOutCubic
-      // l'intro percorre la prima porzione del path (fuori → dentro, prime 2 stazioni)
-      renderT = eased * (1 / (stations.length - 1)) * 1.15;
-      if (k >= 1) introActive = false;
-    } else {
-      // Smoothing indipendente dal framerate: stessa "morbidezza" a 20 o 120fps.
-      const s = 1 - Math.pow(0.94, Math.min(dtRaw, 0.25) * 60);
-      renderT += (targetT - renderT) * s;
-    }
+    // Smoothing indipendente dal framerate: stessa "morbidezza" a 20 o 120fps.
+    const s = 1 - Math.pow(0.94, Math.min(dtRaw, 0.25) * 60);
+    renderT += (targetT - renderT) * s;
     applyCamera(renderT);
 
     // micro-vita: bagliore lampade + leggerissimo bob
@@ -1552,8 +1544,7 @@ export function initPub(canvas, { quality = 'high' } = {}) {
     setZone: (name, p) => {
       if (name in zoneAmt) zoneAmt[name] = Math.max(0, Math.min(1, p));
     },
-    getT: () => ({ targetT, renderT, intro: introActive }),
-    introRunning: () => introActive,
+    getT: () => ({ targetT, renderT }),
     dispose() {
       running = false;
       cancelAnimationFrame(raf);

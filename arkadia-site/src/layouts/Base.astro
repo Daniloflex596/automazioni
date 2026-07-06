@@ -96,6 +96,20 @@ const schema = {
     <link rel="sitemap" href={asset('/sitemap.xml')} />
 
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+    <!-- Progressive enhancement: senza JavaScript i contenuti "rivelati allo
+         scroll" (opacity:0 in attesa della classe .is-visible) resterebbero
+         invisibili. Con JS disattivato li forziamo visibili. -->
+    <noscript>
+      <style>
+        [data-reveal],
+        [data-stagger] > *,
+        .split-inner {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip-link" href="#contenuto">Salta al contenuto</a>

@@ -284,14 +284,7 @@ async function boot() {
     const { initPub } = await import('../three/pub3d.js');
     pub = initPub(canvas, { quality: tier === 'high' ? 'high' : 'low' });
     setPreload(0.95);
-    // Blocca lo scroll durante la cinematica d'ingresso, poi lo sblocca.
-    lenis.stop();
-    const waitIntro = () => {
-      if (pub.introRunning()) requestAnimationFrame(waitIntro);
-      else lenis.start();
-    };
     requestAnimationFrame(hidePreloader);
-    requestAnimationFrame(waitIntro);
   } catch (err) {
     console.warn('[Arkadia] Pub 3D non disponibile, fallback al calice:', err);
     document.body.classList.remove('pub-mode');
