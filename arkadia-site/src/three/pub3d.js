@@ -1550,6 +1550,17 @@ export function initPub(canvas, { quality = 'high' } = {}) {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       probe.remove();
+      // renderer.dispose()/env.dispose() liberano contesto e render target, ma
+      // NON le geometrie/materiali/texture allocati nel grafo: vanno liberati a
+      // mano percorrendo la scena, altrimenti restano in memoria GPU. (Oggi
+      // dispose non viene mai chiamato — home one-page, /menu ricarica il
+      // documento — ma così initPub è riutilizzabile in un contesto SPA.)
+      scene.traverse((o) => {
+        o.geometry?.dispose();
+        const m = o.material;
+        if (Array.isArray(m)) m.forEach(disposeMaterial);
+        else if (m) disposeMaterial(m);
+      });
       renderer.dispose();
       env.dispose();
     },
@@ -1557,6 +1568,16 @@ export function initPub(canvas, { quality = 'high' } = {}) {
 }
 
 /* ---------- helper ---------- */
+// Libera un materiale e OGNI texture che referenzia (map, normalMap, …),
+// così dispose() non lascia texture orfane in memoria GPU.
+function disposeMaterial(mat) {
+  for (const k in mat) {
+    const v = mat[k];
+    if (v && v.isTexture) v.dispose();
+  }
+  mat.dispose();
+}
+
 function pseudo(i) {
   const x = Math.sin(i * 12.9898) * 43758.5453;
   return x - Math.floor(x);
