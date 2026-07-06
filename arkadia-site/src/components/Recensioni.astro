@@ -1,9 +1,11 @@
 ---
-// DICONO DI NOI — recensioni reali (Google), trascritte testualmente.
+// DICONO DI NOI — recensioni reali dei clienti (da Google), trascritte testualmente.
 // Fondale 3D: lo sguardo panoramico sul locale (stazione "il luogo").
-// La CTA porta alle recensioni Google (coerente con rating e citazioni).
-const GOOGLE_REVIEWS =
-  'https://www.google.com/maps/search/?api=1&query=Arkadia+Pub+Ciampino';
+// Le card citano recensioni Google; la CTA rimanda alla scheda TripAdvisor del
+// locale, dove si trovano ALTRE recensioni (reputazione multi-piattaforma), così
+// il link non contraddice le citazioni Google mostrate sopra.
+const RECENSIONI_URL =
+  'https://www.tripadvisor.it/Attraction_Review-g675714-d15574690-Reviews-Arkadia_Pub-Ciampino_Province_of_Rome_Lazio.html';
 const RECENSIONI = [
   {
     testo: 'Miglior Pub della zona a mani basse.',
@@ -64,8 +66,8 @@ const RECENSIONI = [
       }
     </ul>
 
-    <a class="rec-cta mono" href={GOOGLE_REVIEWS} target="_blank" rel="noopener">
-      Leggi tutte le recensioni su Google →
+    <a class="rec-cta mono" href={RECENSIONI_URL} target="_blank" rel="noopener">
+      Leggi altre recensioni su TripAdvisor →
     </a>
   </div>
 </section>
