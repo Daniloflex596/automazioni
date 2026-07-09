@@ -89,6 +89,7 @@ import { prenotazione, info, giorniChiusura } from '../data/contenuti';
         form.reportValidity();
         return;
       }
+      form.sanitycheck();
       // Blocca le date in un giorno di chiusura (es. lunedì).
       if (giornoChiuso(String(dataInput?.value || ''))) {
         if (nota) nota.textContent = 'Quel giorno siamo chiusi — scegli un’altra data 🙏';
