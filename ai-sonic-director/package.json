@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "AI Sonic Director - l'app non ha dipendenze di runtime; Playwright serve solo alla suite e2e (tests/e2e.mjs)",
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

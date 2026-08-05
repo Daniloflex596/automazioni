@@ -143,3 +143,59 @@ export function adaptationNotes(identity, analysis) {
   if (notes.length === 0) notes.push('Il tuo brano è già equilibrato: l’identità si applica nella sua forma piena.');
   return notes;
 }
+
+// SUGGERIMENTO DELL'IDENTITÀ (primo passo "copilota"):
+// l'app non si limita a offrire opzioni, ma confronta il ritratto del brano
+// (bilanciamento tonale, dinamica, volume — ciò che l'analisi ha misurato) con
+// il carattere di ogni identità e ne classifica l'adeguatezza. Consiglia una
+// direzione e ne propone un paio di alternative, sempre lasciando la scelta
+// all'utente. Il punteggio è una distanza pesata: più bassa, meglio l'identità
+// "calza" il brano. La motivazione mostrata nasce dal tratto più marcato del
+// brano, non dai numeri: l'app consiglia, non sentenzia.
+
+// Profilo di brano per cui ogni identità "dà il meglio". Tenuto qui (non dentro
+// IDENTITIES) per non cambiare la forma del modello: è logica di suggerimento,
+// non una proprietà dell'identità.
+const FIT_TARGETS = {
+  club:    { low: 44, high: 18, crest: 9,  loud: -10 },
+  radio:   { low: 32, high: 24, crest: 11, loud: -12 },
+  lofi:    { low: 40, high: 30, crest: 10, loud: -14 },
+  dark:    { low: 48, high: 16, crest: 8,  loud: -11 },
+  natural: { low: 28, high: 22, crest: 15, loud: -16 },
+  social:  { low: 26, high: 34, crest: 9,  loud: -10 },
+};
+
+function fitScore(target, analysis) {
+  const dLow = Math.abs(target.low - analysis.bands.low);
+  const dHigh = Math.abs(target.high - analysis.bands.high);
+  const dCrest = Math.abs(target.crest - analysis.crest);
+  const dLoud = Math.abs(target.loud - analysis.rmsDb);
+  // tonale e dinamica definiscono il carattere; il volume conta meno perché
+  // l'adattività lo riallinea comunque verso il riferimento dell'identità.
+  return dLow + dHigh + dCrest * 1.4 + dLoud * 0.5;
+}
+
+function fitReason(identity, analysis) {
+  if (analysis.bands.low >= 42) return `Bassi in primo piano: ${identity.name} è fatta per un suono pieno e corposo come il tuo.`;
+  if (analysis.bands.low <= 24) return `Il brano è leggero in basso: ${identity.name} gli dà corpo senza appesantirlo.`;
+  if (analysis.crest >= 14) return `Dinamica molto aperta: ${identity.name} la tiene insieme con equilibrio.`;
+  if (analysis.crest <= 8) return `Brano già compatto: ${identity.name} lo valorizza senza forzarlo.`;
+  if (analysis.bands.high >= 32) return `Tanta aria in alto: ${identity.name} sfrutta bene questa brillantezza.`;
+  if (analysis.bands.high <= 14) return `Poche frequenze alte: ${identity.name} apre il suono quanto basta.`;
+  return `${identity.name} è la direzione più in equilibrio con ciò che abbiamo sentito.`;
+}
+
+// Restituisce { recommendedId, alternativeIds, reason } oppure null se non c'è
+// analisi disponibile (il flusso resta valido: si torna alla scelta libera).
+export function recommendIdentities(analysis) {
+  if (!analysis || !analysis.bands) return null;
+  const ranked = IDENTITIES
+    .map((identity) => ({ identity, score: fitScore(FIT_TARGETS[identity.id], analysis) }))
+    .sort((a, b) => a.score - b.score);
+  const recommended = ranked[0].identity;
+  return {
+    recommendedId: recommended.id,
+    alternativeIds: ranked.slice(1, 3).map((r) => r.identity.id),
+    reason: fitReason(recommended, analysis),
+  };
+}

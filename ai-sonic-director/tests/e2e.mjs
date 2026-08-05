@@ -28,7 +28,8 @@ const MIME = {
 
 const server = http.createServer(async (req, res) => {
   try {
-    const path = normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^\/+/, '') || 'index.html';
+    // su Windows normalize('/') produce '\', quindi vanno spogliati entrambi i separatori
+    const path = normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^[/\\]+/, '') || 'index.html';
     const file = await readFile(join(APP_DIR, path === '' ? 'index.html' : path));
     res.writeHead(200, { 'Content-Type': MIME[extname(path)] || 'application/octet-stream' });
     res.end(file);
@@ -62,6 +63,10 @@ const goodWav = join(fixtureDir, 'mio-pezzo.wav');
 await writeFile(goodWav, makeWavFixture());
 const badWav = join(fixtureDir, 'corrotto.wav');
 await writeFile(badWav, Buffer.from('questo non è un file audio, è testo travestito'));
+// "vocale WhatsApp": estensione .opus (MIME spesso vuoto/generico) con dentro
+// audio reale — il primo controllo deve farlo passare, la decodifica decide
+const opusVoice = join(fixtureDir, 'vocale-whatsapp.opus');
+await writeFile(opusVoice, makeWavFixture(1, 330));
 
 // ---------- harness ----------
 
@@ -84,8 +89,8 @@ async function newPage(context = desktopContext) {
   const page = await context.newPage();
   page.on('pageerror', (e) => jsErrors.push(`PAGEERROR: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') jsErrors.push(`CONSOLE: ${m.text()}`); });
-  // conferma i confirm(); risponde ai prompt() (usato dal test di rinomina)
-  page.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'Rinominato' : undefined));
+  // nessun handler per i dialog nativi: l'app non deve più usarli (step A3);
+  // se ricomparissero, Playwright li chiude e i test falliscono — di proposito
   return page;
 }
 
@@ -99,13 +104,46 @@ console.log('\n[1] Flusso completo con upload reale');
   check(await page.locator('.file-pill .name').textContent() === 'mio-pezzo.wav', 'file accettato e mostrato');
   check((await page.inputValue('input[type="text"]')) === 'mio-pezzo', 'nome progetto precompilato dal file');
 
+  // pre-ascolto prima del caricamento (step A1): player presente sul file
+  // scelto, sparisce togliendo il file, ricompare scegliendone un altro
+  check((await page.locator('audio[src^="blob:"]').count()) === 1, 'pre-ascolto disponibile sul file scelto');
+  await page.locator('.file-pill button').click();
+  check((await page.locator('audio').count()) === 0, 'pre-ascolto rimosso togliendo il file');
+  await page.setInputFiles('input[type="file"]', goodWav);
+  check((await page.locator('audio[src^="blob:"]').count()) === 1, 'pre-ascolto torna ricaricando un file');
+
   await page.click('button:has-text("Crea il progetto")');
   await page.waitForSelector('.metric-grid', { timeout: 30000 });
   check((await page.locator('.insight').count()) > 0, 'analisi con osservazioni');
 
+  // A4: l'analisi cita i valori misurati e distingue misure da stime
+  check(/-?\d+ dB/.test(await page.locator('.insight').first().textContent()),
+    'le osservazioni citano i valori misurati del brano');
+  check((await page.locator('p:has-text("BPM e tonalità sono stime")').count()) === 1,
+    'nota di trasparenza: misure vs stime');
+
+  // B1: BPM e tonalità presentati come STIME; sul tono di test (nessun ritmo,
+  // una sola nota) il sistema deve preferire il fallback onesto
+  check((await page.locator('.metric').count()) === 5, 'cinque schede metriche (incluse le stime)');
+  const tempoCard = await page.locator('.metric', { hasText: 'Tempo' }).textContent();
+  check(tempoCard.includes('stima'), 'il tempo è dichiarato come stima');
+  check(tempoCard.includes('—') && tempoCard.includes('certezza'),
+    'fallback onesto: nessun BPM inventato su materiale senza ritmo');
+  const keyCard = await page.locator('.metric', { hasText: 'Tonalità' }).textContent();
+  check(keyCard.includes('stima'), 'la tonalità è dichiarata come stima');
+
   await page.click('button:has-text("Scegli l’identità sonora")');
   await page.waitForSelector('.identity-card');
   check((await page.locator('.identity-card').count()) === 6, '6 identità presenti');
+
+  // suggerimento automatico (blocco 6c): banner con motivo, consigliata
+  // evidenziata e preselezionata, due alternative — la scelta resta libera
+  check((await page.locator('.suggestion-banner').count()) === 1, 'banner del suggerimento presente');
+  check((await page.locator('.suggestion-banner h4').textContent()).includes('partiremmo da'),
+    'il suggerimento parla in linguaggio da artista');
+  check((await page.locator('.identity-card.recommended').count()) === 1, 'una identità consigliata evidenziata');
+  check((await page.locator('.identity-card.recommended.selected').count()) === 1, 'la consigliata è preselezionata');
+  check((await page.locator('.reco-ribbon.alt').count()) === 2, 'due alternative proposte');
 
   // pre-ascolto, poi selezione
   await page.locator('.identity-card').nth(1).locator('button:has-text("Ascolta")').click();
@@ -133,15 +171,34 @@ console.log('\n[1] Flusso completo con upload reale');
 
   await page.click('.step-actions button:has-text("Confronta")');
   await page.waitForSelector('.compare-switch');
+  // B3: il confronto dichiara il pareggio di volume (e che è una stima)
+  check((await page.locator('.compare-stage', { hasText: 'parità di volume' }).count()) === 1,
+    'confronto A/B dichiarato a parità di volume');
   await page.click('.step-actions button:has-text("esporta")');
   await page.waitForSelector('.export-summary');
   check((await page.locator('.export-summary .row').count()) === 5, 'riepilogo export completo');
+  check((await page.locator('.export-version').count()) === 4, '3 versioni + snippet social in export');
 
-  const download = page.waitForEvent('download', { timeout: 60000 });
-  await page.click('button:has-text("Scarica WAV")');
-  await download;
+  // A4: ogni versione dichiara formato e peso stimato prima del download
+  check((await page.locator('.export-version', { hasText: 'WAV 16 bit ·' }).count()) === 4,
+    'formato e peso stimato dichiarati per ogni versione');
+
+  let download = page.waitForEvent('download', { timeout: 60000 });
+  await page.locator('.export-version', { hasText: 'Master' }).locator('button').click();
+  const masterDl = await download;
+  check(masterDl.suggestedFilename().endsWith(' - Master.wav'),
+    'nome file pulito e usabile (Brano - Identità - Versione.wav)');
   await page.waitForSelector('.export-done');
-  check(true, 'export WAV scaricato');
+  download = page.waitForEvent('download', { timeout: 60000 });
+  await page.locator('.export-version').nth(2).locator('button').click();
+  await download;
+  check(true, 'versioni Master e Social scaricate');
+
+  // snippet social: presenza nell'export (non testiamo il download reale)
+  check((await page.locator('.export-version', { hasText: 'Snippet social' }).count()) === 1,
+    'voce snippet social presente in export');
+  check((await page.locator('.export-version:has-text("Snippet social") .btn').count()) === 1,
+    'bottone snippet social presente e cliccabile');
 
   // stepper: torno all'analisi e risalto direttamente all'export (già raggiunto)
   await page.click('.stepper button:has-text("Analisi")');
@@ -162,7 +219,13 @@ console.log('\n[2] Libreria, persistenza, profilo');
   check((await page.locator('.proj-card').count()) === 1, 'progetto presente dopo nuova sessione');
   check((await page.locator('.badge.done').count()) === 1, 'badge "esportato" presente');
 
+  // rinomina con il dialog dell'app (A3: niente prompt nativi)
   await page.locator('.proj-card button:has-text("Rinomina")').click();
+  await page.waitForSelector('.dialog-card');
+  check((await page.locator('.dialog-card h3').textContent()).includes('Rinomina'),
+    'dialog di rinomina coerente con l’app');
+  await page.fill('.dialog-card input', 'Rinominato');
+  await page.locator('.dialog-card button:has-text("Salva")').click();
   await page.waitForTimeout(200);
   check((await page.locator('.proj-card h3').first().textContent()) === 'Rinominato', 'rinomina progetto funziona');
 
@@ -173,7 +236,19 @@ console.log('\n[2] Libreria, persistenza, profilo');
   await page.goto(`${BASE}/#/library`);
   await page.waitForSelector('.proj-card');
   check((await page.locator('.proj-card').count()) === 2, 'due progetti in libreria');
+
+  // eliminazione con conferma dell'app (A3): prima Annulla, poi conferma
   await page.locator('.proj-card', { hasText: 'Brano demo' }).locator('button:has-text("Elimina")').click();
+  await page.waitForSelector('.dialog-card');
+  check((await page.locator('.dialog-card').textContent()).includes('non si può annullare'),
+    'conferma di eliminazione chiara sulle conseguenze');
+  await page.locator('.dialog-card button:has-text("Annulla")').click();
+  await page.waitForTimeout(200);
+  check((await page.locator('.proj-card').count()) === 2, 'annulla non elimina nulla');
+
+  await page.locator('.proj-card', { hasText: 'Brano demo' }).locator('button:has-text("Elimina")').click();
+  await page.waitForSelector('.dialog-card');
+  await page.locator('.dialog-card button:has-text("Elimina")').click();
   await page.waitForTimeout(300);
   check((await page.locator('.proj-card').count()) === 1, 'eliminazione funziona');
 
@@ -192,20 +267,32 @@ console.log('\n[2] Libreria, persistenza, profilo');
   await page.close();
 }
 
-// ---------- test 3: file corrotto → errore gestito ----------
+// ---------- test 3: validazione upload (A2) — corrotto bloccato, .opus accettato ----------
 
-console.log('\n[3] File corrotto');
+console.log('\n[3] Validazione upload: file corrotto e vocale .opus');
 {
   const page = await newPage();
+
+  // file corrotto: la creazione viene bloccata SUL FORM, nessun progetto creato
   await page.goto(`${BASE}/#/new`, { waitUntil: 'networkidle' });
   await page.setInputFiles('input[type="file"]', badWav);
   await page.click('button:has-text("Crea il progetto")');
-  await page.waitForSelector('.empty-state', { timeout: 30000 });
-  check((await page.locator('.empty-state').textContent()).includes('Non sono riuscito a leggere'),
-    'errore di decodifica gestito con messaggio chiaro');
-  // l'errore di decodeAudioData è atteso: non contarlo come errore JS
-  const expected = jsErrors.findIndex((e) => /decod|Unable|EncodingError/i.test(e));
-  if (expected !== -1) jsErrors.splice(expected, 1);
+  await page.waitForSelector('.toast.error', { timeout: 30000 });
+  check((await page.locator('.toast.error').textContent()).includes('Non riesco a leggere'),
+    'file corrotto bloccato con messaggio chiaro');
+  check((await page.locator('.dropzone').count()) === 1, 'si resta sul form, niente Studio');
+  await page.goto(`${BASE}/#/library`);
+  await page.waitForSelector('.proj-card');
+  check((await page.locator('.proj-card').count()) === 1, 'nessun progetto orfano dal file corrotto');
+
+  // vocale .opus con audio reale: accettato e portato fino all'analisi
+  await page.goto(`${BASE}/#/new`);
+  await page.setInputFiles('input[type="file"]', opusVoice);
+  check(await page.locator('.file-pill .name').textContent() === 'vocale-whatsapp.opus',
+    'file .opus accettato dal form');
+  await page.click('button:has-text("Crea il progetto")');
+  await page.waitForSelector('.metric-grid', { timeout: 30000 });
+  check(true, 'progetto creato dal vocale .opus, analisi raggiunta');
   await page.close();
 }
 
@@ -224,6 +311,13 @@ console.log('\n[4] Mobile viewport');
   await page.click('button:has-text("brano demo")');
   await page.waitForSelector('.metric-grid', { timeout: 30000 });
   check(await noOverflow(), 'analisi senza overflow');
+
+  // B1 sul brano demo (trap 140 BPM reale): la stima del tempo deve esporsi
+  const demoTempo = await page.locator('.metric', { hasText: 'Tempo' }).textContent();
+  check(/≈ \d+ BPM/.test(demoTempo), 'BPM stimato su un brano con ritmo reale');
+  const demoKey = await page.locator('.metric', { hasText: 'Tonalità' }).textContent();
+  check(/maggiore|minore|certezza/.test(demoKey),
+    'tonalità: stima in linguaggio musicale oppure fallback onesto');
 
   await page.click('button:has-text("Scegli l’identità sonora")');
   await page.waitForSelector('.identity-card');

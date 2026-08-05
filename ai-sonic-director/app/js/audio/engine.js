@@ -6,8 +6,6 @@
 // La stessa catena viene costruita sia nel contesto live sia in quello
 // offline: ciò che l'utente esporta è esattamente ciò che ha ascoltato.
 
-import { audioBufferToWav } from './wav.js';
-
 const CROSSFADE = 0.04; // secondi, per l'A/B senza click
 
 export class AudioEngine {
@@ -19,6 +17,9 @@ export class AudioEngine {
     this.dryGain = null;
     this.master = null;
     this.mode = 'processed'; // 'original' | 'processed'
+    // trim di pareggio loudness per l'A/B onesto (≤1, mai amplifica):
+    // calcolati fuori (vista Studio) su un segmento rappresentativo
+    this.trims = { original: 1, processed: 1 };
     this.playing = false;
     this.startedAt = 0;   // ctx.currentTime alla partenza
     this.startOffset = 0; // posizione nel brano alla partenza
@@ -64,9 +65,20 @@ export class AudioEngine {
     this.mode = mode;
     if (!this.ctx || !this.dryGain) return;
     const now = this.ctx.currentTime;
-    const dryTarget = mode === 'original' ? 1 : 0;
-    this.dryGain.gain.setTargetAtTime(dryTarget, now, CROSSFADE);
-    this.chain.output.gain.setTargetAtTime(1 - dryTarget, now, CROSSFADE);
+    const dry = mode === 'original' ? this.trims.original : 0;
+    const wet = mode === 'original' ? 0 : this.trims.processed;
+    this.dryGain.gain.setTargetAtTime(dry, now, CROSSFADE);
+    this.chain.output.gain.setTargetAtTime(wet, now, CROSSFADE);
+  }
+
+  // Pareggio di loudness per il confronto A/B: applica i trim (≤1) al
+  // percorso attivo senza interrompere la riproduzione.
+  setLoudnessTrims(trims) {
+    this.trims = {
+      original: Math.min(1, trims.original || 1),
+      processed: Math.min(1, trims.processed || 1),
+    };
+    if (this.ctx && this.dryGain) this.setMode(this.mode);
   }
 
   play(offset = null) {
@@ -85,11 +97,11 @@ export class AudioEngine {
     if (this.chain) this.chain.output.disconnect();
 
     this.dryGain = ctx.createGain();
-    this.dryGain.gain.value = this.mode === 'original' ? 1 : 0;
+    this.dryGain.gain.value = this.mode === 'original' ? this.trims.original : 0;
     this.dryGain.connect(this.master);
 
     this.chain = buildChain(ctx, this.params);
-    this.chain.output.gain.value = this.mode === 'original' ? 0 : 1;
+    this.chain.output.gain.value = this.mode === 'original' ? 0 : this.trims.processed;
     this.chain.output.connect(this.master);
 
     this.source = ctx.createBufferSource();
@@ -145,8 +157,10 @@ export class AudioEngine {
     this.dryGain = null;
   }
 
-  // Render offline con la stessa catena dell'ascolto live → Blob WAV.
-  async renderToWav(params) {
+  // Render offline con la stessa catena dell'ascolto live → AudioBuffer.
+  // Le versioni di export (loudness per destinazione, tetto anti-clipping,
+  // codifica) sono responsabilità di audio/export.js.
+  async renderBuffer(params) {
     if (!this.buffer) throw new Error('Nessun audio caricato');
     const offline = new OfflineAudioContext(
       Math.min(2, this.buffer.numberOfChannels) || 1,
@@ -159,28 +173,26 @@ export class AudioEngine {
     source.buffer = this.buffer;
     source.connect(chain.input);
     source.start(0);
-    const rendered = await offline.startRendering();
-    protectFromClipping(rendered);
-    return audioBufferToWav(rendered);
+    return offline.startRendering();
   }
-}
 
-// Se l'elaborazione ha spinto il segnale oltre il tetto, riscala l'intero
-// render: il file esportato non deve mai distorcere per clipping digitale.
-function protectFromClipping(buffer, ceiling = 0.985) {
-  let peak = 0;
-  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
-    const data = buffer.getChannelData(ch);
-    for (let i = 0; i < data.length; i++) {
-      const abs = Math.abs(data[i]);
-      if (abs > peak) peak = abs;
-    }
-  }
-  if (peak <= ceiling) return;
-  const scale = ceiling / peak;
-  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
-    const data = buffer.getChannelData(ch);
-    for (let i = 0; i < data.length; i++) data[i] *= scale;
+  // Render offline di un breve segmento con la stessa catena: serve alla
+  // misura di loudness del "lavorato" per il pareggio A/B (vista Studio).
+  async renderSegment(params, offsetSeconds, durationSeconds) {
+    if (!this.buffer) throw new Error('Nessun audio caricato');
+    const duration = Math.min(durationSeconds, this.buffer.duration - offsetSeconds);
+    const offline = new OfflineAudioContext(
+      Math.min(2, this.buffer.numberOfChannels) || 1,
+      Math.max(1, Math.round(duration * this.buffer.sampleRate)),
+      this.buffer.sampleRate
+    );
+    const chain = buildChain(offline, params);
+    chain.output.connect(offline.destination);
+    const source = offline.createBufferSource();
+    source.buffer = this.buffer;
+    source.connect(chain.input);
+    source.start(0, offsetSeconds, duration);
+    return offline.startRendering();
   }
 }
 

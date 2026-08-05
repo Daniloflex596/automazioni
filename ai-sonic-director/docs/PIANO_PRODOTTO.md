@@ -21,7 +21,7 @@
 **Cosa non deve diventare.**
 - Una DAW semplificata con timeline, tracce e editing: appena compaiono, il prodotto perde la sua promessa di semplicità.
 - Un pannello di parametri tecnici travestito: se l'utente deve capire cosa fa un compressore, abbiamo fallito.
-- Un aggregatore di funzioni AI musicali (generazione di beat, separazione stem, testi): ognuna di queste è un prodotto a sé. AI Sonic Director fa una cosa: **dare identità sonora a un brano esistente**.
+- Un aggregatore di funzioni AI musicali (generazione di beat, separazione stem, testi): ognuna di queste è un prodotto a sé. AI Sonic Director fa una cosa: **dare identità sonora a un brano esistente come mix completo**. *(Confine ribadito il 2026-06-10: niente separazione stem né instrumental/acapella reali nel perimetro prototipo/MVP — parcheggiati in fase futura, vedi §11.J. Il "release package" si arricchisce invece con uno snippet/highlight social, §11.I.)*
 
 ---
 
@@ -228,7 +228,20 @@ Proposte ragionate, ciascuna con bisogno intercettato, valore, fase di destinazi
 ### G. Registrazione diretta dal microfono — **da rifiutare per ora (rischio perimetro)**
 - Sembra naturale ("così l'utente non ha bisogno di file"), ma sposta il prodotto verso la registrazione e quindi verso la DAW, violando l'identità definita al punto 1. Si annota e non si lavora.
 
-**Sintesi delle priorità strategiche:** A dentro il prototipo; B ed E come primi differenziatori dell'MVP; C come scommessa identitaria di Fase 3 da tenere d'occhio; D ed F in parcheggio; G fuori.
+### H. Suggerimento automatico dell'identità sonora — **realizzato (Fase 1→2, primo passo "copilota")**
+- *Bisogno:* l'utente target decide con le orecchie ma non sa da dove partire; offrire solo opzioni lo lascia solo davanti alla scelta.
+- *Mercato:* i tool automatici danno "un master"; nessuno *consiglia una direzione* spiegando il perché in linguaggio non tecnico.
+- *Valore:* è il momento in cui l'app smette di sembrare un menu e diventa un copilota che "ha ascoltato". Realizzato confrontando l'analisi del brano con il carattere di ogni identità (consigliata + 2 alternative + motivazione, con preselezione che resta scavalcabile).
+
+### I. Snippet/highlight social nel release package — **utile, MVP (candidato prossimo step)**
+- *Bisogno:* pubblicare non è solo "un file pronto" ma anche "qualcosa con cui promuoverlo"; il momento più forte del brano è ciò che serve per social.
+- *Mercato:* coerente con la promessa "release package" e con il linguaggio dei creator, senza spostare il prodotto altrove.
+- *Valore:* aumenta il valore del pacchetto restando dentro il perimetro "identità di un brano esistente". **Niente separazione stem.**
+
+### J. Separazione stem (instrumental/acapella, trattamento voce/beat) — **fuori da prototipo/MVP, parcheggiata in fase futura**
+- Comporterebbe isolare voce e base: è di fatto un altro prodotto (vedi punto 1, "Cosa non deve diventare"), richiede modelli AI/backend e aspettative facili da deludere. Decisione del product owner (2026-06-10): valida ma rimandata, non nel perimetro attuale.
+
+**Sintesi delle priorità strategiche:** A e H dentro il prototipo/copilota; B, E ed I (snippet) come differenziatori dell'MVP; C come scommessa identitaria di Fase 3 da tenere d'occhio; D ed F in parcheggio; G e J (stem) fuori dal perimetro attuale.
 
 ---
 

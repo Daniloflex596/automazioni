@@ -18,11 +18,55 @@ export function el(tag, attrs = {}, ...children) {
   return node;
 }
 
-export function toast(message, type = 'info', duration = 3200) {
+export function toast(message, type = 'info', duration = null) {
   const root = document.getElementById('toast-root');
   const node = el('div', { class: `toast ${type === 'error' ? 'error' : ''}` }, message);
   root.append(node);
-  setTimeout(() => node.remove(), duration);
+  // gli errori spiegano anche cosa fare: restano visibili più a lungo
+  setTimeout(() => node.remove(), duration ?? (type === 'error' ? 5200 : 3200));
+}
+
+// Dialog dell'app (sostituisce prompt/confirm nativi): coerente col design,
+// chiudibile con Esc o cliccando fuori. Risolve con:
+//  - conferma semplice → true / null
+//  - con `input`      → testo inserito / null
+export function appDialog({ title, message, confirmLabel = 'Conferma', cancelLabel = 'Annulla', input = null, danger = false }) {
+  return new Promise((resolve) => {
+    const inputEl = input
+      ? el('input', { type: 'text', value: input.value || '', maxlength: input.maxlength || '60' })
+      : null;
+
+    const close = (result) => { overlay.remove(); resolve(result); };
+    const confirmBtn = el('button', {
+      class: `btn ${danger ? 'btn-danger' : 'btn-primary'}`,
+      onClick: () => close(inputEl ? inputEl.value.trim() : true),
+    }, confirmLabel);
+
+    const overlay = el('div', {
+        class: 'dialog-overlay',
+        onClick: (event) => { if (event.target === overlay) close(null); },
+        onKeydown: (event) => { if (event.key === 'Escape') close(null); },
+      },
+      el('div', { class: 'dialog-card' },
+        el('h3', {}, title),
+        message && el('p', { class: 'muted small', style: 'margin-top:8px' }, message),
+        inputEl && el('div', { style: 'margin-top:14px' }, inputEl),
+        el('div', { class: 'dialog-actions' },
+          el('button', { class: 'btn', onClick: () => close(null) }, cancelLabel),
+          confirmBtn
+        )
+      )
+    );
+
+    document.body.append(overlay);
+    if (inputEl) {
+      inputEl.addEventListener('keydown', (event) => { if (event.key === 'Enter') confirmBtn.click(); });
+      inputEl.focus();
+      inputEl.select();
+    } else {
+      confirmBtn.focus();
+    }
+  });
 }
 
 export function formatTime(seconds) {

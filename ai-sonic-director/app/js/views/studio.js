@@ -6,7 +6,9 @@ import { el, toast, formatTime, syncRangeFill } from '../ui.js';
 import { getProject, updateProject, loadAudio } from '../store.js';
 import { AudioEngine } from '../audio/engine.js';
 import { analyzeBuffer, computeWaveformPeaks } from '../audio/analysis.js';
-import { IDENTITIES, getIdentity, computeParams, adaptationNotes } from '../audio/identities.js';
+import { IDENTITIES, getIdentity, computeParams, adaptationNotes, recommendIdentities } from '../audio/identities.js';
+import { EXPORT_TARGETS, makeVersionBlob, SNIPPET, makeSnippetBlob } from '../audio/export.js';
+import { measureLoudness } from '../audio/loudness.js';
 
 const STEPS = [
   { id: 'analysis', label: 'Analisi' },
@@ -38,29 +40,105 @@ export function renderStudio({ navigate, projectId }) {
   const frameCallbacks = new Set();
   let previewingId = null;
 
+  // ---- pareggio di loudness per l'A/B onesto ----
+  // Un segmento centrale (~8 s) del brano fa da riferimento: a ogni cambio di
+  // parametri si rifà il render del segmento lavorato, si confrontano le due
+  // loudness (stima LUFS-like) e si abbassa il percorso più forte. Mai
+  // amplificare: niente clipping, e la differenza che resta è il carattere.
+  let matchSegment = null;        // { offset, duration, originalLufs }
+  let matchTimer = null;
+  let matchToken = 0;
+
+  function scheduleLoudnessMatch() {
+    clearTimeout(matchTimer);
+    matchTimer = setTimeout(refreshLoudnessMatch, 350);
+  }
+
+  async function refreshLoudnessMatch() {
+    if (!engine.buffer || !engine.params || !matchSegment) return;
+    const token = ++matchToken;
+    try {
+      const rendered = await engine.renderSegment(engine.params, matchSegment.offset, matchSegment.duration);
+      if (token !== matchToken) return; // nel frattempo i parametri sono cambiati
+      const processedLufs = measureLoudness(rendered);
+      const { originalLufs } = matchSegment;
+      if (!Number.isFinite(processedLufs) || !Number.isFinite(originalLufs)) return;
+      const diffDb = processedLufs - originalLufs;
+      engine.setLoudnessTrims(diffDb > 0
+        ? { original: 1, processed: Math.pow(10, -diffDb / 20) }
+        : { original: Math.pow(10, diffDb / 20), processed: 1 });
+    } catch {
+      // il pareggio è un comfort di confronto: se fallisce, si resta com'è
+    }
+  }
+
   root.append(loadingStage('Sto ascoltando il tuo brano…'));
   init();
 
+  // Ogni fase dell'avvio ha il suo errore, con un messaggio che dice cosa
+  // fare: accesso all'archivio, audio mancante, decodifica, imprevisto.
   async function init() {
+    let blob = null;
     try {
-      const blob = await loadAudio(project.id);
-      if (!blob) {
-        root.replaceChildren(emptyError(
-          'L’audio di questo progetto non è più disponibile in questo browser. Crea un nuovo progetto ricaricando il file.',
-          navigate
-        ));
-        return;
-      }
-      const buffer = await engine.loadBlob(blob);
-      if (!project.analysis) {
+      blob = await loadAudio(project.id);
+    } catch (error) {
+      console.error(error);
+      root.replaceChildren(emptyError(
+        'Non riesco ad accedere all’archivio audio del browser. Ricarica la pagina e riprova.',
+        navigate
+      ));
+      return;
+    }
+    if (!blob) {
+      root.replaceChildren(emptyError(
+        'L’audio di questo progetto non è più disponibile in questo browser. Crea un nuovo progetto ricaricando il file.',
+        navigate
+      ));
+      return;
+    }
+
+    let buffer = null;
+    try {
+      buffer = await engine.loadBlob(blob);
+    } catch {
+      // file non decodificabile: caso atteso (niente console.error)
+      root.replaceChildren(emptyError(
+        'Non sono riuscito a leggere questo file audio. Crea un nuovo progetto riesportando il brano in MP3 o WAV.',
+        navigate
+      ));
+      return;
+    }
+
+    try {
+      // si rianalizza anche se l'analisi salvata è di una versione precedente
+      // (senza stime di tempo/tonalità): così resta coerente con la UI attuale
+      if (!project.analysis || !project.analysis.tempo) {
         project = updateProject(project.id, { analysis: analyzeBuffer(buffer) });
       }
       peaks = computeWaveformPeaks(buffer);
+
+      // riferimento per il pareggio A/B: segmento centrale del brano
+      const segDuration = Math.min(8, buffer.duration);
+      const segOffset = Math.max(0, buffer.duration / 2 - segDuration / 2);
+      const start = Math.floor(segOffset * buffer.sampleRate);
+      const frames = Math.floor(segDuration * buffer.sampleRate);
+      const slice = {
+        numberOfChannels: buffer.numberOfChannels,
+        length: frames,
+        sampleRate: buffer.sampleRate,
+        getChannelData: (ch) => buffer.getChannelData(ch).subarray(start, start + frames),
+      };
+      matchSegment = { offset: segOffset, duration: segDuration, originalLufs: measureLoudness(slice) };
+      scheduleLoudnessMatch();
+
       startFrameLoop();
       drawStep(project.step || 'analysis');
     } catch (error) {
       console.error(error);
-      root.replaceChildren(emptyError('Non sono riuscito a leggere questo file audio. Prova con un altro formato (MP3 o WAV).', navigate));
+      root.replaceChildren(emptyError(
+        'Qualcosa è andato storto durante l’analisi del brano. Ricarica la pagina e riprova.',
+        navigate
+      ));
     }
   }
 
@@ -127,6 +205,7 @@ export function renderStudio({ navigate, projectId }) {
   function applyEngineParams() {
     const identity = getIdentity(project.identityId) || IDENTITIES[0];
     engine.setParams(computeParams(identity, project.macros, project.analysis));
+    scheduleLoudnessMatch();
   }
 
   // ---------- player condiviso ----------
@@ -187,12 +266,19 @@ export function renderStudio({ navigate, projectId }) {
     const a = project.analysis;
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:18px' },
-        'Abbiamo ascoltato il tuo brano. Ecco cosa abbiamo sentito — in parole semplici.'),
+        'Abbiamo misurato volume, dinamica e bilanciamento tonale del tuo brano. Ecco cosa dicono — in parole semplici.'),
       playerBar(),
       el('div', { class: 'metric-grid' },
         metric('Durata', formatTime(a.duration), `${a.channels === 1 ? 'Mono' : 'Stereo'} · ${Math.round(a.sampleRate / 1000)} kHz`),
         metric('Volume medio', `${a.rmsDb} dB`, volumeHint(a.rmsDb)),
-        metric('Dinamica', `${a.crest} dB`, dynamicsHint(a.crest))
+        metric('Dinamica', `${a.crest} dB`, dynamicsHint(a.crest)),
+        // stime, mai verità assolute: se la confidenza non basta, lo diciamo
+        a.tempo && a.tempo.reliable
+          ? metric('Tempo (stima)', `≈ ${a.tempo.bpm} BPM`, 'Stimato dal ritmo del brano')
+          : metric('Tempo (stima)', '—', 'Non riusciamo a stimarlo con certezza su questo brano'),
+        a.key && a.key.reliable
+          ? metric('Tonalità (stima)', a.key.name, 'Stimata dall’armonia del brano')
+          : metric('Tonalità (stima)', '—', 'Non riusciamo a stimarla con certezza su questo brano')
       ),
       el('div', { class: 'card', style: 'margin-top:14px' },
         el('h4', {}, 'Bilanciamento tonale'),
@@ -205,7 +291,9 @@ export function renderStudio({ navigate, projectId }) {
           el('span', {}, el('i', { style: 'background:#6366f1' }), `Bassi ${a.bands.low}%`),
           el('span', {}, el('i', { style: 'background:#a855f7' }), `Medi ${a.bands.mid}%`),
           el('span', {}, el('i', { style: 'background:#ec4899' }), `Alti ${a.bands.high}%`)
-        )
+        ),
+        el('p', { class: 'muted', style: 'font-size:0.78rem; margin-top:10px' },
+          'Quota di energia misurata sull’intero brano: bassi sotto i 250 Hz, medi tra 250 e 4000 Hz, alti oltre i 4000 Hz.')
       ),
       el('div', { class: 'insights' },
         project.analysis.insights.map((insight) =>
@@ -216,6 +304,9 @@ export function renderStudio({ navigate, projectId }) {
               el('p', {}, insight.text))
           ))
       ),
+      // trasparenza: cosa è misurato e cosa è stimato, senza promesse implicite
+      el('p', { class: 'muted small', style: 'margin-top:14px' },
+        'Volume, dinamica e bilanciamento tonale sono misurati sull’intero brano. BPM e tonalità sono stime: quando non sono abbastanza affidabili preferiamo dirtelo, invece di mostrare un valore sbagliato.'),
       el('div', { class: 'step-actions' },
         el('span', {}),
         el('button', { class: 'btn btn-primary btn-lg', onClick: () => drawStep('identity') },
@@ -247,6 +338,15 @@ export function renderStudio({ navigate, projectId }) {
   // ---------- step 2: identità sonora ----------
 
   function buildIdentity() {
+    // L'app consiglia una direzione in base all'analisi e ne propone alternative.
+    // Se l'utente non ha ancora scelto, la consigliata viene preselezionata: è un
+    // punto di partenza, non un verdetto — resta libero di cambiarla.
+    const suggestion = recommendIdentities(project.analysis);
+    if (suggestion && !project.identityId) {
+      project = updateProject(project.id, { identityId: suggestion.recommendedId });
+      applyEngineParams();
+    }
+
     const grid = el('div', { class: 'identity-grid' });
     const continueBtn = el('button', {
       class: 'btn btn-primary btn-lg',
@@ -254,14 +354,24 @@ export function renderStudio({ navigate, projectId }) {
       onClick: () => drawStep('customize'),
     }, 'Continua con questa →');
 
+    function roleOf(identity) {
+      if (!suggestion) return null;
+      if (suggestion.recommendedId === identity.id) return 'reco';
+      if (suggestion.alternativeIds.includes(identity.id)) return 'alt';
+      return null;
+    }
+
     function drawCards() {
       grid.replaceChildren(...IDENTITIES.map((identity) => {
         const selected = project.identityId === identity.id;
         const previewing = previewingId === identity.id;
+        const role = roleOf(identity);
         return el('div', {
-            class: `identity-card ${selected ? 'selected' : ''}`,
+            class: `identity-card ${selected ? 'selected' : ''} ${role === 'reco' ? 'recommended' : ''}`,
             onClick: () => select(identity),
           },
+          role === 'reco' && el('span', { class: 'reco-ribbon' }, '★ Consigliata per il tuo brano'),
+          role === 'alt' && el('span', { class: 'reco-ribbon alt' }, 'Buona alternativa'),
           el('div', { class: 'id-emoji' }, identity.emoji),
           el('h3', {}, identity.name),
           el('p', { class: 'id-desc' }, identity.description),
@@ -290,6 +400,7 @@ export function renderStudio({ navigate, projectId }) {
         previewingId = null;
       } else {
         engine.setParams(computeParams(identity, project.macros, project.analysis));
+        scheduleLoudnessMatch();
         engine.setMode('processed');
         engine.play(engine.isPlaying() || engine.getPosition() > 0 ? engine.getPosition() : engine.duration * 0.25);
         previewingId = identity.id;
@@ -300,9 +411,19 @@ export function renderStudio({ navigate, projectId }) {
     engine.onEnded = () => { previewingId = null; drawCards(); };
     drawCards();
 
+    const recommended = suggestion ? getIdentity(suggestion.recommendedId) : null;
+
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:4px' },
         'Che carattere vuoi dare al brano? Ogni identità si dosa su ciò che abbiamo sentito nell’analisi. Ascoltale sul tuo pezzo: si decide con le orecchie, non con i nomi.'),
+      recommended && el('div', { class: 'card suggestion-banner' },
+        el('span', { class: 'sb-emoji' }, recommended.emoji),
+        el('div', {},
+          el('h4', {}, `Per il tuo brano partiremmo da ${recommended.name}`),
+          el('p', { class: 'muted small' }, suggestion.reason),
+          el('p', { class: 'muted', style: 'font-size:0.8rem; margin-top:4px' },
+            'È già pronta qui sotto: ascoltala, oppure scegli un’altra direzione quando vuoi.'))
+      ),
       grid,
       el('div', { class: 'step-actions' },
         el('button', { class: 'btn', onClick: () => drawStep('analysis') }, '← Analisi'),
@@ -393,6 +514,8 @@ export function renderStudio({ navigate, projectId }) {
         stateLabel,
         el('p', { class: 'muted small', style: 'margin-top:10px' },
           'Premi play e passa da una versione all’altra mentre il brano suona. Il cambio è istantaneo.'),
+        el('p', { class: 'muted small', style: 'margin-top:6px' },
+          '🔊 Confronto a parità di volume (allineamento stimato): la differenza che senti è il carattere, non un volume più alto.'),
         el('div', { class: 'compare-switch' }, btnA, btnB)
       ),
       el('div', { style: 'margin-top:18px' }, playerBar()),
@@ -407,59 +530,143 @@ export function renderStudio({ navigate, projectId }) {
 
   function buildExport() {
     const identity = getIdentity(project.identityId);
+    const params = computeParams(identity, project.macros, project.analysis);
     const macroSummary = MACROS
       .map((macro) => `${macro.name} ${project.macros[macro.id]}`)
       .join(' · ');
 
     const doneSlot = el('div', {});
-    const exportBtn = el('button', { class: 'btn btn-primary btn-lg', onClick: onExport }, '⬇ Scarica WAV');
+    // il render della catena si fa una volta sola, alla prima richiesta;
+    // ogni versione applica poi solo il proprio livello di destinazione
+    let renderedPromise = null;
+    const getRendered = () => (renderedPromise ||= engine.renderBuffer(params));
 
-    async function onExport() {
-      exportBtn.disabled = true;
-      exportBtn.textContent = 'Preparo il tuo brano…';
+    // peso stimato del WAV 16 bit: l'utente lo sa PRIMA di scaricare
+    function wavSizeLabel(seconds) {
+      const channels = Math.min(2, engine.buffer.numberOfChannels) || 1;
+      const mb = (seconds * engine.buffer.sampleRate * 2 * channels) / 1048576;
+      return mb < 1 ? 'meno di 1 MB' : `~${Math.round(mb)} MB`;
+    }
+
+    // consegna comune a versioni e snippet: download, stato "esportato", toast
+    function deliverBlob(blob, versionName) {
+      const url = URL.createObjectURL(blob);
+      // nome file pulito e prevedibile: "Brano - Identità - Versione.wav"
+      const safeName = `${project.name} - ${identity.name} - ${versionName}`
+        .replace(/[\\/:*?"<>|]+/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const link = el('a', { href: url, download: `${safeName}.wav` });
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      markExported();
+      toast(`Versione ${versionName} scaricata: la trovi nei download.`);
+    }
+
+    // il primo export elabora il brano (più lento); i successivi riusano
+    // lo stesso render e sono rapidi — la label lo dice all'utente
+    function waitLabel(fallback) {
+      return renderedPromise ? fallback : 'Elaboro il brano… (solo la prima volta)';
+    }
+
+    async function downloadVersion(target, button) {
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = waitLabel('Preparo il file…');
       try {
-        const blob = await engine.renderToWav(computeParams(identity, project.macros, project.analysis));
-        const url = URL.createObjectURL(blob);
-        const safeName = `${project.name} — ${identity.name}`.replace(/[\\/:*?"<>|]+/g, '-');
-        const link = el('a', { href: url, download: `${safeName}.wav` });
-        document.body.append(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
-        project = updateProject(project.id, { exported: true });
-        doneSlot.replaceChildren(
-          el('div', { class: 'export-done' },
-            el('h3', {}, '🎉 Il tuo brano è pronto'),
-            el('p', { class: 'muted small', style: 'margin-top:6px' },
-              'Lo trovi nei download. Il progetto resta in libreria: puoi tornarci e provare un’altra direzione quando vuoi.'),
-            el('div', { style: 'margin-top:16px; display:flex; gap:10px; justify-content:center' },
-              el('a', { href: '#/library', class: 'btn btn-primary' }, 'Vai alla libreria'),
-              el('a', { href: '#/new', class: 'btn' }, 'Nuovo brano'))
-          )
-        );
-        toast('Export completato.');
+        const rendered = await getRendered();
+        const { blob } = makeVersionBlob(rendered, target);
+        deliverBlob(blob, target.name);
       } catch (error) {
         console.error(error);
-        toast('Export non riuscito. Riprova.', 'error');
+        toast('Export non riuscito. Riprova; se succede ancora, ricarica la pagina.', 'error');
       } finally {
-        exportBtn.disabled = false;
-        exportBtn.textContent = '⬇ Scarica WAV';
+        button.disabled = false;
+        button.textContent = originalLabel;
       }
     }
 
+    // lo snippet riusa lo stesso render della catena: è coerente con
+    // l'identità e le rifiniture per costruzione
+    async function downloadSnippet(button) {
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = waitLabel('Cerco il momento migliore…');
+      try {
+        const rendered = await getRendered();
+        const { blob } = makeSnippetBlob(rendered);
+        deliverBlob(blob, SNIPPET.name);
+      } catch (error) {
+        console.error(error);
+        toast('Export non riuscito. Riprova; se succede ancora, ricarica la pagina.', 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    }
+
+    function markExported() {
+      if (project.exported) return;
+      project = updateProject(project.id, { exported: true });
+      doneSlot.replaceChildren(
+        el('div', { class: 'export-done' },
+          el('h3', {}, '🎉 Il tuo brano è pronto'),
+          el('p', { class: 'muted small', style: 'margin-top:6px' },
+            'Lo trovi nei download. Il progetto resta in libreria: puoi tornarci e provare un’altra direzione quando vuoi.'),
+          el('div', { style: 'margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap' },
+            el('a', { href: '#/library', class: 'btn btn-primary' }, 'Vai alla libreria'),
+            el('a', { href: '#/new', class: 'btn' }, 'Nuovo brano'))
+        )
+      );
+    }
+
+    const versionRows = EXPORT_TARGETS.map((target) => {
+      const button = el('button', { class: 'btn btn-sm' }, '⬇ Scarica');
+      button.addEventListener('click', () => downloadVersion(target, button));
+      return el('div', { class: 'export-version' },
+        el('span', { class: 'ico' }, target.emoji),
+        el('div', { class: 'ev-text' },
+          el('h4', {}, target.name),
+          el('p', {}, target.desc),
+          el('p', { class: 'muted', style: 'font-size:0.78rem; margin-top:4px' },
+            `WAV 16 bit · ${wavSizeLabel(engine.duration)} · brano intero`)),
+        button
+      );
+    });
+
+    const snippetBtn = el('button', { class: 'btn btn-sm' }, '✂️ Esporta snippet');
+    snippetBtn.addEventListener('click', () => downloadSnippet(snippetBtn));
+    const snippetSeconds = Math.min(SNIPPET.seconds, engine.duration);
+    const snippetRow = el('div', { class: 'export-version' },
+      el('span', { class: 'ico' }, SNIPPET.emoji),
+      el('div', { class: 'ev-text' },
+        el('h4', {}, SNIPPET.name),
+        el('p', {}, SNIPPET.desc),
+        el('p', { class: 'muted', style: 'font-size:0.78rem; margin-top:4px' },
+          `WAV 16 bit · ${wavSizeLabel(snippetSeconds)} · circa ${Math.round(snippetSeconds)} secondi`)),
+      snippetBtn
+    );
+
     return el('div', {},
       el('p', { class: 'page-sub', style: 'margin-bottom:8px' },
-        'Riepilogo delle tue scelte. Quello che scarichi è esattamente quello che hai ascoltato.'),
+        'Scegli la destinazione: ogni versione è tarata sul volume giusto per dove la pubblicherai.'),
       el('div', { class: 'export-summary' },
         summaryRow('Brano', project.name),
         summaryRow('File originale', project.fileName),
         summaryRow('Identità sonora', `${identity.emoji} ${identity.name}`),
         summaryRow('Rifiniture', macroSummary),
-        summaryRow('Formato', 'WAV 16 bit (MP3 e versioni per piattaforma: prossima fase)')
+        summaryRow('Formato', 'WAV 16 bit, qualità piena — l’MP3 arriverà in una fase successiva')
+      ),
+      el('div', { class: 'card export-versions' },
+        el('h4', {}, 'Le tue versioni'),
+        versionRows,
+        snippetRow
       ),
       el('div', { class: 'step-actions' },
         el('button', { class: 'btn', onClick: () => drawStep('compare') }, '← Riascolta il confronto'),
-        exportBtn
+        el('span', {})
       ),
       doneSlot
     );
@@ -473,6 +680,8 @@ export function renderStudio({ navigate, projectId }) {
     node: root,
     cleanup() {
       if (rafId) cancelAnimationFrame(rafId);
+      clearTimeout(matchTimer);
+      matchToken++; // invalida eventuali render di pareggio in volo
       engine.dispose();
     },
   };
